@@ -1,0 +1,65 @@
+<!--
+  COMPONENT 2–5 — HERO SECTION (Cover Page)
+  Pax Via Tours & Travel
+
+  Contains:
+    Component 2 — Hero Text Zone    (leader + title)
+    Component 4 — Destination Strip  (city stops banner)
+    Component 3 — Photo Grid 2×2    (four destination photos)
+    Component 5 — Tour Info Bar      (dates + badge + price + CTA)
+
+  All [data-field] attributes are populated by ui.js / app.js.
+  Rendered inside <section class="hero cover-section"> on tour.html.
+-->
+
+<!-- Hero Text Zone -->
+<div class="hero__text-zone">
+  <p class="hero__leader" data-field="leader">
+    Join Father Tito Cartagenas on a Pilgrimage to
+  </p>
+  <h1 class="hero__title" data-field="title">
+    Poland, Czeck,<br>&amp; Medjugorje
+  </h1>
+</div>
+
+<!-- Destination Strip -->
+<div class="destination-strip" role="region" aria-label="Tour destinations">
+  <div class="destination-strip__inner" data-field="stops">
+    <!-- JS renders: <span class="destination-strip__stop">Warsaw</span> etc. -->
+  </div>
+</div>
+
+<!-- Photo Grid 2×2 -->
+<div class="photo-grid" data-field="photos" aria-label="Tour destination photos">
+  <!-- JS renders 4 .photo-grid__cell elements -->
+</div>
+
+<!-- Tour Info Bar -->
+<div class="tour-info-bar" data-field="tourInfo">
+  <div class="tour-info-bar__main">
+
+    <div class="tour-info-bar__dates">
+      <span class="tour-info-bar__month" data-field="month">October</span>
+      <span class="tour-info-bar__range" data-field="dateRange">12–23, 2026</span>
+    </div>
+
+    <div class="tour-info-bar__badge">
+      <img src="./assets/logos/pax-via-logo.png"
+
+           alt="Pax Via Tours &amp; Travel"
+           width="72" height="72">
+    </div>
+
+    <div class="tour-info-bar__price-block">
+      <span class="tour-info-bar__price" data-field="price">$4,699</span>
+      <span class="tour-info-bar__from" data-field="departure">From San Francisco</span>
+    </div>
+
+  </div>
+
+  <div class="tour-info-bar__cta">
+    <a href="mailto:info@paxvia.com" class="btn btn--cta-bar" data-field="bookCta">
+      Book Now at PaxVia.com
+    </a>
+  </div>
+</div>

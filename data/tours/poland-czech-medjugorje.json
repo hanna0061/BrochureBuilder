@@ -1,0 +1,260 @@
+{
+  "id": "poland-czech-medjugorje",
+  "slug": "poland-czech-medjugorje",
+  "title": "Poland, Czeck,\n& Medjugorje",
+  "titleShort": "Poland, Czech & Medjugorje",
+  "leader": "Join Father Tito Cartagenas on a Pilgrimage to",
+  "tourCode": "SFO-1012/12D",
+
+  "dates": {
+    "start": "2026-10-12",
+    "end": "2026-10-23",
+    "month": "October",
+    "range": "12–23, 2026",
+    "display": "October 12–23, 2026"
+  },
+
+  "duration": {
+    "days": 12,
+    "nights": 10,
+    "display": "12 Days / 10 Nights"
+  },
+
+  "departure": {
+    "city": "San Francisco",
+    "airport": "SFO",
+    "display": "From San Francisco"
+  },
+
+  "price": {
+    "base": 4699,
+    "currency": "USD",
+    "basis": "per person, double occupancy",
+    "note": "*Discount cash/check price",
+    "display": "$4,699.00*"
+  },
+
+  "options": [
+    {
+      "label": "Single Room Supplement",
+      "note": "*Subject to availability",
+      "addAmount": 950,
+      "display": "add $950"
+    },
+    {
+      "label": "Travel Insurance",
+      "note": "Available only for travelers with primary residence in USA or Canada",
+      "linkLabel": "visit www.paxvia.com/travel-protection",
+      "linkUrl": "https://www.paxvia.com/travel-protection"
+    }
+  ],
+
+  "payments": [
+    {
+      "label": "First Payment",
+      "amount": 500,
+      "due": "Now",
+      "display": "$500.00",
+      "dueDisplay": "Due: Now"
+    },
+    {
+      "label": "Second Payment",
+      "amount": 1249,
+      "due": "2026-05-15",
+      "display": "$1,249.00",
+      "dueDisplay": "Due: May 15, 2026"
+    },
+    {
+      "label": "Third Payment",
+      "amount": 1000,
+      "due": "2026-07-14",
+      "display": "$1,000.00",
+      "dueDisplay": "Due: July 14, 2026"
+    },
+    {
+      "label": "Final Payment",
+      "amount": null,
+      "due": "2026-08-28",
+      "display": "Remaining",
+      "dueDisplay": "Due: Aug 28, 2026"
+    }
+  ],
+
+  "stops": [
+    "Warsaw",
+    "Czestochowa",
+    "Krakow",
+    "Prague",
+    "Medjugorje"
+  ],
+
+  "overview": [
+    "This 12-day pilgrimage unites the great Marian shrines and papal landmarks of Central Europe — the Black Madonna at Czestochowa, the footsteps of Karol Wojtyła across Krakow, the Infant Jesus of Prague, and the apparition site of Our Lady at Medjugorje. Every stage is spiritually ordered and thoughtfully paced.",
+    "Led by Father Tito Cartagenas, daily Mass anchors each day of travel. From Warsaw's restored Gothic heart to the summit cross of Mount Krizevac, every visit is an encounter with the living faith of the Church — and an invitation to deeper prayer."
+  ],
+
+  "photos": {
+    "grid": [
+      {
+        "src": "https://images.unsplash.com/photo-1772202950305-2e6fee0b1ab3",
+        "localSrc": "assets/images/tours/poland-czech-medjugorje/grid-1.jpg",
+        "alt": "Prague — Charles Bridge over the Vltava River at dusk",
+        "credit": "Photo by Thijs on Unsplash",
+        "city": "Prague"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1590219889510-a6b27ee7c6a6",
+        "localSrc": "assets/images/tours/poland-czech-medjugorje/grid-2.jpg",
+        "alt": "Warsaw — Colorful townhouses at Old Town Market Square",
+        "credit": "Photo by Severinus Dewantara on Unsplash",
+        "city": "Warsaw"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1611995767894-5847cee6ae1a",
+        "localSrc": "assets/images/tours/poland-czech-medjugorje/grid-3.jpg",
+        "alt": "Medjugorje — Our Lady of Medjugorje statue",
+        "credit": "Photo via Unsplash",
+        "city": "Medjugorje"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1761073991372-58f6376ea3f4",
+        "localSrc": "assets/images/tours/poland-czech-medjugorje/grid-4.jpg",
+        "alt": "Krakow — Gothic church spires against a dramatic orange sunset sky",
+        "credit": "Photo via Unsplash",
+        "city": "Krakow"
+      }
+    ],
+    "pricingHero": {
+      "src": "https://images.unsplash.com/photo-1747466404761-ebbc7c31d2a2",
+      "localSrc": "assets/images/tours/poland-czech-medjugorje/pricing-hero.jpg",
+      "alt": "Aerial view of Prague's iconic historic architecture",
+      "credit": "Photo by Sinisa Lekovic on Unsplash"
+    },
+    "thumbnail": {
+      "src": "https://images.unsplash.com/photo-1772202950305-2e6fee0b1ab3",
+      "localSrc": "assets/images/tours/poland-czech-medjugorje/grid-1.jpg",
+      "alt": "Poland, Czech & Medjugorje Pilgrimage — Charles Bridge Prague"
+    }
+  },
+
+  "inclusions": [
+    "Roundtrip airfare from San Francisco (SFO)",
+    "Excursions per itinerary",
+    "10-Nights accommodation",
+    "Meals per itinerary",
+    "English-Speaking tour guides",
+    "Entrance Fees as per itinerary",
+    "Spiritual director",
+    "Whisper Headsets",
+    "Pilgrims' Backpack"
+  ],
+
+  "itinerary": [
+    {
+      "day": 1,
+      "label": "Day 1",
+      "heading": "Departure: Depart USA",
+      "body": "Our spiritual pilgrimage begins as we board our transatlantic flight to Warsaw. Meals and refreshments will be served aloft.",
+      "overnight": null,
+      "meals": null
+    },
+    {
+      "day": 2,
+      "label": "Day 2",
+      "heading": "Arrive Warsaw",
+      "body": "After arrival in Warsaw, we are met by our representative and transferred to our hotel. Delighting the \"new\" Warsaw, which has been lovingly restored after the devastation of World War II.",
+      "overnight": "Warsaw",
+      "meals": "Dinner"
+    },
+    {
+      "day": 3,
+      "label": "Day 3",
+      "heading": "Warsaw: St. Stanislaw Kostka Church, Old Town Square, Royal Castle",
+      "body": "We begin with morning mass at St. Stanislaw Kostka Church, where martyred Solidarity priest Father Popieluszko worked and is buried. Visit the bustling Old Town Square, where horse-drawn carriages carry visitors past beautifully rebuilt Baroque houses and Renaissance-style storefronts. Traditional Polish cafes and shops surround the square, which has been restored to its 13th-century charm. Stroll the streets of this historic area, which is mostly closed to traffic, and explore its beautiful churches and castle. See the birthplace of Madame Curie, Chopin's monument and the Royal Castle (exterior view) which was the residence of Polish Kings.",
+      "overnight": "Warsaw",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 4,
+      "label": "Day 4",
+      "heading": "Warsaw / Krakow: Czestochowa, Jasna Gora Monastery, Black Madonna",
+      "body": "Depart Warsaw and drive to Czestochowa, a city which has been for the last 600 years the principal center of the Catholic religion in Poland and is a shrine for pilgrims. Visit Jasna Gora Monastery with religious, historic and artistic value, and participate in the unveiling of the Black Madonna. Our guide will show us the Gothic Chapel of Our Lady in which hangs the famous Black Madonna icon on a magnificent silver and ebony altar. Tour the treasury and celebrate mass at the Shrine. After Lunch proceed to Auschwitz for a guided tour of the infamous death camp where millions were killed during World War II. Continue to Krakow, our home for the next three nights.",
+      "overnight": "Krakow",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 5,
+      "label": "Day 5",
+      "heading": "Krakow: Wawel Hill, Church of St. Stanislaw, Kanonicza Street, St. Faustina Shrine",
+      "body": "Following breakfast, proceed to Wawel Hill and celebrate mass at the Church of St. Stanislaw, Poland's second most important pilgrimage shrine. Visit Krakow's cathedral which serves as the nation's spiritual capital and has witnessed most of the royal coronations and funerals of the last millennium. See the Cathedral's Treasury and continue to Krakow's Old Town to see Kanonicza Street where Pope John Paul II resided while living in Krakow. Visit the courtyard of the Collegium Maius; see the ancient Market Square and Cloth Hall. This afternoon stops at Lagwieniki to visit St. Faustina Shrine before returning to Krakow.",
+      "overnight": "Krakow",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 6,
+      "label": "Day 6",
+      "heading": "Krakow: Wieliczka Salt Mines, Wadowice, Kalwaria Zebrzydowska",
+      "body": "This morning we drive to Wieliczka to see the oldest salt mine in Europe, a world-class tourist attraction. It is a unique place where many generations of Polish miners have created a world of underground salt lakes with a rich interior of decorated chapels including the famous Blessed Kings Chapel, plus other galleries and workings made of salt. Wieliczka salt mine is listed by UNESCO as a World Cultural Heritage Site. Then proceed to Wadowice, birthplace of Karol Wojtla, the late Pope John Paul II. His museum is in his family house. Continue to Kalwaria Zebrzydowska, where in the 17th century the Palatine of Krakow founded a Franciscan Monastery.",
+      "overnight": "Krakow",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 7,
+      "label": "Day 7",
+      "heading": "Krakow / Prague: Velehrad, Prague",
+      "body": "Depart this morning for the Czech capital of Prague. En route stop at Velehrad to visit the Shrine in memory of the two missionaries from Byzantium, \"Cyril and Methodius\", who brought Christianity to the Czech lands. In 1985 His Holiness Pope John Paul II conferred the \"Golden Rose\" on Velehrad, a Papal distinction conveyed to only three other venerable places of pilgrimage; Lourdes, Guadalupe and Czestochowa. Continue to the \"Golden City\" of Prague, one of Europe's most attractive capitals.",
+      "overnight": "Prague",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 8,
+      "label": "Days 8",
+      "heading": "Prague: Prague Castle, St. Vitus Cathedral, the Church of Our Lady of Victory",
+      "body": "Spanning the River Vltava, Prague ranks as one of the most beautifully preserved cities in Europe. The town is famous for its Gothic and Baroque architecture. Wonder at the graceful enormity of Prague Castle and St. Vitus Cathedral, the Church of Our Lady of Victory and the statue of the Infant Jesus of Prague. After mass, cross the historic Charles Bridge, built in 1400, and admire its Baroque statuary. Continue to the Loreto Shrine, one of the most important places of pilgrimage in Eastern Europe.",
+      "overnight": "Prague",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 9,
+      "label": "Days 9",
+      "heading": "Depart Prague: Flights to Medjugorje",
+      "body": "Today, you will depart early in the morning for your flights to Medjugorje. Upon arrival, you'll be greeted by our guide and/or driver who will then take you to a scenic transfer to the serene town of Medjugorje. Upon Arrival, check in to your hotel, where you can unwind and refresh. As evening falls, savor a delicious dinner featuring local cuisine, followed by a restful overnight stay in the peaceful ambiance of Medjugorje.",
+      "overnight": "Medjugorje",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 10,
+      "label": "Day 10",
+      "heading": "Medjugorje: St. James Church, Apparition Hill",
+      "body": "Welcome to Medjugorje, a place known for its simplicity, peace, and powerful spiritual renewal. During your stay, a local guide will accompany the group as we enter into prayer and the sacramental life of this holy village. This morning, we will attend Holy Mass at St. James Church (English-speaking at 10:00 AM), with the special blessing of religious articles after Mass. Later, pilgrims will have the opportunity to climb Apparition Hill, where Our Lady first appeared to the visionaries, and spend time in quiet prayer and reflection.",
+      "overnight": "Medjugorje",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 11,
+      "label": "Day 11",
+      "heading": "Medjugorje: Mt. Krizevac, Cenacolo",
+      "body": "Today we continue our pilgrimage with deeper moments of conversion and healing. We will have the opportunity to climb Mt. Krizevac (Cross Mountain) and pray the Stations of the Cross, honoring Christ's Passion at the summit cross. We will also visit the inspiring Community of Cenacolo, where pilgrims hear powerful testimonies of young people whose lives were transformed through faith and prayer.",
+      "overnight": "Medjugorje",
+      "meals": "Breakfast, Dinner"
+    },
+    {
+      "day": 12,
+      "label": "Day 12",
+      "heading": "Return Flights Home",
+      "body": "After an early breakfast and heartfelt farewells, we transfer to Split airport for our return flight to the USA.",
+      "overnight": null,
+      "meals": "Breakfast"
+    }
+  ],
+
+  "footnotes": [
+    "*Time Permitting"
+  ],
+
+  "meta": {
+    "pageTitle": "Poland, Czech & Medjugorje Pilgrimage | Pax Via Tours",
+    "description": "Join Father Tito Cartagenas on a 12-day Catholic pilgrimage to Poland, Czech Republic, and Medjugorje. October 12–23, 2026 from San Francisco. From $4,699.",
+    "keywords": "pilgrimage Poland Czech Medjugorje Father Tito Pax Via Tours"
+  }
+}

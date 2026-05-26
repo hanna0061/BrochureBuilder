@@ -1,0 +1,549 @@
+/* =============================================================
+   RESPONSIVE.CSS — All Media Query Overrides
+   Pax Via Tours & Travel — Pilgrimage Website
+
+   This is the ONLY file that contains @media queries.
+   Component CSS files contain zero media queries.
+   Mobile-first: base styles target mobile. Breakpoints add complexity.
+
+   Breakpoint scale:
+     480px  — large mobile / landscape phones
+     768px  — tablet portrait (iPad)
+    1024px  — tablet landscape / small laptop
+    1280px  — standard desktop
+    1440px  — wide desktop (design target)
+   ============================================================= */
+
+
+/* ─────────────────────────────────────────────
+   480px — LARGE MOBILE / LANDSCAPE PHONE
+   ─────────────────────────────────────────────
+   Subtle refinements: more breathing room, strip font bump. */
+
+@media (min-width: 480px) {
+
+  /* Hero: eyebrow lines slightly wider */
+  .hero__eyebrow-line {
+    width: 48px;
+  }
+
+  /* Photo grid: slightly larger gap */
+  .photo-grid {
+    gap: 4px;
+  }
+
+  /* Destination strip */
+  .destination-strip__stop {
+    font-size: var(--text-sm);
+  }
+
+  /* Tour info bar: start transitioning toward row layout */
+  .tour-info-bar__main {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Tour intro: 2-column stat bar */
+  .tour-intro__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   768px — TABLET PORTRAIT
+   ─────────────────────────────────────────────
+   Major layout shifts: navbar, tour info bar become
+   horizontal. Footer becomes 2-col. Pricing becomes 2-col.
+   Itinerary days expand by default. */
+
+@media (min-width: 768px) {
+
+  /* ── Navbar: show links + CTA, hide hamburger ── */
+  .navbar__nav {
+    display: flex;
+  }
+
+  .navbar__cta {
+    display: inline-flex;
+  }
+
+  .navbar__hamburger {
+    display: none;
+  }
+
+  /* ── Hero: eyebrow lines wider at tablet ── */
+  .hero__eyebrow-line {
+    width: 52px;
+  }
+
+  /* ── Destination strip: single line, no wrap ── */
+  .destination-strip__inner {
+    flex-wrap: nowrap;
+    padding-block: var(--space-3);
+  }
+
+  .destination-strip__stop {
+    font-size: var(--text-sm);
+  }
+
+  /* ── Tour info bar: horizontal row ── */
+  .tour-info-bar__main {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .tour-info-bar__badge img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .tour-info-bar__price-block {
+    align-items: flex-end;
+  }
+
+  /* ── Itinerary: always expanded on tablet+ ── */
+  .itinerary__day-chevron {
+    display: none !important;
+  }
+
+  .itinerary__day-content {
+    display: block !important;
+  }
+
+  /* ── Tour intro: 4-column stat bar ── */
+  .tour-intro__stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* ── Pricing hero: taller ── */
+  .pricing-hero {
+    height: 280px;
+  }
+
+  /* ── Pricing grid: two columns ── */
+  .pricing__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+
+  /* ── Footer: two columns ── */
+  .footer__inner {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .footer__legal {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   1024px — TABLET LANDSCAPE / SMALL LAPTOP
+   ─────────────────────────────────────────────
+   Itinerary goes two-column (brochure Page 2 layout). */
+
+@media (min-width: 1024px) {
+
+  /* ── Itinerary: CSS columns — brochure Page 2 layout ──
+     Days flow top-to-bottom in col 1, then col 2.
+     .itinerary__day--col-break forces col 2 start. */
+  .itinerary__grid {
+    column-count: 2;
+    column-gap: var(--space-12);
+  }
+
+  .itinerary__day {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Body text scales up at laptop */
+  .itinerary__day-body {
+    font-size: var(--text-base);
+  }
+
+  /* ── Pricing hero: fluid height ── */
+  .pricing-hero {
+    height: clamp(300px, 35vw, 480px);
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   1280px — STANDARD DESKTOP
+   ─────────────────────────────────────────────
+   Full brochure-width layout. Photo grid at full 5px gap.
+   Tour info bar at 72px badge. Footer 3-column. */
+
+@media (min-width: 1280px) {
+
+  /* ── Navbar: full layout ── */
+  .navbar__links {
+    gap: var(--space-8);
+  }
+
+  .navbar__links a {
+    font-size: var(--text-base);
+  }
+
+  /* ── Hero text zone: desktop scale ── */
+  .hero__leader {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .hero__text-zone {
+    padding-top: var(--space-10);
+  }
+
+  /* ── Photo grid: full brochure gap ── */
+  .photo-grid {
+    gap: var(--photo-grid-gap); /* 5px */
+  }
+
+  /* ── Tour info bar: full badge size ── */
+  .tour-info-bar__badge img {
+    width: var(--badge-size); /* 72px */
+    height: var(--badge-size);
+  }
+
+  /* ── Pricing grid: wider gap at desktop ── */
+  .pricing__grid {
+    gap: var(--space-12);
+  }
+
+  /* ── Why Us: generous vertical padding ── */
+  .why-us {
+    padding-block: var(--space-20);
+  }
+
+  .why-us__heading {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-10);
+  }
+
+  /* ── Footer: three-column layout ── */
+  .footer__inner {
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+  }
+
+  .footer__legal {
+    grid-column: auto;
+    text-align: right;
+  }
+
+  /* ── Terms: max-width for readable dense text ── */
+  .terms .container {
+    max-width: 900px;
+  }
+
+  .terms__body {
+    font-size: var(--text-sm);
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   1440px — WIDE DESKTOP
+   ─────────────────────────────────────────────
+   Brochure design baseline. Fine-tune spacing
+   at maximum content width. */
+
+@media (min-width: 1440px) {
+
+  /* Container is already capped at 1100px — no changes needed.
+     These overrides handle edge cases at very wide viewports. */
+
+  .hero__text-zone {
+    padding-top: var(--space-12);
+  }
+
+  /* Ensure destination strip text never wraps at this width */
+  .destination-strip__inner {
+    flex-wrap: nowrap;
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   MOBILE-ONLY OVERRIDES (max-width)
+   ─────────────────────────────────────────────
+   Applied specifically to small screens only.
+   Used sparingly — prefer min-width mobile-first. */
+
+@media (max-width: 767px) {
+
+  /* ── Navbar: show hamburger, hide links + CTA ── */
+  .navbar__nav {
+    display: none;
+  }
+
+  .navbar__cta {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: flex;
+  }
+
+  /* ── Mobile nav overlay (full-screen) when .is-open ── */
+  .navbar.is-open {
+    /* Ensure the navbar itself covers full screen as overlay */
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    background-color: rgba(26, 49, 96, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    align-items: flex-start;
+    padding-top: 0;
+    z-index: var(--z-overlay);
+  }
+
+  /* Keep the container positioned normally inside the overlay */
+  .navbar.is-open .container {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Keep inner at full height, align content */
+  .navbar.is-open .navbar__inner {
+    height: var(--navbar-height);
+    align-items: center;
+  }
+
+  /* Show nav as centered vertical stack */
+  .navbar.is-open .navbar__nav {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0;
+    top: var(--navbar-height);
+    align-items: center;
+    justify-content: center;
+    padding-bottom: var(--space-20);
+  }
+
+  .navbar.is-open .navbar__links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .navbar.is-open .navbar__links li {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .navbar.is-open .navbar__links li:first-child {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .navbar.is-open .navbar__links a {
+    display: block;
+    padding: var(--space-4) var(--space-6);
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    color: var(--color-white) !important;
+    letter-spacing: var(--ls-heading);
+    min-height: 56px;
+    line-height: 56px;
+    transition: opacity var(--transition-fast);
+  }
+
+  .navbar.is-open .navbar__links a:hover {
+    opacity: 0.7;
+  }
+
+  /* Brand + hamburger remain visible and white in overlay */
+  .navbar.is-open .navbar__brand-name,
+  .navbar.is-open .navbar__hamburger span {
+    color: var(--color-white);
+    background-color: var(--color-white);
+  }
+
+  /* ── Tour info bar: stacked column ── */
+  .tour-info-bar__main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
+  }
+
+  .tour-info-bar__dates {
+    align-items: center;
+  }
+
+  .tour-info-bar__price-block {
+    align-items: center;
+  }
+
+  .tour-info-bar__badge img {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* ── Hero eyebrow: hide decorative lines on narrow mobile ── */
+  .hero__eyebrow-line {
+    display: none;
+  }
+
+  /* ── Destination strip: allow wrap, tighten font ── */
+  .destination-strip__inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1);
+    padding-block: var(--space-2);
+  }
+
+  .destination-strip__stop {
+    font-size: 0.75rem; /* 12px */
+    letter-spacing: 0.04em;
+  }
+
+  .destination-strip__sep {
+    padding-inline: var(--space-1);
+  }
+
+  /* ── Itinerary: collapsible on mobile ── */
+  .itinerary__day-header.itinerary__day-toggle {
+    cursor: pointer;
+    min-height: 44px;
+  }
+
+  .itinerary__day-content {
+    display: none;
+  }
+
+  .itinerary__day.is-expanded .itinerary__day-content {
+    display: block;
+  }
+
+  /* Chevron: visible on mobile, hidden on desktop via 768px block */
+  .itinerary__day-chevron {
+    display: inline-block;
+  }
+
+  /* ── Pricing hero: compact mobile height ── */
+  .pricing-hero {
+    height: 200px;
+  }
+
+  /* ── Why Us: tighter mobile ── */
+  .why-us__heading {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  /* ── Terms: small font for dense mobile text ── */
+  .terms__body {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.5;
+  }
+
+  .terms__section-heading {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  /* ── Payment table: compressed ── */
+  .payment-table td {
+    font-size: 0.8125rem; /* 13px */
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .payment-table__label {
+    font-size: 0.6875rem !important; /* 11px — tight label */
+  }
+
+  .payment-table__amount {
+    font-size: var(--text-base) !important;
+  }
+
+  /* ── Footer: single column centered ── */
+  .footer__inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .footer__brand {
+    justify-content: center;
+  }
+
+  .footer__legal {
+    text-align: center;
+  }
+
+  .footer__legal a {
+    display: inline-block;
+    padding: var(--space-2) 0;
+    min-height: 44px;
+    line-height: 44px;
+  }
+
+}
+
+
+/* ─────────────────────────────────────────────
+   PRINT STYLES
+   ─────────────────────────────────────────────
+   Terms & Conditions page is print-optimized.
+   Navigation and footer are hidden on print. */
+
+@media print {
+
+  .navbar,
+  .footer {
+    display: none !important;
+  }
+
+  .terms {
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #000;
+  }
+
+  .terms__title {
+    font-size: 18pt;
+  }
+
+  .terms__section-heading {
+    font-size: 10pt;
+  }
+
+  .terms__body {
+    font-size: 9pt;
+  }
+
+  .itinerary__day {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .photo-grid__cell img {
+    transition: none;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+  }
+
+  /* Don't print URL after mailto links */
+  a[href^="mailto"]::after {
+    content: none;
+  }
+
+}

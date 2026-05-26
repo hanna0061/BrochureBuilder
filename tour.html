@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Meta tags are overwritten by JS from tourData.meta -->
+  <meta name="description" content="" id="meta-description">
+  <meta name="keywords" content="" id="meta-keywords">
+
+  <!-- Open Graph — overwritten by JS -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="" id="og-title">
+  <meta property="og:description" content="" id="og-description">
+  <meta property="og:image" content="" id="og-image">
+
+  <!-- Title overwritten by JS: tourData.meta.pageTitle -->
+  <title>Loading Tour | Pax Via Tours &amp; Travel</title>
+
+  <!-- Google Fonts: EB Garamond + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS — load order must be preserved -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Skip navigation for keyboard/screen reader users -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- ═══════════════════════════════════════
+       COMPONENT 1 — NAVBAR
+       ═══════════════════════════════════════ -->
+  <header class="navbar" id="navbar" role="banner" data-theme="light">
+    <div class="container">
+      <div class="navbar__inner">
+
+        <a class="navbar__brand" href="index.html" aria-label="Pax Via Tours — All Tours">
+          <img class="navbar__logo"
+               src="./assets/logos/pax-via-logo.png"
+               alt="Pax Via Tours &amp; Travel logo"
+               width="48" height="48">
+          <span class="navbar__brand-name">Pax Via Tours</span>
+        </a>
+
+        <nav class="navbar__nav" aria-label="Main navigation" id="navbar__menu">
+          <ul class="navbar__links">
+            <li><a href="index.html">All Tours</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="mailto:info@paxvia.com">Contact</a></li>
+          </ul>
+        </nav>
+
+        <button class="navbar__hamburger"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="navbar__menu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT — dynamic shell
+       All [data-field] elements are populated
+       from JSON by country-manager.js
+       ═══════════════════════════════════════ -->
+  <main id="main">
+
+    <!-- Global loading state: shown on page load, hidden when data arrives -->
+    <div class="loading-state" id="page-loading" role="status" aria-live="polite">
+      <p class="loading-state__text">Loading pilgrimage&hellip;</p>
+    </div>
+
+    <!-- Global error state: hidden by default, shown on JSON fetch failure -->
+    <div class="error-state u-hidden" id="page-error" role="alert">
+      <h1 class="error-state__title">Tour Not Found</h1>
+      <p class="error-state__message">
+        We couldn&rsquo;t load the tour details. Please check the link
+        or contact us and we&rsquo;ll help you find your pilgrimage.
+      </p>
+      <p class="error-state__contact">
+        <a href="mailto:info@paxvia.com">info@paxvia.com</a> &middot;
+        <a href="tel:8442128162">(844) 212-8162</a>
+      </p>
+    </div>
+
+    <!-- Tour content wrapper: hidden until data loads -->
+    <div id="tour-content" class="u-hidden">
+
+      <!-- ───────────────────────────────────
+           COMPONENT 2 — HERO TEXT ZONE
+           Brochure Page 1, top block
+           ─────────────────────────────────── -->
+      <section class="hero cover-section" aria-label="Tour overview">
+
+        <div class="hero__text-zone">
+          <div class="hero__eyebrow" aria-hidden="true">
+            <span class="hero__eyebrow-line"></span>
+            <p class="hero__leader" data-field="leader">
+              Join Father Tito Cartagenas on a Pilgrimage to
+            </p>
+            <span class="hero__eyebrow-line"></span>
+          </div>
+          <h1 class="hero__title" data-field="title">
+            Poland, Czeck,<br>&amp; Medjugorje
+          </h1>
+        </div>
+
+        <!-- ─────────────────────────────────
+             COMPONENT 4 — DESTINATION STRIP
+             Navy banner with city stops
+             ──────────────────────────────── -->
+        <div class="destination-strip" role="region" aria-label="Tour destinations">
+          <div class="destination-strip__inner" data-field="stops">
+            <!-- JS renders stop spans + separator spans -->
+          </div>
+        </div>
+
+        <!-- ─────────────────────────────────
+             COMPONENT 3 — PHOTO GRID 2×2
+             Brochure Page 1, center visual
+             ──────────────────────────────── -->
+        <div class="photo-grid" data-field="photos" aria-label="Tour destination photos">
+          <!-- JS renders 4 photo cells -->
+        </div>
+
+        <!-- ─────────────────────────────────
+             COMPONENT 5 — TOUR INFO BAR
+             Brochure Page 1, bottom bar
+             ──────────────────────────────── -->
+        <div class="tour-info-bar" data-field="tourInfo">
+          <div class="tour-info-bar__main">
+
+            <div class="tour-info-bar__dates">
+              <span class="tour-info-bar__month" data-field="month">October</span>
+              <span class="tour-info-bar__range" data-field="dateRange">12–23, 2026</span>
+            </div>
+
+            <div class="tour-info-bar__badge">
+              <img src="./assets/logos/pax-via-logo.png"
+                   alt="Pax Via Tours &amp; Travel"
+                   width="100" height="100">
+            </div>
+
+            <div class="tour-info-bar__price-block">
+              <span class="tour-info-bar__price" data-field="price">$4,699</span>
+              <span class="tour-info-bar__from" data-field="departure">From San Francisco</span>
+            </div>
+
+          </div>
+
+          <div class="tour-info-bar__cta">
+            <a href="mailto:info@paxvia.com" class="btn btn--cta-bar" data-field="bookCta">
+              Book Now at PaxVia.com
+            </a>
+          </div>
+        </div>
+
+      </section><!-- /.hero -->
+
+
+      <!-- ───────────────────────────────────
+           TOUR INTRO
+           Stat bar + pilgrimage overview.
+           Bridges cover to itinerary.
+           ─────────────────────────────────── -->
+      <section class="tour-intro" aria-label="Tour at a glance" data-animate>
+        <div class="container">
+          <div class="tour-intro__stats" id="tour-intro-stats" role="list">
+            <!-- JS renders: Duration | Dates | Departure | Price -->
+          </div>
+          <div class="tour-intro__body" id="tour-intro-body">
+            <!-- JS renders overview paragraphs from JSON -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ───────────────────────────────────
+           COMPONENT 6–7 — ITINERARY
+           Brochure Page 2 — full two-column
+           day-by-day itinerary
+           ─────────────────────────────────── -->
+      <section class="itinerary section" aria-labelledby="itinerary-heading">
+        <div class="container">
+
+          <header class="itinerary__header" data-animate>
+            <p class="itinerary__header-eyebrow">Pilgrimage Route</p>
+            <h2 class="itinerary__heading" id="itinerary-heading">Day by Day Itinerary</h2>
+          </header>
+
+          <div class="itinerary__grid" data-field="itinerary" id="itinerary-grid">
+            <!-- JS renders one .itinerary__day article per day -->
+          </div>
+
+          <div class="itinerary__meta">
+            <p class="itinerary__tour-code" data-field="tourCode">
+              Tour Number: SFO-1012/12D
+            </p>
+            <p class="itinerary__contact" data-field="companyContact">
+              Pax Via Tours &amp; Travel &mdash; info@paxvia.com &mdash; Tel. (844) 212-8162
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ───────────────────────────────────
+           COMPONENT 8 — PRICING HERO IMAGE
+           Brochure Page 3 — dramatic full photo
+           ─────────────────────────────────── -->
+      <div class="pricing-hero" data-field="pricingHero"
+           role="img" aria-label="Tour destination image">
+        <img class="pricing-hero__img"
+             src=""
+             alt=""
+             loading="lazy"
+             width="1100" height="480"
+             data-field="pricingHeroImg">
+        <div class="pricing-hero__overlay" aria-hidden="true"></div>
+      </div>
+
+
+      <!-- ───────────────────────────────────
+           COMPONENT 9 — PRICING PANEL
+           Brochure Page 3 — "PRICING" header
+           + two-column price/inclusions
+           ─────────────────────────────────── -->
+      <section class="pricing" aria-labelledby="pricing-heading">
+
+        <div class="pricing__header-bar">
+          <h2 class="pricing__heading" id="pricing-heading">PRICING</h2>
+        </div>
+
+        <div class="container">
+          <div class="pricing__grid">
+
+            <!-- LEFT COLUMN: base price + options + payment table -->
+            <div class="pricing__left">
+
+              <div class="pricing__base-block">
+                <h3 class="pricing__base-label">Base Price Per Person</h3>
+                <p class="pricing__base-price" data-field="basePrice">$4,699.00*</p>
+                <p class="pricing__base-note">Double occupancy with base airfare</p>
+                <p class="pricing__discount-note">*Discount cash/check price</p>
+              </div>
+
+              <div class="pricing__options-block">
+                <h4 class="pricing__options-label">Options</h4>
+                <ul class="pricing__options-list" data-field="options">
+                  <!-- JS renders option items -->
+                </ul>
+              </div>
+
+              <!-- COMPONENT 10 — Payment Table -->
+              <table class="payment-table" aria-label="Payment schedule">
+                <thead class="u-visually-hidden">
+                  <tr>
+                    <th scope="col">Payment</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Due Date</th>
+                  </tr>
+                </thead>
+                <tbody data-field="payments">
+                  <!-- JS renders payment rows -->
+                </tbody>
+              </table>
+
+            </div>
+
+            <!-- RIGHT COLUMN: inclusions list (Component 11) -->
+            <div class="pricing__right">
+              <div class="inclusions">
+                <h3 class="inclusions__title">Base Price Includes:</h3>
+                <ul class="inclusions__list" data-field="inclusions">
+                  <!-- JS renders inclusion items -->
+                </ul>
+              </div>
+            </div>
+
+          </div><!-- /.pricing__grid -->
+        </div>
+
+      </section><!-- /.pricing -->
+
+
+      <!-- ───────────────────────────────────
+           COMPONENT 12 — WHY TRAVEL WITH US
+           Brochure Page 3 — bottom navy section
+           ─────────────────────────────────── -->
+      <section class="why-us section" aria-labelledby="why-us-heading">
+        <div class="container">
+          <h2 class="why-us__heading" id="why-us-heading">Why Travel with Us?</h2>
+          <div class="why-us__body" data-field="whyUs">
+            <!-- JS populates from company.json -->
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#tour-content -->
+
+  </main>
+
+
+  <!-- ═══════════════════════════════════════
+       COMPONENT 15 — FOOTER
+       ═══════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+
+        <div class="footer__brand">
+          <img src="./assets/logos/pax-via-logo.png"
+               alt="Pax Via Tours" width="55" height="55">
+          <p class="footer__tagline">Pax Via Tours &amp; Travel</p>
+        </div>
+
+        <address class="footer__address">
+          9939 Hibert Street Suite 106<br>
+          San Diego, CA 92131<br>
+          <a href="tel:8442128162">(844) 212-8162</a> &middot;
+          <a href="mailto:info@paxvia.com">info@paxvia.com</a>
+        </address>
+
+        <div class="footer__legal">
+          <p>CST-2161770-50</p>
+          <p>&copy; <span id="year"></span> Pax Via Tours &amp; Travel. All rights reserved.</p>
+          <a href="terms.html">Terms &amp; Conditions</a>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- JavaScript — ES modules -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>

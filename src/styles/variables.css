@@ -1,0 +1,201 @@
+/* =============================================================
+   VARIABLES.CSS — Design Token System
+   Pax Via Tours & Travel — Pilgrimage Website
+   Source: Fr. Tito Full Brochure (Poland, Czech & Medjugorje)
+   All tokens derived directly from brochure visual analysis.
+   ============================================================= */
+
+:root {
+
+  /* ─────────────────────────────────────────────
+     BRAND COLORS
+     Extracted from brochure: cover bars, sections
+     ───────────────────────────────────────────── */
+
+  --color-navy:           #1A3160;   /* Primary — banner bars, headers, dark sections */
+  --color-navy-dark:      #112244;   /* Hover states, deep shadow overlays */
+  --color-navy-light:     #1E3D70;   /* Active states, lighter nav background */
+  --color-navy-overlay:   rgba(26, 49, 96, 0.55);  /* Pricing hero image overlay */
+
+  --color-white:          #FFFFFF;
+  --color-off-white:      #F8F7F5;   /* Warm off-white — alternate section backgrounds */
+
+  --color-badge-gold:     #C4973A;   /* Pax Via circular logo seal accent */
+  --color-badge-gold-light: #D4A84B; /* Badge gold hover */
+
+  /* ─────────────────────────────────────────────
+     TEXT COLORS
+     ───────────────────────────────────────────── */
+
+  --color-text-heading:   #1A1A2E;   /* All headings — near-black with navy undertone */
+  --color-text-body:      #3A3A4A;   /* Body paragraphs, itinerary text */
+  --color-text-muted:     #6B6B7A;   /* Captions, footnotes, metadata */
+  --color-text-label:     #4A4A5A;   /* Section labels, table headers, day numbers */
+  --color-text-on-dark:   #FFFFFF;   /* Text on navy backgrounds */
+  --color-text-on-dark-muted: rgba(255, 255, 255, 0.75);  /* Secondary text on dark */
+
+  /* ─────────────────────────────────────────────
+     FUNCTIONAL / UI COLORS
+     ───────────────────────────────────────────── */
+
+  --color-divider:        #D0CFC8;   /* Horizontal rules, table borders */
+  --color-row-alt:        #F3F2F0;   /* Alternating table row background */
+  --color-border:         #E4E3DC;   /* Card borders, input borders */
+  --color-focus-ring:     rgba(196, 151, 58, 0.5);  /* Focus ring (gold-tinted) */
+
+  /* ─────────────────────────────────────────────
+     TYPOGRAPHY — FONT FAMILIES
+     EB Garamond: classical serif — matches brochure display font
+     Inter: clean sans-serif — UI, labels, data
+     ───────────────────────────────────────────── */
+
+  --font-serif:   'EB Garamond', 'Garamond', 'Times New Roman', Georgia, serif;
+  --font-sans:    'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+  /* ─────────────────────────────────────────────
+     TYPOGRAPHY — TYPE SCALE
+     Base: 16px (1rem). All sizes from brochure proportions.
+     ───────────────────────────────────────────── */
+
+  --text-xs:      0.75rem;    /* 12px — legal fine print, T&C body */
+  --text-sm:      0.875rem;   /* 14px — captions, labels, metadata */
+  --text-base:    1rem;       /* 16px — standard body copy */
+  --text-md:      1.125rem;   /* 18px — lead body, pricing descriptions */
+  --text-lg:      1.375rem;   /* 22px — itinerary day headings */
+  --text-xl:      1.75rem;    /* 28px — section sub-headers */
+  --text-2xl:     2.25rem;    /* 36px — section titles */
+  --text-3xl:     3rem;       /* 48px — hero title mobile */
+  --text-4xl:     4rem;       /* 64px — hero title desktop */
+
+  /* Fluid hero display — main tour title "Poland, Czeck & Medjugorje" */
+  --text-display: clamp(2.5rem, 7vw, 4.5rem);
+
+  /* ─────────────────────────────────────────────
+     TYPOGRAPHY — LINE HEIGHTS
+     ───────────────────────────────────────────── */
+
+  --lh-display:   1.10;   /* Tight — large serif display headings */
+  --lh-heading:   1.25;   /* Section headings */
+  --lh-body:      1.65;   /* Comfortable body reading */
+  --lh-dense:     1.40;   /* Table text, compact lists */
+  --lh-label:     1.00;   /* Single-line labels */
+
+  /* ─────────────────────────────────────────────
+     TYPOGRAPHY — LETTER SPACING
+     ───────────────────────────────────────────── */
+
+  --ls-display:   -0.02em;   /* Tight — large serif titles */
+  --ls-heading:   -0.01em;   /* Section headings */
+  --ls-body:       0;        /* Normal body */
+  --ls-label:      0.12em;   /* Uppercase UI labels */
+  --ls-banner:     0.06em;   /* Destination strip city names */
+
+  /* ─────────────────────────────────────────────
+     SPACING SCALE
+     Base unit: 4px (0.25rem)
+     ───────────────────────────────────────────── */
+
+  --space-1:    0.25rem;    /*  4px */
+  --space-2:    0.5rem;     /*  8px */
+  --space-3:    0.75rem;    /* 12px */
+  --space-4:    1rem;       /* 16px */
+  --space-5:    1.25rem;    /* 20px */
+  --space-6:    1.5rem;     /* 24px */
+  --space-7:    1.75rem;    /* 28px */
+  --space-8:    2rem;       /* 32px */
+  --space-10:   2.5rem;     /* 40px */
+  --space-12:   3rem;       /* 48px */
+  --space-14:   3.5rem;     /* 56px */
+  --space-16:   4rem;       /* 64px */
+  --space-20:   5rem;       /* 80px */
+  --space-24:   6rem;       /* 96px */
+  --space-32:   8rem;       /* 128px */
+
+  /* ─────────────────────────────────────────────
+     LAYOUT
+     ───────────────────────────────────────────── */
+
+  --container-max:       1100px;
+  --container-pad:       clamp(1rem, 5vw, 3rem);
+  --section-py:          clamp(3rem, 6vw, 5rem);
+  --grid-gap:            1.5rem;
+  --photo-grid-gap:      5px;   /* Signature white-border gap between cover photos */
+
+  /* ─────────────────────────────────────────────
+     BORDER RADIUS
+     The brochure is formal/sharp — minimal rounding.
+     ───────────────────────────────────────────── */
+
+  --radius-none:  0;
+  --radius-sm:    4px;    /* Buttons, tags */
+  --radius-md:    8px;    /* Cards (homepage only) */
+  --radius-lg:    16px;   /* Modals, overlays */
+  --radius-full:  9999px; /* Pill badges */
+
+  /* ─────────────────────────────────────────────
+     SHADOWS
+     Navy-tinted — matches brand color
+     ───────────────────────────────────────────── */
+
+  --shadow-sm:    0 2px 8px rgba(26, 49, 96, 0.08);
+  --shadow-md:    0 4px 20px rgba(26, 49, 96, 0.12);
+  --shadow-lg:    0 8px 40px rgba(26, 49, 96, 0.18);
+  --shadow-xl:    0 16px 64px rgba(26, 49, 96, 0.22);
+
+  /* ─────────────────────────────────────────────
+     TRANSITIONS
+     ───────────────────────────────────────────── */
+
+  --transition-fast:    150ms ease;
+  --transition-base:    250ms ease;
+  --transition-slow:    400ms ease;
+  --transition-expand:  300ms ease-in-out;
+
+  /* ─────────────────────────────────────────────
+     Z-INDEX LAYERS
+     Explicit stacking context to prevent conflicts.
+     ───────────────────────────────────────────── */
+
+  --z-base:       1;
+  --z-raised:     10;
+  --z-dropdown:   100;
+  --z-overlay:    200;
+  --z-sticky:     300;
+  --z-modal:      400;
+  --z-toast:      500;
+
+  /* ─────────────────────────────────────────────
+     BREAKPOINTS
+     (CSS custom properties for documentation only.
+      Use these values in media queries in responsive.css)
+     Mobile-first: base = mobile, add width upward.
+
+     --bp-sm:   480px   Large mobile / landscape
+     --bp-md:   768px   Tablet portrait
+     --bp-lg:  1024px   Tablet landscape / small laptop
+     --bp-xl:  1280px   Standard desktop
+     --bp-2xl: 1440px   Wide desktop (brochure design baseline)
+     ───────────────────────────────────────────── */
+
+  /* ─────────────────────────────────────────────
+     NAVBAR
+     ───────────────────────────────────────────── */
+
+  --navbar-height:       72px;
+  --navbar-height-sm:    60px;
+  --navbar-bg:           var(--color-white);
+  --navbar-bg-sticky:    var(--color-navy);
+  --navbar-border:       1px solid var(--color-border);
+
+  /* ─────────────────────────────────────────────
+     COMPONENT-SPECIFIC TOKENS
+     ───────────────────────────────────────────── */
+
+  --photo-grid-aspect:   4 / 3;
+  --pricing-hero-height: clamp(280px, 38vw, 480px);
+  --badge-size:          72px;
+  --badge-size-sm:       52px;
+
+}
+
+
