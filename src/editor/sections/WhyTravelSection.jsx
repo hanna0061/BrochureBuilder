@@ -8,8 +8,6 @@ export default function WhyTravelSection() {
   const {
     heading = 'Why Travel with Pax Via?',
     paragraphs = [],
-    fontSize = 8.5,
-    lineHeight = 1.55,
   } = whyUs;
 
   const setField = (field, value) =>
@@ -57,32 +55,6 @@ export default function WhyTravelSection() {
       >
         + Add Paragraph
       </button>
-
-      <span className="field-group-label">Typography</span>
-      <div className="field">
-        <label className="field__label">Font Size — {fontSize}px</label>
-        <input
-          type="range"
-          min={6}
-          max={14}
-          step={0.5}
-          value={fontSize}
-          onChange={(e) => setField('fontSize', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      <div className="field">
-        <label className="field__label">Line Height — {lineHeight}</label>
-        <input
-          type="range"
-          min={1.1}
-          max={2.0}
-          step={0.05}
-          value={lineHeight}
-          onChange={(e) => setField('lineHeight', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
 
     </div>
   );

@@ -4,6 +4,12 @@ import DestinationsSection from './sections/DestinationsSection';
 import ImagesSection from './sections/ImagesSection';
 import ItinerarySection from './sections/ItinerarySection';
 import PricingSection from './sections/PricingSection';
+import TermsSection from './sections/TermsSection';
+import NavbarSection from './sections/NavbarSection';
+import FooterSection from './sections/FooterSection';
+import ColorsSection from './sections/ColorsSection';
+import PositionsSection from './sections/PositionsSection';
+import LogosSection from './sections/LogosSection';
 import { useBrochure } from '../context/BrochureContext';
 
 const SECTIONS = [
@@ -12,6 +18,12 @@ const SECTIONS = [
   { id: 'images',        title: 'Images',                 Component: ImagesSection },
   { id: 'itinerary',     title: 'Itinerary',              Component: ItinerarySection },
   { id: 'pricing',       title: 'Pricing & Inclusions',   Component: PricingSection },
+  { id: 'terms',         title: 'Terms & Conditions',     Component: TermsSection },
+  { id: 'navbar',        title: 'Navbar',                 Component: NavbarSection },
+  { id: 'footer',        title: 'Footer',                 Component: FooterSection },
+  { id: 'colors',        title: 'Colors',                 Component: ColorsSection },
+  { id: 'positions',     title: 'Content Positions',      Component: PositionsSection },
+  { id: 'logos',         title: 'Logos',                  Component: LogosSection },
 ];
 
 export default function EditorSidebar() {

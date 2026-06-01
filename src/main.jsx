@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrochureProvider } from './context/BrochureContext';
 import App from './App';
+import AuthGate from './components/AuthGate';
 
 // Global styles — load order must be preserved
 import './styles/variables.css';
@@ -19,7 +20,10 @@ import './styles/app.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrochureProvider>
-      <App />
+      {/* AuthGate wraps the app and shows Login when unauthenticated */}
+      <AuthGate>
+        <App />
+      </AuthGate>
     </BrochureProvider>
   </React.StrictMode>
 );

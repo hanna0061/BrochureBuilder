@@ -22,6 +22,47 @@
   align-items: center;
 }
 
+/* ── Preview toolbar (drag mode toggle) ── */
+.preview-panel__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 16px;
+  flex-shrink: 0;
+}
+
+.preview-toolbar__btn {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preview-toolbar__btn:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+.preview-toolbar__btn.is-active {
+  background: #1A3160;
+  border-color: #1A3160;
+  color: #fff;
+}
+
+.preview-toolbar__hint {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.02em;
+}
+
 .preview-page-wrap {
   margin-bottom: 32px;
   position: relative;
@@ -117,7 +158,7 @@
 /* Navy page header bar (Pages 2–3) */
 .pg-header {
   flex-shrink: 0;
-  background-color: var(--color-navy);
+  background-color: var(--color-navbar-bg, var(--color-navy));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -131,7 +172,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-navbar-text, rgba(255, 255, 255, 0.8));
 }
 
 .pg-header__logo {
@@ -364,7 +405,7 @@
   flex: 1;
   min-height: 0;
   padding: 18px 24px 12px;
-  overflow: hidden;
+  overflow: hidden; /* hard boundary — content must never reach the footer */
 }
 
 .p2-section-header {
@@ -395,7 +436,7 @@
 .p2-grid {
   column-count: 2;
   column-gap: 20px;
-  height: calc(100% - 48px); /* subtract section header height */
+  height: calc(100% - 60px); /* conservative fallback; JS overrides with measured value */
   overflow: hidden;
 }
 
@@ -656,13 +697,13 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-label);
-  font-size: 10px !important;
+  font-size: 10px;
 }
 
 .p3-pay-amount {
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 15px !important;
+  font-size: 15px;
   color: var(--color-text-heading);
 }
 
@@ -847,7 +888,7 @@
 /* Company footer — centered column */
 .p4-footer {
   flex-shrink: 0;
-  background-color: var(--color-navy);
+  background-color: var(--color-footer-bg, var(--color-navy));
   padding: 8px 24px 9px;
   display: flex;
   flex-direction: column;
@@ -872,7 +913,7 @@
   font-family: var(--font-serif);
   font-size: 25px;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--color-footer-text, var(--color-white));
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -880,7 +921,7 @@
 .p4-footer__info {
   font-family: var(--font-sans);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-footer-text, rgba(255, 255, 255, 0.62));
   text-align: center;
   line-height: 1.5;
 }

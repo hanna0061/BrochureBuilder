@@ -4,7 +4,9 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hanao\\\\OneDrive\\\\Desktop\\\\Vipe-Coding\\\\Work\\\\Brochure\" -Recurse -Directory)",
       "Bash(Select-Object FullName)",
       "WebSearch",
-      "WebFetch(domain:unsplash.com)"
+      "WebFetch(domain:unsplash.com)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hanao\\\\OneDrive\\\\Desktop\\\\Vipe-Coding\\\\Work\\\\Brochure\" -Force)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\hanao\\\\OneDrive\\\\Desktop\\\\Vipe-Coding\\\\Work\\\\Brochure\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table -AutoSize)"
     ]
   }
 }

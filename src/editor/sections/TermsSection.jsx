@@ -1,6 +1,7 @@
 import React from 'react';
 import { TextField } from '../fields/Field';
 import { useBrochure } from '../../context/BrochureContext';
+import TypoPanel from '../components/TypoPanel';
 
 export default function TermsSection() {
   const { state, dispatch } = useBrochure();
@@ -10,8 +11,6 @@ export default function TermsSection() {
     intro = '',
     bodyText = '',
     disclaimer = '',
-    fontSize = 7,
-    lineHeight = 1.45,
   } = terms;
 
   const set = (field, value) =>
@@ -19,7 +18,6 @@ export default function TermsSection() {
 
   return (
     <div>
-
       <span className="field-group-label" style={{ marginTop: 0, borderTop: 'none' }}>
         Page Header
       </span>
@@ -29,6 +27,7 @@ export default function TermsSection() {
         onChange={(v) => set('headerTitle', v)}
         placeholder="Terms & Conditions of Travel"
       />
+      <TypoPanel keys={['termsTitle']} resetLabel="Terms Title" label="Terms Title" />
 
       <span className="field-group-label">Introduction</span>
       <TextField
@@ -39,6 +38,7 @@ export default function TermsSection() {
         rows={4}
         placeholder="Opening paragraphs — separate with a blank line…"
       />
+      <TypoPanel keys={['termsIntro']} resetLabel="Terms Intro" label="Terms Intro" />
 
       <span className="field-group-label">Legal Body Text</span>
       <p style={{ fontSize: 10, color: '#6B6B7A', padding: '0 0 6px', lineHeight: 1.45 }}>
@@ -56,6 +56,7 @@ export default function TermsSection() {
         rows={20}
         placeholder={"**DOCUMENTS:** US citizens require a valid passport.\n\n**REGISTRATION AND DEPOSIT:** Deposit of $500 per person…"}
       />
+      <TypoPanel keys={['termsBody']} resetLabel="Terms Body" label="Terms Body" />
 
       <span className="field-group-label">Disclaimer Note</span>
       <TextField
@@ -66,33 +67,10 @@ export default function TermsSection() {
         rows={3}
         placeholder="Note: While no changes are anticipated…"
       />
+      <TypoPanel keys={['termsDisclaimer']} resetLabel="Terms Disclaimer" label="Terms Disclaimer" />
 
-      <span className="field-group-label">Typography</span>
-      <div className="field">
-        <label className="field__label">Font Size — {fontSize}px</label>
-        <input
-          type="range"
-          min={5}
-          max={12}
-          step={0.5}
-          value={fontSize}
-          onChange={(e) => set('fontSize', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      <div className="field">
-        <label className="field__label">Line Height — {lineHeight}</label>
-        <input
-          type="range"
-          min={1.1}
-          max={2.0}
-          step={0.05}
-          value={lineHeight}
-          onChange={(e) => set('lineHeight', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-
+      <span className="field-group-label">Footer</span>
+      <TypoPanel keys={['termsFooter']} resetLabel="Terms Footer" label="Terms Footer" />
     </div>
   );
 }

@@ -1,6 +1,17 @@
 import React from 'react';
 import { TextField } from '../fields/Field';
 import { useBrochure } from '../../context/BrochureContext';
+import TypoPanel from '../components/TypoPanel';
+
+const COVER_TYPO_KEYS = [
+  'coverTitle',
+  'coverSubtitle',
+  'infobarMonth',
+  'infobarDateRange',
+  'infobarPrice',
+  'infobarDeparture',
+  'infobarBookNow',
+];
 
 export default function TourInfoSection() {
   const { state, dispatch } = useBrochure();
@@ -81,6 +92,8 @@ export default function TourInfoSection() {
         onChange={(v) => nested('price', 'display', v)}
         placeholder="$4,699*"
       />
+
+      <TypoPanel keys={COVER_TYPO_KEYS} resetLabel="Cover" />
     </div>
   );
 }

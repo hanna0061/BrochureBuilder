@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, ArrayField, ImageField } from '../fields/Field';
 import { useBrochure } from '../../context/BrochureContext';
+import TypoPanel from '../components/TypoPanel';
 
 function OptionEditor({ opt, index, dispatch }) {
   const [open, setOpen] = useState(false);
@@ -162,6 +163,16 @@ export default function PricingSection() {
         onAdd={() => dispatch({ type: 'ADD_INCLUSION' })}
         onRemove={(i) => dispatch({ type: 'REMOVE_INCLUSION', index: i })}
         placeholder="Included item…"
+      />
+
+      <TypoPanel
+        keys={['pricingHeading', 'pricingBody', 'tourIncludes', 'whyTravel']}
+        resetLabel="Pricing"
+      />
+      <TypoPanel
+        keys={['pricingTableLabel', 'pricingTableAmount', 'pricingTableDue']}
+        resetLabel="Payment Table"
+        label="Payment Table"
       />
     </div>
   );

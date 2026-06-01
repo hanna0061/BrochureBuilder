@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TextField } from '../fields/Field';
 import { useBrochure } from '../../context/BrochureContext';
+import TypoPanel from '../components/TypoPanel';
 
 function DayEditor({ day, index, dispatch }) {
   const [open, setOpen] = useState(false);
@@ -84,6 +85,8 @@ export default function ItinerarySection() {
       >
         + Add Day
       </button>
+
+      <TypoPanel keys={['itineraryHeading', 'itineraryBody']} resetLabel="Itinerary" />
     </div>
   );
 }

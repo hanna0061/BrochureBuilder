@@ -2,6 +2,38 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import defaultBrochure from '../data/brochures/poland-czech-medjugorje.json';
 import companyData from '../data/global/company.json';
 import termsData from '../data/global/terms.json';
+import { TYPOGRAPHY_DEFAULTS } from '../data/typography';
+import { POSITION_DEFAULTS } from '../data/positions';
+
+// Forward-migrate a loaded tour so all keys are present (typography, colors, positions).
+function migrateTour(tour) {
+  const typo = tour.typography ? { ...tour.typography } : {};
+  for (const key of Object.keys(TYPOGRAPHY_DEFAULTS)) {
+    if (!typo[key]) typo[key] = { ...TYPOGRAPHY_DEFAULTS[key] };
+  }
+
+  // Migrate logos: old 'size' field → new 'width' field
+  const rawLogos = tour.logos ?? {};
+  const logos = {};
+  for (const key of Object.keys(rawLogos)) {
+    const logo = rawLogos[key];
+    if (logo && logo.size !== undefined && logo.width === undefined) {
+      const { size, ...rest } = logo;
+      logos[key] = { ...rest, width: size };
+    } else {
+      logos[key] = logo;
+    }
+  }
+
+  return {
+    ...tour,
+    typography:     typo,
+    colors:         tour.colors         ?? {},
+    positions:      tour.positions      ?? {},
+    imagePositions: tour.imagePositions ?? {},
+    logos,
+  };
+}
 
 const BrochureContext = createContext(null);
 const STORAGE_KEY = 'paxvia_brochure_draft';
@@ -9,10 +41,120 @@ const STORAGE_KEY = 'paxvia_brochure_draft';
 function reducer(state, action) {
   switch (action.type) {
     case 'SET_TOUR':
-      return { ...state, tour: action.payload };
+      return { ...state, tour: migrateTour(action.payload) };
 
     case 'RESET_TOUR':
-      return { ...state, tour: defaultBrochure };
+      return { ...state, tour: migrateTour(defaultBrochure) };
+
+    case 'UPDATE_TYPOGRAPHY': {
+      const currentSection = state.tour.typography?.[action.section] || {};
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          typography: {
+            ...state.tour.typography,
+            [action.section]: { ...currentSection, [action.field]: action.value },
+          },
+        },
+      };
+    }
+
+    case 'RESET_TYPOGRAPHY_SECTION':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          typography: {
+            ...state.tour.typography,
+            [action.section]: { ...TYPOGRAPHY_DEFAULTS[action.section] },
+          },
+        },
+      };
+
+    case 'UPDATE_COLOR':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          colors: { ...state.tour.colors, [action.key]: action.value },
+        },
+      };
+
+    case 'RESET_COLORS':
+      return {
+        ...state,
+        tour: { ...state.tour, colors: {} },
+      };
+
+    case 'UPDATE_POSITION':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          positions: {
+            ...state.tour.positions,
+            [action.key]: {
+              ...(state.tour.positions?.[action.key] ?? POSITION_DEFAULTS[action.key]),
+              [action.axis]: action.value,
+            },
+          },
+        },
+      };
+
+    case 'RESET_POSITION':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          positions: { ...state.tour.positions, [action.key]: { x: 0, y: 0 } },
+        },
+      };
+
+    case 'RESET_ALL_POSITIONS':
+      return {
+        ...state,
+        tour: { ...state.tour, positions: {} },
+      };
+
+    case 'UPDATE_IMAGE_POSITION':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          imagePositions: { ...state.tour.imagePositions, [action.key]: action.value },
+        },
+      };
+
+    case 'RESET_IMAGE_POSITIONS':
+      return {
+        ...state,
+        tour: { ...state.tour, imagePositions: {} },
+      };
+
+    case 'UPDATE_LOGO':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          logos: {
+            ...state.tour.logos,
+            [action.key]: { ...(state.tour.logos?.[action.key] ?? {}), [action.field]: action.value },
+          },
+        },
+      };
+
+    case 'RESET_LOGO':
+      return {
+        ...state,
+        tour: { ...state.tour, logos: { ...state.tour.logos, [action.key]: {} } },
+      };
+
+    case 'RESET_ALL_LOGOS':
+      return {
+        ...state,
+        tour: { ...state.tour, logos: {} },
+      };
 
     case 'UPDATE_FIELD':
       return { ...state, tour: { ...state.tour, [action.field]: action.value } };
@@ -301,16 +443,14 @@ function loadSavedTour() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Forward-migrate: inject new top-level fields that didn't exist in older saves.
-      // This runs once; on next save the full object is persisted and this is a no-op.
-      if (!parsed.terms)  parsed.terms  = defaultBrochure.terms;
-      if (!parsed.whyUs)  parsed.whyUs  = defaultBrochure.whyUs;
-      return parsed;
+      if (!parsed.terms) parsed.terms = defaultBrochure.terms;
+      if (!parsed.whyUs) parsed.whyUs = defaultBrochure.whyUs;
+      return migrateTour(parsed);
     }
   } catch {
     // ignore parse errors — fall through to default
   }
-  return defaultBrochure;
+  return migrateTour(defaultBrochure);
 }
 
 export function BrochureProvider({ children }) {
