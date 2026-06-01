@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 
+const USERS = [
+  { username: 'Hanna Odeh', password: '123456789' },
+  { username: 'Paxvia',     password: '@paxvia2025' },
+];
+
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -7,7 +12,7 @@ export default function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username === 'Hanna Odeh' && password === '123456789') {
+    if (USERS.some(u => u.username === username && u.password === password)) {
       onLogin();
     } else {
       setError('Invalid username or password');
