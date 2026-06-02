@@ -1,7 +1,9 @@
 import React, { useRef, useState, useContext } from 'react';
 import { AuthContext } from './components/AuthGate';
+import { SelectionProvider } from './context/SelectionContext';
 import { useReactToPrint } from 'react-to-print';
 import EditorSidebar from './editor/EditorSidebar';
+import FloatingEditor from './editor/FloatingEditor';
 import BrochurePreview from './preview/BrochurePreview';
 import PrintLayout from './print/PrintLayout';
 import { useBrochure } from './context/BrochureContext';
@@ -134,10 +136,13 @@ export default function App() {
         </div>
       </header>
 
-      <div className="app-body">
-        <EditorSidebar />
-        <BrochurePreview />
-      </div>
+      <SelectionProvider>
+        <div className="app-body">
+          <EditorSidebar />
+          <BrochurePreview />
+        </div>
+        <FloatingEditor />
+      </SelectionProvider>
 
       <PrintLayout printRef={printLayoutRef} />
 

@@ -26,12 +26,17 @@
     "display": "From San Francisco"
   },
 
+  "landOnlyLabel": "Land Only Per Person",
+
   "price": {
     "base": 4699,
+    "landOnly": 2799,
     "currency": "USD",
     "basis": "per person, double occupancy",
+    "landOnlyBasis": "land only — no airfare",
     "note": "*Discount cash/check price",
-    "display": "$4,699.00*"
+    "display": "$4,699.00*",
+    "landOnlyDisplay": "$2,799.00*"
   },
 
   "options": [
@@ -266,6 +271,30 @@
     "fontSize": 7,
     "lineHeight": 1.45
   },
+
+  "notIncluded": [
+    "Passport and visa fees",
+    "Meals not mentioned in itinerary",
+    "Beverages with meals",
+    "Excess baggage fees",
+    "Personal expenses",
+    "Fuel surcharge increases"
+  ],
+
+  "infoBlocks": [
+    {
+      "title": "Group Airport Transfer",
+      "bullets": [
+        "Group transportation between the airport and your lodging upon arrival and departure.",
+        "Pilgrims who select a Land Only package and wish to participate in the group airport transfer are responsible for meeting up with the group before the transfer.",
+        "Pilgrims who opt to skip the transfer or miss it, will be responsible for finding their own transportation from and/or to the airport. Fortunately, there is a direct train from ICN airport to Seoul Station in the city center."
+      ]
+    },
+    {
+      "title": "Public Transportation",
+      "body": "Public transit passes issued by the WYD committee will be used in the city and region of Seoul."
+    }
+  ],
 
   "whyUs": {
     "heading": "Why Travel with Pax Via?",

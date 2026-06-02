@@ -32,6 +32,8 @@ function migrateTour(tour) {
     positions:      tour.positions      ?? {},
     imagePositions: tour.imagePositions ?? {},
     logos,
+    notIncluded:    tour.notIncluded    ?? [],
+    infoBlocks:     tour.infoBlocks     ?? [],
   };
 }
 
@@ -377,6 +379,93 @@ function reducer(state, action) {
         },
       };
 
+    case 'UPDATE_NOT_INCLUDED':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          notIncluded: (state.tour.notIncluded || []).map((item, i) =>
+            i === action.index ? action.value : item
+          ),
+        },
+      };
+
+    case 'ADD_NOT_INCLUDED':
+      return {
+        ...state,
+        tour: { ...state.tour, notIncluded: [...(state.tour.notIncluded || []), ''] },
+      };
+
+    case 'REMOVE_NOT_INCLUDED':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          notIncluded: (state.tour.notIncluded || []).filter((_, i) => i !== action.index),
+        },
+      };
+
+    case 'UPDATE_INFO_BLOCK':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          infoBlocks: (state.tour.infoBlocks || []).map((block, i) =>
+            i === action.index ? { ...block, [action.field]: action.value } : block
+          ),
+        },
+      };
+
+    case 'UPDATE_INFO_BULLET':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          infoBlocks: (state.tour.infoBlocks || []).map((block, i) =>
+            i === action.index
+              ? {
+                  ...block,
+                  bullets: (block.bullets || []).map((bullet, j) =>
+                    j === action.bulletIndex ? action.value : bullet
+                  ),
+                }
+              : block
+          ),
+        },
+      };
+
+    case 'UPDATE_WHY_PARAGRAPH':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          whyUs: {
+            ...state.tour.whyUs,
+            paragraphs: (state.tour.whyUs?.paragraphs || []).map((para, i) =>
+              i === action.index ? action.value : para
+            ),
+          },
+        },
+      };
+
+    case 'ADD_INFO_BLOCK':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          infoBlocks: [...(state.tour.infoBlocks || []), { title: 'New Block', body: '' }],
+        },
+      };
+
+    case 'REMOVE_INFO_BLOCK':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          infoBlocks: (state.tour.infoBlocks || []).filter((_, i) => i !== action.index),
+        },
+      };
+
     case 'UPDATE_TERMS_FIELD':
       return {
         ...state,
@@ -445,6 +534,11 @@ function loadSavedTour() {
       const parsed = JSON.parse(saved);
       if (!parsed.terms) parsed.terms = defaultBrochure.terms;
       if (!parsed.whyUs) parsed.whyUs = defaultBrochure.whyUs;
+      // Migrate infoBlocks: old format used plain body strings; new format uses bullets arrays.
+      // If any block is missing bullets, replace the entire array from the default JSON.
+      const needsInfoMigration = !parsed.infoBlocks?.length ||
+        parsed.infoBlocks.some(b => !b.bullets && b.body !== undefined);
+      if (needsInfoMigration) parsed.infoBlocks = defaultBrochure.infoBlocks;
       return migrateTour(parsed);
     }
   } catch {

@@ -20,8 +20,14 @@ const GROUP_LABELS = {
   infobarPrice:     'Info Bar — Price',
   infobarDeparture: 'Info Bar — Departure',
   infobarBookNow:   'Info Bar — Book Now',
-  itineraryHeading: 'Itinerary Headings',
-  itineraryBody:    'Itinerary Body Text',
+  itineraryTitle:     'Section Title',
+  itinerarySubtitle:  'Section Subtitle',
+  itineraryDayLabel:  'Day Label',
+  itineraryHeading:   'Itinerary Headings',
+  itineraryBody:      'Itinerary Body Text',
+  itineraryOvernight: 'Overnight / Meals',
+  pricingBarTitle:  'Pricing Bar Title',
+  pricingPrice:     'Price Amount Display',
   pricingHeading:   'Pricing Headings',
   pricingBody:      'Pricing Body Text',
   tourIncludes:     'Tour Includes List',
@@ -103,6 +109,22 @@ function TypoGroup({ sectionKey, current, onSet }) {
           onChange={e => onSet('letterSpacing', clamp(e.target.value, LS_MIN, LS_MAX))}
           style={{ width: '100%' }}
         />
+      </div>
+
+      <div className="field">
+        <label className="field__label">Color</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <input
+            type="color"
+            value={current.color || '#000000'}
+            onChange={e => onSet('color', e.target.value)}
+            style={{ width: 32, height: 26, border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: 0, flexShrink: 0 }}
+          />
+          {current.color
+            ? <button type="button" onClick={() => onSet('color', null)} style={{ fontSize: 9, color: '#888', background: 'none', border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: '2px 6px' }}>Clear</button>
+            : <span style={{ fontSize: 9, color: '#aaa' }}>inherited from CSS</span>
+          }
+        </div>
       </div>
     </div>
   );

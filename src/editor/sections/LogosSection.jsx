@@ -3,6 +3,7 @@ import { useBrochure } from '../../context/BrochureContext';
 import { LOGO_DEFAULTS, LOGO_LABELS, getLogo } from '../../data/logos';
 import { checkLogos } from '../../safety/checks';
 import SafetyBadge from '../components/SafetyBadge';
+import { ImageField } from '../fields/Field';
 
 // footer logo is controlled in FooterSection
 const LOGO_KEYS = ['cover', 'navbar'];
@@ -18,6 +19,14 @@ function LogoGroup({ logoKey, logo, onSet, onReset, warning }) {
         <button type="button" className="position-group__reset" onClick={onReset}>Reset</button>
       </div>
       {warning && <SafetyBadge warnings={[warning]} />}
+
+      {logoKey === 'cover' && (
+        <ImageField
+          label="Cover Logo Image"
+          value={logo.src ?? '/logos/cir-logo.png'}
+          onChange={(val) => onSet('src', val)}
+        />
+      )}
 
       <div className="field">
         <label className="field__label">Width — {logo.width ?? logo.size ?? 56}px</label>

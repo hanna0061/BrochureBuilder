@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { SelectionContext } from '../context/SelectionContext';
 import TourInfoSection from './sections/TourInfoSection';
 import DestinationsSection from './sections/DestinationsSection';
 import ImagesSection from './sections/ImagesSection';
@@ -29,6 +30,18 @@ const SECTIONS = [
 export default function EditorSidebar() {
   const { dispatch } = useBrochure();
   const [openSections, setOpenSections] = useState(['tourInfo']);
+  const { selectedId } = useContext(SelectionContext);
+
+  // When a preview element is clicked, open its section and scroll to it.
+  useEffect(() => {
+    if (!selectedId) return;
+    setOpenSections(prev => prev.includes(selectedId) ? prev : [...prev, selectedId]);
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`editor-section-${selectedId}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [selectedId]);
 
   const toggle = (id) =>
     setOpenSections((prev) =>
@@ -51,7 +64,7 @@ export default function EditorSidebar() {
         {SECTIONS.map(({ id, title, Component }) => {
           const isOpen = openSections.includes(id);
           return (
-            <div key={id} className={`editor-section${isOpen ? ' is-open' : ''}`}>
+            <div key={id} id={`editor-section-${id}`} className={`editor-section${isOpen ? ' is-open' : ''}`}>
               <button
                 className="editor-section__toggle"
                 onClick={() => toggle(id)}

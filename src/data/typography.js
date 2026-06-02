@@ -27,17 +27,23 @@ export const TYPOGRAPHY_DEFAULTS = Object.freeze({
   destinationStrip: { fontFamily: 'Inter',        fontSize: 10,   fontWeight: 500, lineHeight: 1.00, letterSpacing:  0.08  },
 
   // Cover info bar
-  infobarMonth:     { fontFamily: 'EB Garamond', fontSize: 35,   fontWeight: 400, lineHeight: 1.00, letterSpacing: -0.01  },
-  infobarDateRange: { fontFamily: 'EB Garamond', fontSize: 20,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.01  },
-  infobarPrice:     { fontFamily: 'EB Garamond', fontSize: 40,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.02  },
-  infobarDeparture: { fontFamily: 'EB Garamond', fontSize: 20,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.01  },
-  infobarBookNow:   { fontFamily: 'EB Garamond', fontSize: 30,   fontWeight: 400, lineHeight: 1.30, letterSpacing:  0.01  },
+  infobarMonth:     { fontFamily: 'EB Garamond', fontSize: 26,   fontWeight: 400, lineHeight: 1.00, letterSpacing: -0.01  },
+  infobarDateRange: { fontFamily: 'EB Garamond', fontSize: 15,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.01  },
+  infobarPrice:     { fontFamily: 'EB Garamond', fontSize: 30,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.02  },
+  infobarDeparture: { fontFamily: 'EB Garamond', fontSize: 15,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.01  },
+  infobarBookNow:   { fontFamily: 'EB Garamond', fontSize: 22,   fontWeight: 400, lineHeight: 1.30, letterSpacing:  0.01  },
 
   // Itinerary pages
-  itineraryHeading: { fontFamily: 'EB Garamond', fontSize: 11,   fontWeight: 800, lineHeight: 1.25, letterSpacing:  0     },
-  itineraryBody:    { fontFamily: 'EB Garamond', fontSize: 12,   fontWeight: 400, lineHeight: 1.50, letterSpacing:  0     },
+  itineraryTitle:     { fontFamily: 'EB Garamond', fontSize: 23,  fontWeight: 600, lineHeight: 1.20, letterSpacing:  0     },
+  itinerarySubtitle:  { fontFamily: 'Inter',       fontSize: 9,   fontWeight: 600, lineHeight: 1.00, letterSpacing:  0.10  },
+  itineraryDayLabel:  { fontFamily: 'Inter',       fontSize: 9,   fontWeight: 600, lineHeight: 1.00, letterSpacing:  0.08  },
+  itineraryHeading:   { fontFamily: 'EB Garamond', fontSize: 11,  fontWeight: 800, lineHeight: 1.25, letterSpacing:  0     },
+  itineraryBody:      { fontFamily: 'EB Garamond', fontSize: 12,  fontWeight: 400, lineHeight: 1.50, letterSpacing:  0     },
+  itineraryOvernight: { fontFamily: 'Inter',       fontSize: 7,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.04  },
 
   // Pricing page
+  pricingBarTitle:  { fontFamily: 'Inter',        fontSize: 15,   fontWeight: 700, lineHeight: 1.20, letterSpacing:  0.10  },
+  pricingPrice:     { fontFamily: 'EB Garamond',  fontSize: 24,   fontWeight: 700, lineHeight: 1.00, letterSpacing:  0     },
   pricingHeading:   { fontFamily: 'Inter',        fontSize: 12,   fontWeight: 700, lineHeight: 1.00, letterSpacing:  0.10  },
   pricingBody:      { fontFamily: 'Inter',        fontSize: 9,    fontWeight: 400, lineHeight: 1.40, letterSpacing:  0     },
   tourIncludes:     { fontFamily: 'EB Garamond', fontSize: 12,   fontWeight: 400, lineHeight: 1.45, letterSpacing:  0     },
@@ -82,11 +88,13 @@ export function getTypo(typography, section) {
  */
 export function typoStyle(t) {
   if (!t) return {};
-  return {
+  const style = {
     fontFamily:    FONT_STACKS[t.fontFamily] || t.fontFamily,
     fontSize:      `${t.fontSize}px`,
     fontWeight:    t.fontWeight,
     lineHeight:    t.lineHeight,
     letterSpacing: `${t.letterSpacing}em`,
   };
+  if (t.color) style.color = t.color;
+  return style;
 }

@@ -1,14 +1,14 @@
 // Default dimensions — height 0 means auto (preserve aspect ratio).
 export const LOGO_DEFAULTS = Object.freeze({
-  cover:  { width: 160, height: 0, x: 0, y: 0 },
-  navbar: { width:  56, height: 0, x: 0, y: 0 },
+  cover:  { width: 90, height: 0, x: 0, y: 0, src: '/logos/cir-logo.png' },
+  navbar: { width: 56, height: 0, x: 0, y: 0 },
   footer: { width: 100, height: 0, x: 0, y: 0 },
 });
 
 // Fixed-size "slot" that holds its space in the layout regardless of logo size.
 // The logo img is centered inside via flexbox and can overflow visually.
 const LOGO_SLOTS = {
-  cover:  { width: 160, height: 160 },
+  cover:  { width:  90, height:  90 },
   navbar: { width:  56, height:  56 },
   footer: { width: 100, height:  76 },
 };
