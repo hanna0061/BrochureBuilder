@@ -20,7 +20,6 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
   const headingStyle       = typoStyle(getTypo(typo, 'itineraryHeading'));
   const bodyStyle          = typoStyle(getTypo(typo, 'itineraryBody'));
   const overnightStyle     = typoStyle(getTypo(typo, 'itineraryOvernight'));
-  const footerContactStyle = typoStyle(getTypo(typo, 'footerContact'));
 
   const pageDays = days ?? tour.itinerary;
   const breakAt  = colBreakIdx ?? Math.ceil(pageDays.length / 2);
@@ -65,70 +64,70 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
                 className={`p2-day${index === breakAt ? ' p2-day--col-break' : ''}`}
                 style={sp != null ? { paddingBlock: sp } : undefined}
               >
-                <div className="p2-day__meta">
-                  <span className="p2-day__num" style={dayLabelStyle}>{String(day.day).padStart(2, '0')}</span>
-                  <div className="p2-day__titles">
-                    <span className="p2-day__label" style={dayLabelStyle}
-                      {...floatSel({
-                        id: 'itinerary', label: `Day ${day.day} Label`, typographyKey: 'itineraryDayLabel',
-                        getValue: (t) => t.itinerary[gi]?.label ?? '',
-                        setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'label', value: val }),
-                      })}
-                    >{day.label}</span>
-                    <h3 className="p2-day__heading" style={headingStyle}
-                      {...floatSel({
-                        id: 'itinerary', label: `Day ${day.day} Heading`, typographyKey: 'itineraryHeading',
-                        getValue: (t) => t.itinerary[gi]?.heading ?? '',
-                        setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'heading', value: val }),
-                      })}
-                    >{day.heading}</h3>
-                  </div>
-                </div>
-                <div className="p2-day__content">
-                  <p className="p2-day__body" style={bodyStyle}
+                <p className="p2-day__title-line">
+                  <span
+                    className="p2-day__label"
+                    style={dayLabelStyle}
                     {...floatSel({
-                      id: 'itinerary', label: `Day ${day.day} Body`, typographyKey: 'itineraryBody', textRows: 4,
-                      getValue: (t) => t.itinerary[gi]?.body ?? '',
-                      setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'body', value: val }),
+                      id: 'itinerary', label: `Day ${day.day} Label`, typographyKey: 'itineraryDayLabel',
+                      getValue: (t) => t.itinerary[gi]?.label ?? '',
+                      setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'label', value: val }),
                     })}
-                  >{day.body}</p>
-                  {(day.overnight || day.meals) && (
-                    <p className="p2-day__overnight" style={overnightStyle}>
-                      {day.overnight && (
-                        <>
-                          <span className="p2-overnight-lbl">Overnight:</span>{' '}
-                          <span
-                            {...floatSel({
-                              id: 'itinerary', label: `Day ${day.day} Overnight`, typographyKey: 'itineraryOvernight',
-                              getValue: (t) => t.itinerary[gi]?.overnight ?? '',
-                              setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'overnight', value: val }),
-                            })}
-                          >{day.overnight}</span>
-                        </>
-                      )}
-                      {day.overnight && day.meals && '  ·  '}
-                      {day.meals && (
-                        <>
-                          <span className="p2-overnight-lbl">Meals:</span>{' '}
-                          <span
-                            {...floatSel({
-                              id: 'itinerary', label: `Day ${day.day} Meals`, typographyKey: 'itineraryOvernight',
-                              getValue: (t) => t.itinerary[gi]?.meals ?? '',
-                              setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'meals', value: val }),
-                            })}
-                          >{day.meals}</span>
-                        </>
-                      )}
-                    </p>
-                  )}
-                </div>
+                  >{day.label}:</span>
+                  {' '}
+                  <span
+                    className="p2-day__heading"
+                    style={headingStyle}
+                    {...floatSel({
+                      id: 'itinerary', label: `Day ${day.day} Heading`, typographyKey: 'itineraryHeading',
+                      getValue: (t) => t.itinerary[gi]?.heading ?? '',
+                      setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'heading', value: val }),
+                    })}
+                  >{day.heading}</span>
+                </p>
+                <p
+                  className="p2-day__body"
+                  style={bodyStyle}
+                  {...floatSel({
+                    id: 'itinerary', label: `Day ${day.day} Body`, typographyKey: 'itineraryBody', textRows: 4,
+                    getValue: (t) => t.itinerary[gi]?.body ?? '',
+                    setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'body', value: val }),
+                  })}
+                >{day.body}</p>
+                {(day.overnight || day.meals) && (
+                  <p className="p2-day__overnight" style={overnightStyle}>
+                    {day.overnight && (
+                      <>
+                        <span className="p2-overnight-lbl">Overnight:</span>{' '}
+                        <span
+                          {...floatSel({
+                            id: 'itinerary', label: `Day ${day.day} Overnight`, typographyKey: 'itineraryOvernight',
+                            getValue: (t) => t.itinerary[gi]?.overnight ?? '',
+                            setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'overnight', value: val }),
+                          })}
+                        >{day.overnight}</span>
+                      </>
+                    )}
+                    {day.overnight && day.meals && '  ·  '}
+                    {day.meals && (
+                      <>
+                        <span className="p2-overnight-lbl">Meals:</span>{' '}
+                        <span
+                          {...floatSel({
+                            id: 'itinerary', label: `Day ${day.day} Meals`, typographyKey: 'itineraryOvernight',
+                            getValue: (t) => t.itinerary[gi]?.meals ?? '',
+                            setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'meals', value: val }),
+                          })}
+                        >{day.meals}</span>
+                      </>
+                    )}
+                  </p>
+                )}
               </div>
             );
           })}
         </div>
       </div>
-
-
 
     </div>
   );

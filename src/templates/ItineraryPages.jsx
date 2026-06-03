@@ -23,27 +23,23 @@ const INIT_AVAIL_COL_H =
 function MeasureDay({ day, headingStyle, bodyStyle, daySpacing }) {
   return (
     <div className="p2-day" style={daySpacing != null ? { paddingBlock: daySpacing } : undefined}>
-      <div className="p2-day__meta">
-        <span className="p2-day__num">{String(day.day).padStart(2, '0')}</span>
-        <div className="p2-day__titles">
-          <span className="p2-day__label">{day.label}</span>
-          <h3 className="p2-day__heading" style={headingStyle}>{day.heading}</h3>
-        </div>
-      </div>
-      <div className="p2-day__content">
-        <p className="p2-day__body" style={bodyStyle}>{day.body}</p>
-        {(day.overnight || day.meals) && (
-          <p className="p2-day__overnight">
-            {day.overnight && (
-              <><span className="p2-overnight-lbl">Overnight:</span>{' '}{day.overnight}</>
-            )}
-            {day.overnight && day.meals && '  ·  '}
-            {day.meals && (
-              <><span className="p2-overnight-lbl">Meals:</span>{' '}{day.meals}</>
-            )}
-          </p>
-        )}
-      </div>
+      <p className="p2-day__title-line">
+        <span className="p2-day__label">{day.label}:</span>
+        {' '}
+        <span className="p2-day__heading" style={headingStyle}>{day.heading}</span>
+      </p>
+      <p className="p2-day__body" style={bodyStyle}>{day.body}</p>
+      {(day.overnight || day.meals) && (
+        <p className="p2-day__overnight">
+          {day.overnight && (
+            <><span className="p2-overnight-lbl">Overnight:</span>{' '}{day.overnight}</>
+          )}
+          {day.overnight && day.meals && '  ·  '}
+          {day.meals && (
+            <><span className="p2-overnight-lbl">Meals:</span>{' '}{day.meals}</>
+          )}
+        </p>
+      )}
     </div>
   );
 }
@@ -118,7 +114,6 @@ export default function ItineraryPages({ tour, company, renderPage }) {
   // ── Phase 1: measure natural day heights → compute analytical compression ──
   useLayoutEffect(() => {
     if (!measureRef.current) return;
-    const availableTotalH = availableColH * 2;
 
     if (
       lastInput.current.itinerary === tour.itinerary &&
@@ -156,41 +151,41 @@ export default function ItineraryPages({ tour, company, renderPage }) {
 
     const naturalHeight = heights.reduce((s, h) => s + h, 0);
 
-    // Diagnostics: log measured heights and chosen break
     // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase1] naturalHeight=', naturalHeight, 'availableTotalH=', availableTotalH, 'availableColH=', availableColH, 'bestBreak=', bestIdx, 'bestMaxColH=', bestMax);
+    console.log('[Itinerary Debug][Phase1] naturalHeight=', naturalHeight, 'availableColH=', availableColH, 'bestIdx=', bestIdx);
 
-    // Content fits — expand each column independently to fill availableColH.
-    if (bestMax <= availableColH) {
-      const col1H = heights.slice(0, bestIdx).reduce((s, h) => s + h, 0);
-      const col2H = naturalHeight - col1H;
-      const n1    = bestIdx;
-      const n2    = n - bestIdx;
-      // Each day already carries 14px from CSS paddingBlock:7 (7 top + 7 bottom).
-      // Per-column formula: colH + n × 2 × (spacing − 7) = availableColH
-      //   → spacing = 7 + (availableColH − colH) / (2 × n)
-      // Clamped to 0 as a safety net; in the expansion path colH ≤ availableColH always.
-      const sp1 = n1 > 0 ? Math.max(0, 7 + (availableColH - col1H) / (2 * n1)) : 7;
-      const sp2 = n2 > 0 ? Math.max(0, 7 + (availableColH - col2H) / (2 * n2)) : 7;
+    // Per-column spacing — each column fills exactly availableColH.
+    //
+    // CSS_BASE = 5 matches .p2-day { padding-block: 5px } in brochure.css.
+    //
+    // Formula (same for expansion and compression):
+    //   sp = CSS_BASE + (availableColH − colH_nat) / (2 × n)
+    //
+    // When colH_nat < availableColH → sp > CSS_BASE  (expand, more inter-day padding)
+    // When colH_nat > availableColH → sp < CSS_BASE  (compress, less padding, clamped ≥ 0)
+    //
+    // A forced break-before:column at bestIdx enforces this per-column split.
+    // The formula guarantees col1_expanded == col2_expanded == availableColH,
+    // so column 1 never overflows → no phantom column 3 overflow.
+    const CSS_BASE = 5;
+    const col1H = heights.slice(0, bestIdx).reduce((s, h) => s + h, 0);
+    const col2H = naturalHeight - col1H;
+    const n1    = bestIdx;
+    const n2    = n - bestIdx;
+    const sp1 = n1 > 0 ? Math.max(0, CSS_BASE + (availableColH - col1H) / (2 * n1)) : CSS_BASE;
+    const sp2 = n2 > 0 ? Math.max(0, CSS_BASE + (availableColH - col2H) / (2 * n2)) : CSS_BASE;
 
-      // eslint-disable-next-line no-console
-      console.log('[Itinerary Debug][Phase1] Per-col expand. col1H=', col1H, 'col2H=', col2H, 'n1=', n1, 'n2=', n2, 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
+    // eslint-disable-next-line no-console
+    console.log('[Itinerary Debug][Phase1] col1H=', col1H, 'col2H=', col2H, 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
 
-      if (sp1 > 7.5 || sp2 > 7.5) {
-        setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2 });
-      } else {
-        setCompression(null);
-      }
-      setPageScale(1);
-      setGridColH(availableColH);
-      return;
+    const THRESHOLD = 0.4;
+    if (Math.abs(sp1 - CSS_BASE) > THRESHOLD || Math.abs(sp2 - CSS_BASE) > THRESHOLD) {
+      setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2 });
+    } else {
+      setCompression(null);
     }
-
-    // Otherwise compute compression analytically (last resort after rebalance).
-    const factor = availableTotalH / naturalHeight;
-    // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase1] compressionFactor=', factor);
-    setCompression(computeCompression(naturalHeight, tour.typography, availableTotalH));
+    setPageScale(1);
+    setGridColH(availableColH);
   }, [tour.itinerary, itHeadingTypo, itBodyTypo, availableColH]);
 
   // ── Phase 2: measure compressed heights → proportional font squeeze if still overflowing ──
