@@ -151,7 +151,7 @@ export default function TypographySection() {
 
       <span className="field-group-label">Global Elements</span>
       {group('Footer Text', 'footer')}
-      {group('Navbar Text', 'navbar')}
+      {/* Navbar removed from brochure — navbar key kept internally for data compatibility */}
 
     </div>
   );

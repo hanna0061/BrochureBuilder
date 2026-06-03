@@ -161,10 +161,48 @@ export default function PricingSection() {
   const { inclusions, options, payments, notIncluded, infoBlocks } = state.tour;
   const { pricingHero } = state.tour.photos;
 
+  const page3AccentColor = state.tour.colors?.page3AccentColor ?? '';
+  const setPage3AccentColor = (val) =>
+    dispatch({ type: 'UPDATE_COLOR', key: 'page3AccentColor', value: val || null });
+
   return (
     <div>
-      {/* Pricing page hero image */}
+      {/* Page 3 accent — drives both Pricing Bar and Divider Bar */}
       <span className="field-group-label" style={{ marginTop: 0, borderTop: 'none' }}>
+        Page 3 Accent Color
+      </span>
+      <div className="color-field">
+        <label className="field__label">Pricing Bar + Divider Bar</label>
+        <div className="color-field__row">
+          <input
+            type="color"
+            className="color-field__picker"
+            value={page3AccentColor || '#286ebe'}
+            onChange={e => setPage3AccentColor(e.target.value)}
+          />
+          <input
+            type="text"
+            className="color-field__hex field__input"
+            value={page3AccentColor}
+            placeholder="Default blue / navy"
+            onChange={e => /^#[0-9A-Fa-f]{0,6}$/.test(e.target.value) && setPage3AccentColor(e.target.value)}
+            maxLength={7}
+            spellCheck={false}
+          />
+          {page3AccentColor && (
+            <button
+              type="button"
+              onClick={() => setPage3AccentColor(null)}
+              style={{ fontSize: 9, color: '#888', background: 'none', border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: '2px 6px', whiteSpace: 'nowrap' }}
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Pricing page hero image */}
+      <span className="field-group-label">
         Pricing Page Hero Image
       </span>
       <ImageField
@@ -270,11 +308,19 @@ export default function PricingSection() {
       </button>
 
       <TypoPanel
-        keys={['pricingBarTitle', 'pricingPrice', 'pricingHeading', 'pricingBody', 'tourIncludes', 'whyTravelHeading', 'whyTravel']}
+        keys={[
+          'pricingBarTitle',
+          'priceLabel', 'priceAmount', 'priceBasis',
+          'optionsHeading', 'optionsText',
+          'includesHeading', 'includesItems',
+          'notIncludedHeading', 'notIncludedItems',
+          'infoSectionTitle', 'infoSectionBody',
+          'whyTravelHeading', 'whyTravel',
+        ]}
         resetLabel="Pricing"
       />
       <TypoPanel
-        keys={['pricingTableLabel', 'pricingTableAmount', 'pricingTableDue']}
+        keys={['paymentLabels', 'paymentValues', 'paymentDue']}
         resetLabel="Payment Table"
         label="Payment Table"
       />

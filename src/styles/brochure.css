@@ -108,6 +108,11 @@
   font-feature-settings: "kern" 1, "liga" 1;
 }
 
+/* Pages 1, 2, 4 — no outer page margin; content fills full 816px width */
+.brochure-page--full {
+  padding: 0;
+}
+
 .brochure-page * {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -584,11 +589,19 @@
   position: relative;
   z-index: 2;
   margin-top: -42px;
+  /*
+   * --color-pricing-bar-rgb is set by colorVars() as "R, G, B" when a custom
+   * color is chosen. Each stop's fallback preserves the original blue-family
+   * values so the default render is pixel-identical to before.
+   *
+   * Changing the color only replaces the RGB channels — opacity layers (0.45,
+   * 0.65, 0.90), gradient direction, and backdrop-filter are NEVER modified.
+   */
   background: linear-gradient(
     to bottom,
-    rgba(40, 110, 190, 0.45) 0%,
-    rgba(20,  80, 150, 0.65) 50%,
-    rgba(10,  45, 110, 0.90) 100%
+    rgba(var(--color-pricing-bar-rgb, 40, 110, 190), 0.45) 0%,
+    rgba(var(--color-pricing-bar-rgb, 20,  80, 150), 0.65) 50%,
+    rgba(var(--color-pricing-bar-rgb, 10,  45, 110), 0.90) 100%
   );
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -865,7 +878,13 @@
 .p3-bottom-divider {
   flex-shrink: 0;
   height: 12px;
-  background: var(--color-navy);
+  /*
+   * --color-divider-bar is set by colorVars() only when dividerBarColor is
+   * stored in tour.colors. Falls back to --color-navy so the default render
+   * is identical to before, and changing dividerBarColor never affects any
+   * other element that uses --color-navy.
+   */
+  background: var(--color-divider-bar, var(--color-navy));
 }
 
 /* Information Section */
@@ -937,7 +956,18 @@
   cursor: pointer;
 }
 
-/* ─────────────────────────────────────────────
+/* =============================================================================
+   PAGE 4 LOCKED — APPROVED DESIGN
+   Do not modify without explicit approval.
+
+   All rules in this section (.p4-header through .p4-footer__info) are frozen.
+   Layout, spacing, font-size, color, border, and column values must not change.
+   Only crash-fix or broken-render bug fixes are permitted.
+
+   Also verify .brochure-page / .brochure-page--full (line 91) before changing —
+   those shared rules affect Page 4 structure as well.
+   =============================================================================
+
    PAGE 4 — TERMS & CONDITIONS
    Dense 2-column legal text + company footer
    ───────────────────────────────────────────── */
@@ -998,7 +1028,7 @@
 
 .p4-section__body {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.45;
   color: var(--color-text-body);
   margin: 0;

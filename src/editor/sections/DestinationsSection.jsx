@@ -16,7 +16,7 @@ export default function DestinationsSection() {
         onRemove={(i) => dispatch({ type: 'REMOVE_STOP', index: i })}
         placeholder="City name…"
       />
-      <TypoPanel keys={['destinationStrip']} resetLabel="Destination Strip" />
+      <TypoPanel keys={['destinationStrip']} resetLabel="Destination Strip" positionKey="destinationStrip" />
     </div>
   );
 }

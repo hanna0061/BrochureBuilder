@@ -86,7 +86,7 @@ export default function ItinerarySection() {
         + Add Day
       </button>
 
-      <TypoPanel keys={['itineraryTitle', 'itinerarySubtitle', 'itineraryDayLabel', 'itineraryHeading', 'itineraryBody', 'itineraryOvernight']} resetLabel="Itinerary" />
+      <TypoPanel keys={['itineraryTitle', 'itinerarySubtitle', 'itineraryDayLabel', 'itineraryHeading', 'itineraryBody', 'itineraryOvernight']} resetLabel="Itinerary" positionKey="itinerary" />
     </div>
   );
 }

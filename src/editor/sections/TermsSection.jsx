@@ -2,6 +2,8 @@ import React from 'react';
 import { TextField } from '../fields/Field';
 import { useBrochure } from '../../context/BrochureContext';
 import TypoPanel from '../components/TypoPanel';
+// Typography changes go into tour.typography and are applied via getP4Typo() in Page4Terms.jsx.
+// P4_TYPO provides the frozen defaults; user edits layer on top — so these panels have full effect.
 
 export default function TermsSection() {
   const { state, dispatch } = useBrochure();

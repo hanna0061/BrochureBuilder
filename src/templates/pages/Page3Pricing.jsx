@@ -24,14 +24,22 @@ export default function Page3Pricing({ tour, company }) {
   const typo = tour.typography;
   const heroPos = getImagePosition(tour.imagePositions, 'pricingHero');
 
-  const barTitleStyle  = typoStyle(getTypo(typo, 'pricingBarTitle'));
-  const priceStyle     = typoStyle(getTypo(typo, 'pricingPrice'));
-  const headingStyle   = typoStyle(getTypo(typo, 'pricingHeading'));
-  const bodyStyle      = typoStyle(getTypo(typo, 'pricingBody'));
-  const includesStyle = typoStyle(getTypo(typo, 'tourIncludes'));
-  const tableLabel = typoStyle(getTypo(typo, 'pricingTableLabel'));
-  const tableAmount = typoStyle(getTypo(typo, 'pricingTableAmount'));
-  const tableDue = typoStyle(getTypo(typo, 'pricingTableDue'));
+  // One style variable per element — no shared keys on Page 3
+  const barTitleStyle        = typoStyle(getTypo(typo, 'pricingBarTitle'));
+  const priceAmountStyle     = typoStyle(getTypo(typo, 'priceAmount'));
+  const priceLabelStyle      = typoStyle(getTypo(typo, 'priceLabel'));
+  const priceBasisStyle      = typoStyle(getTypo(typo, 'priceBasis'));
+  const optionsHeadingStyle  = typoStyle(getTypo(typo, 'optionsHeading'));
+  const optionsTextStyle     = typoStyle(getTypo(typo, 'optionsText'));
+  const includesHeadingStyle = typoStyle(getTypo(typo, 'includesHeading'));
+  const includesItemStyle    = typoStyle(getTypo(typo, 'includesItems'));
+  const notInclHeadingStyle  = typoStyle(getTypo(typo, 'notIncludedHeading'));
+  const notInclItemStyle     = typoStyle(getTypo(typo, 'notIncludedItems'));
+  const infoTitleStyle       = typoStyle(getTypo(typo, 'infoSectionTitle'));
+  const infoBodyStyle        = typoStyle(getTypo(typo, 'infoSectionBody'));
+  const paymentLabelStyle    = typoStyle(getTypo(typo, 'paymentLabels'));
+  const paymentValueStyle    = typoStyle(getTypo(typo, 'paymentValues'));
+  const paymentDueStyle      = typoStyle(getTypo(typo, 'paymentDue'));
 
   const { pricingHero } = tour.photos;
   const notIncluded = tour.notIncluded ?? [];
@@ -40,7 +48,7 @@ export default function Page3Pricing({ tour, company }) {
 
   return (
     <div className="brochure-page" style={colorVars(tour.colors)}>
-      
+
       {/* ── Hero Image ── */}
       <div className={`p3-hero${hl('images')}`} {...floatSel({
         id: 'images', label: 'Pricing Hero Image', type: 'image',
@@ -71,36 +79,36 @@ export default function Page3Pricing({ tour, company }) {
       {/* ── Two-Column Pricing Table ── */}
       <div className="p3-pricing-section">
         <div className="p3-pricing-table">
-          
+
           {/* Left Column */}
           <div className="p3-pricing-col p3-pricing-col--left">
-            
+
             {/* Base Price */}
             <div className="p3-price-block">
-              <p className="p3-block-title" style={headingStyle} {...floatSel({
-                id: 'pricing', label: 'Price Label', typographyKey: 'pricingHeading',
+              <p className="p3-block-title" style={priceLabelStyle} {...floatSel({
+                id: 'pricing', label: 'Price Label', typographyKey: 'priceLabel',
                 getValue: (t) => t.priceLabel || 'Base Price Per Person',
                 setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'priceLabel', value: val }),
               })}>
                 {tour.priceLabel || 'Base Price Per Person'}
               </p>
-              <p className="p3-price-amount" style={priceStyle} {...floatSel({
-                id: 'pricing', label: 'Base Price', typographyKey: 'pricingPrice',
+              <p className="p3-price-amount" style={priceAmountStyle} {...floatSel({
+                id: 'pricing', label: 'Base Price', typographyKey: 'priceAmount',
                 getValue: (t) => t.price?.display ?? '',
                 setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'price', field: 'display', value: val }),
               })}>
                 {tour.price.display}
               </p>
-              <p className="p3-price-note" style={bodyStyle} {...floatSel({
-                id: 'pricing', label: 'Price Basis',
+              <p className="p3-price-note" style={priceBasisStyle} {...floatSel({
+                id: 'pricing', label: 'Price Basis', typographyKey: 'priceBasis',
                 getValue: (t) => t.price?.basis ?? '',
                 setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'price', field: 'basis', value: val }),
               })}>
                 {tour.price.basis}
               </p>
               {tour.price.note && (
-                <p className="p3-discount-note" style={bodyStyle} {...floatSel({
-                  id: 'pricing', label: 'Price Note',
+                <p className="p3-discount-note" style={priceBasisStyle} {...floatSel({
+                  id: 'pricing', label: 'Price Note', typographyKey: 'priceBasis',
                   getValue: (t) => t.price?.note ?? '',
                   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'price', field: 'note', value: val }),
                 })}>
@@ -112,23 +120,23 @@ export default function Page3Pricing({ tour, company }) {
             {/* Land Only Price */}
             {hasLandOnly && (
               <div className="p3-price-block">
-                <p className="p3-block-title" style={headingStyle} {...floatSel({
-                  id: 'pricing', label: 'Land Only Label', typographyKey: 'pricingHeading',
+                <p className="p3-block-title" style={priceLabelStyle} {...floatSel({
+                  id: 'pricing', label: 'Land Only Label', typographyKey: 'priceLabel',
                   getValue: (t) => t.landOnlyLabel || 'Land Only Per Person',
                   setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'landOnlyLabel', value: val }),
                 })}>
                   {tour.landOnlyLabel || 'Land Only Per Person'}
                 </p>
-                <p className="p3-price-amount" style={priceStyle} {...floatSel({
-                  id: 'pricing', label: 'Land Only Price', typographyKey: 'pricingPrice',
+                <p className="p3-price-amount" style={priceAmountStyle} {...floatSel({
+                  id: 'pricing', label: 'Land Only Price', typographyKey: 'priceAmount',
                   getValue: (t) => t.price?.landOnlyDisplay ?? '',
                   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'price', field: 'landOnlyDisplay', value: val }),
                 })}>
                   {tour.price.landOnlyDisplay}
                 </p>
                 {tour.price.landOnlyBasis && (
-                  <p className="p3-price-note" style={bodyStyle} {...floatSel({
-                    id: 'pricing', label: 'Land Only Basis',
+                  <p className="p3-price-note" style={priceBasisStyle} {...floatSel({
+                    id: 'pricing', label: 'Land Only Basis', typographyKey: 'priceBasis',
                     getValue: (t) => t.price?.landOnlyBasis ?? '',
                     setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'price', field: 'landOnlyBasis', value: val }),
                   })}>
@@ -141,10 +149,10 @@ export default function Page3Pricing({ tour, company }) {
             {/* Options */}
             {tour.options?.length > 0 && (
               <div className="p3-options-block">
-                <p className="p3-block-title" style={headingStyle}>OPTIONS</p>
+                <p className="p3-block-title" style={optionsHeadingStyle}>OPTIONS</p>
                 <ul className="p3-options-list">
                   {tour.options.map((opt, i) => (
-                    <li key={i} className="p3-option-item" style={bodyStyle}>
+                    <li key={i} className="p3-option-item" style={optionsTextStyle}>
                       <span className="p3-option-bullet">•</span>
                       <span className="p3-option-content">
                         <strong>{opt.label}</strong>
@@ -164,22 +172,22 @@ export default function Page3Pricing({ tour, company }) {
                   <tbody>
                     {tour.payments.map((payment, i) => (
                       <tr key={i} className="p3-payment-row">
-                        <td className="p3-payment-label" style={tableLabel} {...floatSel({
-                          id: 'pricing', label: `Payment ${i + 1} Label`, typographyKey: 'pricingTableLabel',
+                        <td className="p3-payment-label" style={paymentLabelStyle} {...floatSel({
+                          id: 'pricing', label: `Payment ${i + 1} Label`, typographyKey: 'paymentLabels',
                           getValue: (t) => t.payments[i]?.label ?? '',
                           setValue: (d, val) => d({ type: 'UPDATE_PAYMENT', index: i, field: 'label', value: val }),
                         })}>
                           {payment.label}
                         </td>
-                        <td className="p3-payment-amount" style={tableAmount} {...floatSel({
-                          id: 'pricing', label: `Payment ${i + 1} Amount`, typographyKey: 'pricingTableAmount',
+                        <td className="p3-payment-amount" style={paymentValueStyle} {...floatSel({
+                          id: 'pricing', label: `Payment ${i + 1} Amount`, typographyKey: 'paymentValues',
                           getValue: (t) => t.payments[i]?.display ?? '',
                           setValue: (d, val) => d({ type: 'UPDATE_PAYMENT', index: i, field: 'display', value: val }),
                         })}>
                           {payment.display}
                         </td>
-                        <td className="p3-payment-due" style={tableDue} {...floatSel({
-                          id: 'pricing', label: `Payment ${i + 1} Due`, typographyKey: 'pricingTableDue',
+                        <td className="p3-payment-due" style={paymentDueStyle} {...floatSel({
+                          id: 'pricing', label: `Payment ${i + 1} Due`, typographyKey: 'paymentDue',
                           getValue: (t) => t.payments[i]?.dueDisplay ?? '',
                           setValue: (d, val) => d({ type: 'UPDATE_PAYMENT', index: i, field: 'dueDisplay', value: val }),
                         })}>
@@ -195,11 +203,11 @@ export default function Page3Pricing({ tour, company }) {
 
           {/* Right Column */}
           <div className="p3-pricing-col p3-pricing-col--right">
-            
+
             {/* Includes */}
             <div className="p3-includes-block">
-              <p className="p3-block-title" style={headingStyle} {...floatSel({
-                id: 'pricing', label: 'Includes Label', typographyKey: 'pricingHeading',
+              <p className="p3-block-title" style={includesHeadingStyle} {...floatSel({
+                id: 'pricing', label: 'Includes Label', typographyKey: 'includesHeading',
                 getValue: (t) => t.includesLabel || 'Base Price Includes',
                 setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'includesLabel', value: val }),
               })}>
@@ -207,10 +215,10 @@ export default function Page3Pricing({ tour, company }) {
               </p>
               <ul className="p3-includes-list">
                 {tour.inclusions.map((item, i) => (
-                  <li key={i} className="p3-include-item" style={includesStyle}>
+                  <li key={i} className="p3-include-item" style={includesItemStyle}>
                     <span className="p3-include-bullet">•</span>
                     <span className="p3-include-text" {...floatSel({
-                      id: 'pricing', label: `Inclusion ${i + 1}`, typographyKey: 'tourIncludes',
+                      id: 'pricing', label: `Inclusion ${i + 1}`, typographyKey: 'includesItems',
                       getValue: (t) => t.inclusions[i] ?? '',
                       setValue: (d, val) => d({ type: 'UPDATE_INCLUSION', index: i, value: val }),
                     })}>
@@ -224,8 +232,8 @@ export default function Page3Pricing({ tour, company }) {
             {/* Not Included */}
             {notIncluded.length > 0 && (
               <div className="p3-not-included-block">
-                <p className="p3-block-title" style={headingStyle} {...floatSel({
-                  id: 'pricing', label: 'Not Included Label', typographyKey: 'pricingHeading',
+                <p className="p3-block-title" style={notInclHeadingStyle} {...floatSel({
+                  id: 'pricing', label: 'Not Included Label', typographyKey: 'notIncludedHeading',
                   getValue: (t) => t.notIncludedLabel || 'Not Included',
                   setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'notIncludedLabel', value: val }),
                 })}>
@@ -233,10 +241,10 @@ export default function Page3Pricing({ tour, company }) {
                 </p>
                 <ul className="p3-not-included-list">
                   {notIncluded.map((item, i) => (
-                    <li key={i} className="p3-not-include-item" style={includesStyle}>
+                    <li key={i} className="p3-not-include-item" style={notInclItemStyle}>
                       <span className="p3-not-include-bullet">•</span>
                       <span className="p3-not-include-text" {...floatSel({
-                        id: 'pricing', label: `Not Included ${i + 1}`, typographyKey: 'tourIncludes',
+                        id: 'pricing', label: `Not Included ${i + 1}`, typographyKey: 'notIncludedItems',
                         getValue: (t) => t.notIncluded?.[i] ?? '',
                         setValue: (d, val) => d({ type: 'UPDATE_NOT_INCLUDED', index: i, value: val }),
                       })}>
@@ -259,9 +267,9 @@ export default function Page3Pricing({ tour, company }) {
         <div className="p3-info-section">
           {infoBlocks.map((block, i) => (
             <div key={i} className="p3-info-block">
-              <p className="p3-info-block__title" style={headingStyle}
+              <p className="p3-info-block__title" style={infoTitleStyle}
                 {...floatSel({
-                  id: 'pricing', label: `Info ${i + 1} Title`, typographyKey: 'pricingHeading',
+                  id: 'pricing', label: `Info ${i + 1} Title`, typographyKey: 'infoSectionTitle',
                   getValue: (t) => t.infoBlocks?.[i]?.title ?? '',
                   setValue: (d, val) => d({ type: 'UPDATE_INFO_BLOCK', index: i, field: 'title', value: val }),
                 })}
@@ -270,9 +278,9 @@ export default function Page3Pricing({ tour, company }) {
               {block.bullets?.length > 0 ? (
                 <ul className="p3-info-block__bullets">
                   {block.bullets.map((bullet, j) => (
-                    <li key={j} className="p3-info-block__bullet" style={bodyStyle}
+                    <li key={j} className="p3-info-block__bullet" style={infoBodyStyle}
                       {...floatSel({
-                        id: 'pricing', label: `Info ${i + 1} Bullet ${j + 1}`, typographyKey: 'pricingBody',
+                        id: 'pricing', label: `Info ${i + 1} Bullet ${j + 1}`, typographyKey: 'infoSectionBody',
                         getValue: (t) => t.infoBlocks?.[i]?.bullets?.[j] ?? '',
                         setValue: (d, val) => d({ type: 'UPDATE_INFO_BULLET', index: i, bulletIndex: j, value: val }),
                       })}
@@ -280,9 +288,9 @@ export default function Page3Pricing({ tour, company }) {
                   ))}
                 </ul>
               ) : block.body ? (
-                <p className="p3-info-block__body" style={bodyStyle}
+                <p className="p3-info-block__body" style={infoBodyStyle}
                   {...floatSel({
-                    id: 'pricing', label: `Info ${i + 1} Body`, typographyKey: 'pricingBody', textRows: 3,
+                    id: 'pricing', label: `Info ${i + 1} Body`, typographyKey: 'infoSectionBody', textRows: 3,
                     getValue: (t) => t.infoBlocks?.[i]?.body ?? '',
                     setValue: (d, val) => d({ type: 'UPDATE_INFO_BLOCK', index: i, field: 'body', value: val }),
                   })}

@@ -3,24 +3,21 @@ import Page2Itinerary from './pages/Page2Itinerary';
 import { typoStyle, getTypo } from '../data/typography';
 
 // ── Page geometry — must match brochure.css ──────────────────────────────────
-const PAGE_H         = 1056;
-const HEADER_H       = 66;   // .pg-header { height: 66px }
-const FOOTER_H       = 28;   // .pg-footer { min-height: 28px }
-const BODY_PAD_TOP   = 18;   // .p2-body { padding: 18px 24px 12px }
+const PAGE_H          = 1056;
+const BODY_PAD_TOP    = 18;   // .p2-body { padding: 18px 24px 12px }
 const BODY_PAD_BOTTOM = 12;
 const SECTION_HDR_MARGIN_B = 12; // .p2-section-header { margin-bottom: 12px }
-const COLUMN_WIDTH   = 374;  // (816 − 48 padding − 20 gap) / 2
+const COLUMN_WIDTH    = 374;  // (816 − 48 padding − 20 gap) / 2
 
-// Inner content height of .p2-body (fixed by flex layout).
-// All day content + section header must fit within this.
-const BODY_CONTENT_H =
-  PAGE_H - HEADER_H - FOOTER_H - BODY_PAD_TOP - BODY_PAD_BOTTOM; // 932
+// Inner content height of .p2-body.
+// Page 2 renders no pg-header and no pg-footer — full PAGE_H minus body padding only.
+const BODY_CONTENT_H = PAGE_H - BODY_PAD_TOP - BODY_PAD_BOTTOM; // 1026
 
 // Conservative initial estimate before the section header is measured.
 // Real value is measured in useLayoutEffect below.
 const SECTION_HDR_ESTIMATE = 56; // eyebrow ~14px + heading ~28px + margin 12px + slop
 const INIT_AVAIL_COL_H =
-  BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4; // 860
+  BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4; // 954
 
 // Minimal day renderer for off-screen height measurement.
 function MeasureDay({ day, headingStyle, bodyStyle, daySpacing }) {
@@ -52,48 +49,18 @@ function MeasureDay({ day, headingStyle, bodyStyle, daySpacing }) {
 }
 
 /**
- * Analytically compress typography to reduce total day content height.
+ * Compute spacing compression to reduce total day content height.
  *
- * Priority (most → least aggressive):
- *   1. day padding  7px → 0       (handles first ~35% of shortage)
- *   2. line-height  up to −10%    (next 20%)
- *   3. body font    up to −10%    (next 20%)
- *   4. heading font up to −8%     (last resort)
- *
- * Minimums keep text readable. scaleY fallback handles remaining overflow.
+ * Only day spacing is reduced (7px → 0). Typography is NEVER modified
+ * automatically — user font size, line height, and letter spacing are
+ * authoritative and must always reflect what the typography panel shows.
  */
 function computeCompression(naturalHeight, typography, availableTotalH) {
-  const factor   = availableTotalH / naturalHeight;
-  const shortage = 1 - factor;
-
-  const baseHeading = getTypo(typography, 'itineraryHeading');
-  const baseBody    = getTypo(typography, 'itineraryBody');
-
-  const spaceFrac  = Math.min(1, shortage / 0.35);
-  const daySpacing = Math.max(0, Math.round(7 * (1 - spaceFrac)));
-
-  const lhFrac   = shortage > 0.35 ? Math.min(1, (shortage - 0.35) / 0.20) : 0;
-  const bodyFrac = shortage > 0.55 ? Math.min(1, (shortage - 0.55) / 0.20) : 0;
-  const headFrac = shortage > 0.75 ? Math.min(1, (shortage - 0.75) / 0.15) : 0;
-
-  const compressedHeading = {
-    ...baseHeading,
-    lineHeight: Math.max(1.1, baseHeading.lineHeight * (1 - lhFrac * 0.10)),
-    fontSize:   Math.max(9,   baseHeading.fontSize   * (1 - headFrac * 0.08)),
-  };
-  const compressedBody = {
-    ...baseBody,
-    lineHeight: Math.max(1.1, baseBody.lineHeight * (1 - lhFrac * 0.10)),
-    fontSize:   Math.max(9,   baseBody.fontSize   * (1 - bodyFrac * 0.10)),
-  };
-
+  const shortage  = Math.max(0, 1 - availableTotalH / naturalHeight);
+  const spaceFrac = Math.min(1, shortage / 0.35);
   return {
-    compressedTypography: {
-      ...typography,
-      itineraryHeading: compressedHeading,
-      itineraryBody:    compressedBody,
-    },
-    daySpacing,
+    compressedTypography: typography, // pass through unchanged
+    daySpacing: Math.max(0, Math.round(7 * (1 - spaceFrac))),
   };
 }
 
@@ -103,16 +70,15 @@ function computeCompression(naturalHeight, typography, availableTotalH) {
  * Three-phase layout engine:
  *   Phase 0: Measure actual section-header height → derive real available col height.
  *   Phase 1: Measure natural day heights → analytical compression if needed.
- *   Phase 2: Measure compressed heights → scaleY if still overflowing.
+ *   Phase 2: Measure compressed heights → proportional font squeeze if still overflowing.
  *
  * The footer is a HARD BOUNDARY. Available height is calculated as:
- *   PAGE_H − HEADER_H − FOOTER_H − body-padding − section-header-height
+ *   PAGE_H − body-padding − section-header-height
  */
 export default function ItineraryPages({ tour, company, renderPage }) {
   const measureRef      = useRef(null); // Phase 1: natural styles
   const measureRef2     = useRef(null); // Phase 2: compressed styles
   const sectionHdrRef   = useRef(null); // Phase 0: section header measurement
-  const footerRef       = useRef(null); // Phase 0: footer measurement
   const lastInput       = useRef({ itinerary: null, headTypo: null, bodyTypo: null, colH: 0 });
   const breakAtRef      = useRef(0);
 
@@ -130,28 +96,23 @@ export default function ItineraryPages({ tour, company, renderPage }) {
 
   const headingStyle = typoStyle(getTypo(activeTour.typography, 'itineraryHeading'));
   const bodyStyle    = typoStyle(getTypo(activeTour.typography, 'itineraryBody'));
-  const daySpacing   = compression?.daySpacing ?? null;
+  const daySpacing    = compression?.daySpacing  ?? null;
+  const daySpacing2   = compression?.daySpacing2 ?? null; // col2 (right) — null means same as daySpacing
 
   // ── Phase 0: measure actual section-header height (once, after fonts load) ─
   useLayoutEffect(() => {
-    if (!sectionHdrRef.current || !footerRef.current) return;
+    if (!sectionHdrRef.current) return;
     const shH = sectionHdrRef.current.getBoundingClientRect().height;
-    const fH  = footerRef.current.getBoundingClientRect().height;
-    if (shH < 10 || fH < 6) return; // fonts/styles not loaded yet — skip
-    // Total space consumed by section header = element height + its margin-bottom
+    if (shH < 10) return; // fonts/styles not loaded yet — skip
+    // Available column height = full body content area minus section header and its margin
     const realColH = Math.max(
       760,
-      Math.floor(BODY_CONTENT_H - shH - SECTION_HDR_MARGIN_B - fH - 2) // 2px safety
+      Math.floor(BODY_CONTENT_H - shH - SECTION_HDR_MARGIN_B - 2) // 2px safety
     );
     setAvailableColH(realColH);
     setGridColH(realColH); // sync default gridColH
-    // Runtime diagnostics for investigation
-    // Print availableColH, measured section header height, footer reserved height
-    // NOTE: realColH is the computed available column height used for layout
-    // and BODY_CONTENT_H is the full space inside the page body.
-    // These logs help reproduce clipping issues.
     // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase0] realColH=', realColH, 'shH=', shH, 'fH=', fH, 'BODY_CONTENT_H=', BODY_CONTENT_H);
+    console.log('[Itinerary Debug][Phase0] realColH=', realColH, 'shH=', shH, 'BODY_CONTENT_H=', BODY_CONTENT_H);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Phase 1: measure natural day heights → compute analytical compression ──
@@ -199,13 +160,29 @@ export default function ItineraryPages({ tour, company, renderPage }) {
     // eslint-disable-next-line no-console
     console.log('[Itinerary Debug][Phase1] naturalHeight=', naturalHeight, 'availableTotalH=', availableTotalH, 'availableColH=', availableColH, 'bestBreak=', bestIdx, 'bestMaxColH=', bestMax);
 
-    // If rebalanced columns already fit, no compression needed.
+    // Content fits — expand each column independently to fill availableColH.
     if (bestMax <= availableColH) {
-      setCompression(null);
+      const col1H = heights.slice(0, bestIdx).reduce((s, h) => s + h, 0);
+      const col2H = naturalHeight - col1H;
+      const n1    = bestIdx;
+      const n2    = n - bestIdx;
+      // Each day already carries 14px from CSS paddingBlock:7 (7 top + 7 bottom).
+      // Per-column formula: colH + n × 2 × (spacing − 7) = availableColH
+      //   → spacing = 7 + (availableColH − colH) / (2 × n)
+      // Clamped to 0 as a safety net; in the expansion path colH ≤ availableColH always.
+      const sp1 = n1 > 0 ? Math.max(0, 7 + (availableColH - col1H) / (2 * n1)) : 7;
+      const sp2 = n2 > 0 ? Math.max(0, 7 + (availableColH - col2H) / (2 * n2)) : 7;
+
+      // eslint-disable-next-line no-console
+      console.log('[Itinerary Debug][Phase1] Per-col expand. col1H=', col1H, 'col2H=', col2H, 'n1=', n1, 'n2=', n2, 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
+
+      if (sp1 > 7.5 || sp2 > 7.5) {
+        setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2 });
+      } else {
+        setCompression(null);
+      }
       setPageScale(1);
       setGridColH(availableColH);
-      // eslint-disable-next-line no-console
-      console.log('[Itinerary Debug][Phase1] Rebalanced columns fit; skipping compression.');
       return;
     }
 
@@ -216,7 +193,7 @@ export default function ItineraryPages({ tour, company, renderPage }) {
     setCompression(computeCompression(naturalHeight, tour.typography, availableTotalH));
   }, [tour.itinerary, itHeadingTypo, itBodyTypo, availableColH]);
 
-  // ── Phase 2: measure compressed heights → scaleY if still overflowing ──────
+  // ── Phase 2: measure compressed heights → proportional font squeeze if still overflowing ──
   useLayoutEffect(() => {
     if (!measureRef2.current) return;
 
@@ -242,13 +219,12 @@ export default function ItineraryPages({ tour, company, renderPage }) {
       // eslint-disable-next-line no-console
       console.log('[Itinerary Debug][Phase2] No scaling needed; pageScale=1');
     } else {
-      // scaleY fallback: give grid full layout height so CSS columns place all days,
-      // then scale it visually to fit within availableColH.
-      const scale = Math.max(0.78, availableColH / maxColH);
-      setPageScale(scale);
-      setGridColH(maxColH);
+      // Spacing compression is exhausted; content exceeds availableColH.
+      // User typography is authoritative — no automatic overrides. Accept the result.
+      setPageScale(1);
+      setGridColH(availableColH);
       // eslint-disable-next-line no-console
-      console.log('[Itinerary Debug][Phase2] Applied scaleY:', scale, 'computedGridColH=', maxColH);
+      console.log('[Itinerary Debug][Phase2] Overflow; spacing exhausted, typography preserved.');
     }
   }, [compression, availableColH]);
 
@@ -271,14 +247,6 @@ export default function ItineraryPages({ tour, company, renderPage }) {
           <p className="p2-eyebrow">Pilgrimage Route</p>
           <h2 className="p2-heading">Day by Day Itinerary</h2>
         </header>
-      </div>
-
-      {/* Off-screen footer measurement (to compute exact footer height) */}
-      <div ref={footerRef} aria-hidden="true" style={offScreenStyle}>
-        <div className="pg-footer">
-          <span className="pg-footer__text">Tour Code: DEMO</span>
-          <span className="pg-footer__text">Company · 000-000-0000 · email@demo.com</span>
-        </div>
       </div>
 
       {/* Phase 1: natural (uncompressed) measurement */}
@@ -314,6 +282,7 @@ export default function ItineraryPages({ tour, company, renderPage }) {
           isFirstPage={true}
           colBreakIdx={colBreakIdx}
           daySpacing={daySpacing}
+          daySpacingCol2={daySpacing2}
           pageScale={pageScale}
           gridColH={gridColH}
           availableColH={availableColH}

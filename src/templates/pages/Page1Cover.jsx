@@ -69,7 +69,7 @@ export default function Page1Cover({ tour, company }) {
   const coverLogoStyle = logoStyle(coverLogo);
 
   return (
-    <div className="brochure-page" style={colorVars(tour.colors)}>
+    <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>
 
       {/* Hero text zone */}
       <div className={`p1-hero${hl('tourInfo')}`} {...sel('tourInfo')}>

@@ -4,7 +4,7 @@ import { colorVars } from '../../data/colors';
 import { positionStyle, getPosition } from '../../data/positions';
 import { useSelection } from '../../context/SelectionContext';
 
-export default function Page2Itinerary({ tour, company, days, isFirstPage = true, colBreakIdx, daySpacing, pageScale = 1, gridColH = null, availableColH = null }) {
+export default function Page2Itinerary({ tour, company, days, isFirstPage = true, colBreakIdx, daySpacing, daySpacingCol2 = null, pageScale = 1, gridColH = null, availableColH = null }) {
   const typo = tour.typography;
   const { selectedId, selectElement, openFloating } = useSelection();
   const hl = (id) => selectedId === id ? ' brochure-element--selected' : '';
@@ -26,14 +26,11 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
   const breakAt  = colBreakIdx ?? Math.ceil(pageDays.length / 2);
 
   return (
-    <div className="brochure-page" style={colorVars(tour.colors)}>
+    <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>
 
       <div
         className={`p2-body${hl('itinerary')}`}
-        style={{
-          ...positionStyle(getPosition(positions, 'itinerary')),
-          overflow: pageScale < 1 ? 'visible' : undefined,
-        }}
+        style={{ ...positionStyle(getPosition(positions, 'itinerary')) }}
         {...sel('itinerary')}
       >
         {isFirstPage && (
@@ -57,25 +54,16 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
 
         <div
           className={`p2-grid${isFirstPage ? '' : ' p2-grid--full'}`}
-          style={
-            pageScale < 1 && gridColH
-              ? {
-                  height:          `${gridColH}px`,
-                  transform:       `scaleY(${pageScale.toFixed(5)})`,
-                  transformOrigin: 'top left',
-                }
-              : availableColH
-              ? { height: `${availableColH}px` }
-              : undefined
-          }
+          style={availableColH ? { height: `${availableColH}px` } : undefined}
         >
           {pageDays.map((day, index) => {
             const gi = tour.itinerary.findIndex(d => d.day === day.day);
+            const sp = (daySpacingCol2 != null && index >= breakAt) ? daySpacingCol2 : daySpacing;
             return (
               <div
                 key={day.day ?? index}
                 className={`p2-day${index === breakAt ? ' p2-day--col-break' : ''}`}
-                style={daySpacing != null ? { paddingBlock: daySpacing } : undefined}
+                style={sp != null ? { paddingBlock: sp } : undefined}
               >
                 <div className="p2-day__meta">
                   <span className="p2-day__num" style={dayLabelStyle}>{String(day.day).padStart(2, '0')}</span>

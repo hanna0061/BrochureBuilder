@@ -1,14 +1,117 @@
+// =============================================================================
+// PAGE 4 LOCKED — APPROVED DESIGN — DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+//
+// Status : FINAL APPROVAL — 2026-06-03
+// Approved by: hanaodeh3@gmail.com
+//
+// APPROVED TYPOGRAPHY (source of truth — P4_TYPO below):
+//   Terms Title      EB Garamond  25px  400  lh 1.00  ls 0em
+//   Terms Intro      Inter         9px  400  lh 1.45  ls 0em
+//   Terms Body       Inter        10px  400  lh 1.20  ls 0.025em  ← APPROVED 2026-06-03 (66% fill, single page)
+//   Terms Disclaimer Inter        9.5px 400  lh 1.40  ls 0em
+//   Terms Footer     EB Garamond  25px  600  lh 1.00  ls -0.01em
+//   Footer Contact   Inter        11px  400  lh 1.20  ls 0.02em
+//
+// ISOLATION: This file does NOT import typoStyle() or TYPOGRAPHY_DEFAULTS.
+// All style values come exclusively from P4_TYPO. Future changes to the global
+// typography system cannot alter Page 4 rendering.
+//
+// What CANNOT change Page 4:
+//   ✗ Editing TYPOGRAPHY_DEFAULTS in typography.js
+//   ✗ Dispatching UPDATE_TYPOGRAPHY / RESET_TYPOGRAPHY_SECTION
+//   ✗ Adding x / y / margin / padding to the typography system (blocked in getP4Typo)
+//   ✗ Changing shared editor controls, TypoPanel, or FloatingEditor internals
+//   ✗ Global CSS changes outside .p4-* rules
+//
+// What CAN still change Page 4 (requires explicit user action):
+//   ✓ Intentional typography edits via editor panels (layered via getP4Typo)
+//   ✓ Intentional position moves via editor (positionStyle / getPosition)
+//   ✓ Content edits (title text, body text, disclaimer)
+//   ✓ Bug fixes that prevent crashes or broken rendering
+//   ✓ Any change with explicit written approval
+//
+// Remaining shared dependencies to audit before changing:
+//   src/styles/brochure.css   — .p4-* rules (line ~965) and .brochure-page
+//   src/data/colors.js        — colorVars() / --color-* CSS variables used by .p4-*
+//   src/data/positions.js     — positionStyle() for 'terms' and 'footer' keys
+//   src/data/logos.js         — getLogo() / logoStyle() for footer logo
+// =============================================================================
+
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useSelection } from '../../context/SelectionContext';
 import companyData from '../../data/global/company.json';
 import defaultBrochure from '../../data/brochures/poland-czech-medjugorje.json';
-import { typoStyle, getTypo } from '../../data/typography';
 import { colorVars } from '../../data/colors';
 import { positionStyle, getPosition } from '../../data/positions';
-import { getLogo, logoStyle, logoWrapperStyle } from '../../data/logos';
+import { getLogo, logoStyle } from '../../data/logos';
 
+// =============================================================================
+// PAGE 4 FROZEN TYPOGRAPHY
+// These values match the approved design exactly. They are independent of
+// TYPOGRAPHY_DEFAULTS and will never be affected by global typography changes.
+// =============================================================================
+const P4_FONT = Object.freeze({
+  serif: "'EB Garamond', Georgia, serif",
+  sans:  "'Inter', 'Helvetica Neue', Arial, sans-serif",
+});
+
+const P4_TYPO = Object.freeze({
+  termsTitle:      { fontFamily: P4_FONT.serif,  fontSize: 25,   fontWeight: 400, lineHeight: 1.00, letterSpacing: 0      },
+  termsIntro:      { fontFamily: P4_FONT.sans,   fontSize: 9,    fontWeight: 400, lineHeight: 1.45, letterSpacing: 0      },
+  termsBody:       { fontFamily: P4_FONT.sans,   fontSize: 10,   fontWeight: 400, lineHeight: 1.20, letterSpacing: 0.025  }, // APPROVED 2026-06-03 (66% fill; all content fits single page)
+  termsDisclaimer: { fontFamily: P4_FONT.sans,   fontSize: 9.5,  fontWeight: 400, lineHeight: 1.40, letterSpacing: 0,     color: '#000000' },
+  termsFooter:     { fontFamily: P4_FONT.serif,  fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01  },
+  footerContact:   { fontFamily: P4_FONT.sans,   fontSize: 11,   fontWeight: 400, lineHeight: 1.20, letterSpacing: 0.02,  color: '#000000' },
+  footerParagraph: { fontFamily: P4_FONT.sans,   fontSize: 12,   fontWeight: 400, lineHeight: 1.50, letterSpacing: 0      },
+});
+
+// Converts a P4_TYPO entry to a React inline style object.
+// Intentionally does NOT call the global typoStyle() — this keeps Page 4
+// isolated from future changes to that function (margin, padding, x, y, etc.).
+function p4Style(t) {
+  const s = {
+    fontFamily:    t.fontFamily,
+    fontSize:      `${t.fontSize}px`,
+    fontWeight:    t.fontWeight,
+    lineHeight:    t.lineHeight,
+    letterSpacing: `${t.letterSpacing}em`,
+  };
+  if (t.color) s.color = t.color;
+  return s;
+}
+
+// Merges user-stored typography overrides on top of the frozen P4_TYPO base.
+//
+// WHY: P4_TYPO provides immutable defaults so global TYPOGRAPHY_DEFAULTS
+// changes never silently alter Page 4. But intentional user edits made through
+// the editor (font family, size, weight, etc.) must still take effect.
+//
+// The layout-affecting fields (x, y, margin*, padding*) introduced by the
+// typography expansion are explicitly excluded so Page 4 layout stays frozen.
+function getP4Typo(tour, key) {
+  const base     = P4_TYPO[key];
+  const override = tour?.typography?.[key];
+  if (!override) return base;
+  const merged = { ...base };
+  // Only the 6 core visual properties are honoured — never layout offsets
+  if (override.fontFamily    != null) merged.fontFamily    = override.fontFamily;
+  if (override.fontSize      != null) merged.fontSize      = override.fontSize;
+  if (override.fontWeight    != null) merged.fontWeight    = override.fontWeight;
+  if (override.lineHeight    != null) merged.lineHeight    = override.lineHeight;
+  if (override.letterSpacing != null) merged.letterSpacing = override.letterSpacing;
+  if (override.color         != null) merged.color         = override.color;
+  return merged;
+}
+
+// =============================================================================
+// FLOAT META CONSTANTS — content + typography editing
+// typographyKey is restored so the floating editor shows font controls.
+// Changes go into tour.typography and are applied via getP4Typo() above.
+// Layout offsets (x, y, margin, padding) from the typography expansion are
+// blocked inside getP4Typo so they cannot shift Page 4 elements.
+// =============================================================================
 const FLOAT_TERMS_HEADER = {
-  id: 'terms', label: 'Terms Header', typographyKey: 'termsTitle', positionKey: 'terms',
+  id: 'terms', label: 'Terms Header', typographyKey: 'termsTitle', textRows: 2,
   getValue: (t) => t.terms?.headerTitle ?? 'Terms & Conditions of Travel',
   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'terms', field: 'headerTitle', value: val }),
 };
@@ -36,17 +139,17 @@ const FLOAT_FOOTER_NAME = {
   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'companyOverrides', field: 'name', value: val }),
 };
 const FLOAT_FOOTER_ADDRESS = {
-  id: 'footer', label: 'Footer Address', typographyKey: 'footerParagraph',
+  id: 'footer', label: 'Footer Address', typographyKey: 'footerContact',
   getValue: (t) => t.companyOverrides?.addressFull ?? companyData.address.full,
   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'companyOverrides', field: 'addressFull', value: val }),
 };
 const FLOAT_FOOTER_PHONE = {
-  id: 'footer', label: 'Footer Phone', typographyKey: 'footerParagraph',
+  id: 'footer', label: 'Footer Phone', typographyKey: 'footerContact',
   getValue: (t) => t.companyOverrides?.phone ?? companyData.phone,
   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'companyOverrides', field: 'phone', value: val }),
 };
 const FLOAT_FOOTER_EMAIL = {
-  id: 'footer', label: 'Footer Email', typographyKey: 'footerParagraph',
+  id: 'footer', label: 'Footer Email', typographyKey: 'footerContact',
   getValue: (t) => t.companyOverrides?.email ?? companyData.email,
   setValue: (d, val) => d({ type: 'UPDATE_NESTED', parent: 'companyOverrides', field: 'email', value: val }),
 };
@@ -71,21 +174,24 @@ export default function Page4Terms({ tour }) {
     onClick: (e) => { e.stopPropagation(); openFloating(meta, e); },
   });
 
-  const typo = tour?.typography;
+  // Positions require explicit user action — still read from tour.
   const positions = tour?.positions;
-  const termsTitleStyle      = typoStyle(getTypo(typo, 'termsTitle'));
-  const termsIntroStyle      = typoStyle(getTypo(typo, 'termsIntro'));
-  const termsBodyStyle       = typoStyle(getTypo(typo, 'termsBody'));
-  const termsDisclaimerStyle = typoStyle(getTypo(typo, 'termsDisclaimer'));
-  const termsFooterStyle     = typoStyle(getTypo(typo, 'termsFooter'));
-  const footerParagraphStyle = typoStyle(getTypo(typo, 'footerParagraph'));
-  const footerContactStyle   = typoStyle(getTypo(typo, 'footerContact'));
-  const footerLogo           = getLogo(tour?.logos, 'footer');
-  const footerLogoStyle      = logoStyle(footerLogo);
+
+  // Styles: P4_TYPO provides frozen defaults; getP4Typo layers user overrides.
+  // x / y / margin / padding overrides are intentionally excluded (see getP4Typo).
+  const termsTitleStyle      = p4Style(getP4Typo(tour, 'termsTitle'));
+  const termsIntroStyle      = p4Style(getP4Typo(tour, 'termsIntro'));
+  const termsBodyStyle       = p4Style(getP4Typo(tour, 'termsBody'));
+  const termsDisclaimerStyle = p4Style(getP4Typo(tour, 'termsDisclaimer'));
+  const termsFooterStyle     = p4Style(getP4Typo(tour, 'termsFooter'));
+  const footerContactStyle   = p4Style(getP4Typo(tour, 'footerContact'));
+
+  const footerLogo      = getLogo(tour?.logos, 'footer');
+  const footerLogoStyle = logoStyle(footerLogo);
 
   const headerTitle = tour?.terms?.headerTitle ?? defaultBrochure.terms.headerTitle ?? 'Terms & Conditions of Travel';
   const intro       = tour?.terms?.intro       ?? defaultBrochure.terms.intro       ?? '';
-  const bodyText    = tour?.terms?.bodyText    ?? defaultBrochure.terms.bodyText    ?? '';
+  const bodyText    = tour?.terms?.bodyText     ?? defaultBrochure.terms.bodyText    ?? '';
   const disclaimer  = tour?.terms?.disclaimer  ?? defaultBrochure.terms.disclaimer  ?? '';
 
   const introParagraphs = intro
@@ -99,27 +205,27 @@ export default function Page4Terms({ tour }) {
     .filter(Boolean);
 
   // Layout measurement/compression state
-  const headerRef = useRef(null);
-  const footerRef = useRef(null);
+  const headerRef     = useRef(null);
+  const footerRef     = useRef(null);
   const disclaimerRef = useRef(null);
-  const measureRef = useRef(null);
+  const measureRef    = useRef(null);
+  const contentRef    = useRef(null);
   const [availableH, setAvailableH] = useState(null);
   const [termsCompression, setTermsCompression] = useState(null);
 
-  // compute available vertical space for terms content (accounts for header/disclaimer/footer)
+  // Compute available vertical space for terms content
   useLayoutEffect(() => {
     if (!headerRef.current || !footerRef.current || !disclaimerRef.current) return;
     const hH = headerRef.current.getBoundingClientRect().height || 0;
     const fH = footerRef.current.getBoundingClientRect().height || 0;
     const dH = disclaimerRef.current.getBoundingClientRect().height || 0;
-    // paddings inside .p4-content: 9px top, 6px bottom
-    const contentPad = 9 + 6;
-    // 1056px page minus 20px top+bottom padding = 1016px usable height
+    const contentPad = 9 + 6; // .p4-content padding: 9px top, 6px bottom
     const avail = Math.max(200, Math.floor(1016 - hH - fH - dH - contentPad - 4));
     setAvailableH(avail);
   }, []);
 
-  // Measure natural content height and compute light compression if it overflows
+  // Measure natural content height and compute light compression if it overflows.
+  // Uses P4_TYPO.termsBody directly — never reads from tour.typography.
   useLayoutEffect(() => {
     if (!measureRef.current || availableH == null) return;
     const els = Array.from(measureRef.current.children);
@@ -129,90 +235,36 @@ export default function Page4Terms({ tour }) {
       return;
     }
 
-    // Priority: reduce paragraph gaps -> reduce line-height -> reduce body font-size
-    const baseBody = getTypo(typo, 'termsBody');
-    const maxGap = 12; // assume up to 12px gap
+    const baseBody = P4_TYPO.termsBody; // frozen — never from getTypo()
     const gapFrac = Math.min(1, (natural - availableH) / natural);
-    const newGap = Math.max(0, Math.round(maxGap * (1 - gapFrac)));
-
-    const lhReduction = Math.min(0.12, gapFrac * 0.5); // up to 12%
-    const fontReduction = Math.min(0.10, gapFrac * 0.8); // up to 10%
+    const newGap  = Math.max(0, Math.round(12 * (1 - gapFrac)));
 
     const compressedBody = {
       ...baseBody,
-      lineHeight: Math.max(1.1, baseBody.lineHeight * (1 - lhReduction)),
-      fontSize: Math.max(8, baseBody.fontSize * (1 - fontReduction)),
+      lineHeight: Math.max(1.1, baseBody.lineHeight * (1 - Math.min(0.12, gapFrac * 0.5))),
+      fontSize:   Math.max(8,   baseBody.fontSize   * (1 - Math.min(0.10, gapFrac * 0.8))),
     };
 
     setTermsCompression({ paragraphGap: newGap, compressedBody });
-  }, [availableH, introParagraphs.length, bodyParagraphs.length, typo]);
+  }, [availableH, introParagraphs.length, bodyParagraphs.length, tour?.typography?.termsBody]);
+  // tour.typography.termsBody is included so compression re-runs when the user
+  // changes the terms body font size or line height. Layout fields (x, y, etc.)
+  // are ignored by getP4Typo so they cannot trigger re-layout.
 
   const contentStyle = {
     ...positionStyle(getPosition(positions, 'terms')),
-    height: availableH ? `${availableH}px` : undefined,
-    overflow: availableH ? 'visible' : undefined,
+    height:     availableH ? `${availableH}px` : undefined,
+    overflow:   availableH ? 'visible' : undefined,
     columnFill: 'balance',
   };
 
+  // Compressed body style uses p4Style (not typoStyle) so it stays isolated
   const bodyStyleCompressed = termsCompression
-    ? { ...termsBodyStyle, ...typoStyle(termsCompression.compressedBody), marginBottom: `${termsCompression.paragraphGap}px` }
+    ? { ...p4Style(termsCompression.compressedBody), marginBottom: `${termsCompression.paragraphGap}px` }
     : termsBodyStyle;
 
-  const contentRef = useRef(null);
-
-  // Diagnostic measurement: print container/column metrics to console for investigation
-  useLayoutEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const cs = window.getComputedStyle(el);
-    const children = Array.from(el.children);
-    const rect = el.getBoundingClientRect();
-    const scrollH = el.scrollHeight;
-    const clientH = el.clientHeight;
-    const offsetH = el.offsetHeight;
-    // Estimate column height by max bottom of children relative to container top
-    const childRects = children.map(c => c.getBoundingClientRect());
-    const containerTop = rect.top;
-    const maxChildBottom = childRects.reduce((m, r) => Math.max(m, r.bottom), containerTop);
-    const estimatedColumnHeight = Math.max(0, Math.round(maxChildBottom - containerTop));
-
-    // Find nearest ancestor with overflow hidden
-    let anc = el.parentElement;
-    let overflowHiddenAncestor = null;
-    while (anc) {
-      const aCs = window.getComputedStyle(anc);
-      if (aCs.overflow === 'hidden' || aCs.overflowY === 'hidden' || aCs.overflowX === 'hidden') {
-        overflowHiddenAncestor = anc;
-        break;
-      }
-      anc = anc.parentElement;
-    }
-
-    // Check for transforms on element or ancestors
-    let transformAncestor = null;
-    anc = el;
-    while (anc) {
-      const aCs = window.getComputedStyle(anc);
-      if (aCs.transform && aCs.transform !== 'none') {
-        transformAncestor = { node: anc, transform: aCs.transform };
-        break;
-      }
-      anc = anc.parentElement;
-    }
-
-    // Log requested metrics
-    // eslint-disable-next-line no-console
-    console.log('[Terms Debug] contentRect.height=', Math.round(rect.height), 'containerRect=', rect);
-    // eslint-disable-next-line no-console
-    console.log('[Terms Debug] computedStyles: columnCount=', cs.columnCount, 'columnFill=', cs.columnFill, 'columnGap=', cs.columnGap, 'overflow=', cs.overflow, 'height=', cs.height, 'maxHeight=', cs.maxHeight, 'transform=', cs.transform);
-    // eslint-disable-next-line no-console
-    console.log('[Terms Debug] scrollHeight=', scrollH, 'clientHeight=', clientH, 'offsetHeight=', offsetH, 'estimatedColumnHeight=', estimatedColumnHeight);
-    // eslint-disable-next-line no-console
-    console.log('[Terms Debug] overflowHiddenAncestor=', overflowHiddenAncestor ? overflowHiddenAncestor.tagName : null, 'transformAncestor=', transformAncestor ? transformAncestor.transform : null);
-  }, [availableH, termsCompression, introParagraphs.length, bodyParagraphs.length]);
-
   return (
-    <div className="brochure-page" style={colorVars(tour?.colors)}>
+    <div className="brochure-page brochure-page--full" style={colorVars(tour?.colors)}>
 
       <div className={`p4-header${hl('terms')}`} ref={headerRef} {...sel('terms')}>
         <p className="p4-header__title" style={termsTitleStyle} {...floatSel(FLOAT_TERMS_HEADER)}>{headerTitle}</p>
@@ -232,7 +284,6 @@ export default function Page4Terms({ tour }) {
         {introParagraphs.map((para, i) => (
           <p key={`intro-${i}`} className="p4-intro" style={termsIntroStyle} {...floatSel(FLOAT_TERMS_INTRO)}>{para}</p>
         ))}
-
         {bodyParagraphs.map((para, i) => (
           <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
         ))}

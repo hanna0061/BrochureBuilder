@@ -64,10 +64,10 @@ export default function FooterSection() {
     <div>
       <SafetyBadge warnings={footerWarnings} />
 
-      {/* Typography */}
-      <TypoPanel keys={['termsFooter']}      resetLabel="Footer Heading"   label="Footer Heading" />
+      {/* Typography — footerParagraph and footerContact affect Pages 2–3 footer.
+          termsFooter is removed: it was only used on Page 4 which is now locked. */}
       <TypoPanel keys={['footerParagraph']}  resetLabel="Footer Paragraph" label="Footer Paragraph" />
-      <TypoPanel keys={['footerContact']}    resetLabel="Footer Contact"   label="Footer Contact Info" />
+      <TypoPanel keys={['footerContact']}    resetLabel="Footer Contact"   label="Footer Contact Info" positionKey="footer" />
 
       {/* Colors */}
       <span className="field-group-label">Footer Colors</span>

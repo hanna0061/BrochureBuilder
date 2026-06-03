@@ -4,8 +4,9 @@ import { COLOR_DEFAULTS, COLOR_LABELS } from '../../data/colors';
 import { checkColors } from '../../safety/checks';
 import SafetyBadge from '../components/SafetyBadge';
 
-// footerBg and footerText are now controlled in FooterSection
-const COLOR_KEYS = ['navy', 'gold', 'headings', 'bodyText', 'navbarBg', 'navbarText'];
+// footerBg and footerText are controlled in FooterSection.
+// navbarBg and navbarText are retained internally for compatibility but navbar was removed from the brochure.
+const COLOR_KEYS = ['navy', 'gold', 'headings', 'bodyText'];
 
 function ColorField({ label, value, onChange }) {
   return (

@@ -6,7 +6,6 @@ import ImagesSection from './sections/ImagesSection';
 import ItinerarySection from './sections/ItinerarySection';
 import PricingSection from './sections/PricingSection';
 import TermsSection from './sections/TermsSection';
-import NavbarSection from './sections/NavbarSection';
 import FooterSection from './sections/FooterSection';
 import ColorsSection from './sections/ColorsSection';
 import PositionsSection from './sections/PositionsSection';
@@ -20,7 +19,6 @@ const SECTIONS = [
   { id: 'itinerary',     title: 'Itinerary',              Component: ItinerarySection },
   { id: 'pricing',       title: 'Pricing & Inclusions',   Component: PricingSection },
   { id: 'terms',         title: 'Terms & Conditions',     Component: TermsSection },
-  { id: 'navbar',        title: 'Navbar',                 Component: NavbarSection },
   { id: 'footer',        title: 'Footer',                 Component: FooterSection },
   { id: 'colors',        title: 'Colors',                 Component: ColorsSection },
   { id: 'positions',     title: 'Content Positions',      Component: PositionsSection },
