@@ -156,7 +156,8 @@ export default function ItineraryPages({ tour, company, renderPage }) {
 
     // Per-column spacing — each column fills exactly availableColH.
     //
-    // CSS_BASE = 5 matches .p2-day { padding-block: 5px } in brochure.css.
+    // CSS_BASE is intentionally set 1px below the CSS padding-block (5px) to produce
+    // a tighter, more compact appearance while keeping both columns balanced.
     //
     // Formula (same for expansion and compression):
     //   sp = CSS_BASE + (availableColH − colH_nat) / (2 × n)
@@ -165,9 +166,9 @@ export default function ItineraryPages({ tour, company, renderPage }) {
     // When colH_nat > availableColH → sp < CSS_BASE  (compress, less padding, clamped ≥ 0)
     //
     // A forced break-before:column at bestIdx enforces this per-column split.
-    // The formula guarantees col1_expanded == col2_expanded == availableColH,
-    // so column 1 never overflows → no phantom column 3 overflow.
-    const CSS_BASE = 5;
+    // Lowering CSS_BASE reduces sp by ~2px per day (~10–15% spacing reduction) and
+    // leaves a small (~24px) balanced gap at the bottom of both columns.
+    const CSS_BASE = 3;
     const col1H = heights.slice(0, bestIdx).reduce((s, h) => s + h, 0);
     const col2H = naturalHeight - col1H;
     const n1    = bestIdx;

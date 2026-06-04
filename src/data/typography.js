@@ -40,6 +40,7 @@ export const TYPOGRAPHY_DEFAULTS = Object.freeze({
   itineraryHeading:   { fontFamily: 'EB Garamond', fontSize: 12.5, fontWeight: 800, lineHeight: 1.25, letterSpacing:  0     },
   itineraryBody:      { fontFamily: 'EB Garamond', fontSize: 10,   fontWeight: 400, lineHeight: 1.50, letterSpacing:  0     },
   itineraryOvernight: { fontFamily: 'Inter',       fontSize: 8.5,  fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.04  },
+  itineraryMeals:     { fontFamily: 'Inter',       fontSize: 8.5,  fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.04  },
 
   // Pricing page — legacy shared keys (kept for backward compat; no longer used by Page 3 JSX)
   pricingBarTitle:  { fontFamily: 'Inter',        fontSize: 15,   fontWeight: 700, lineHeight: 1.20, letterSpacing:  0.10  },

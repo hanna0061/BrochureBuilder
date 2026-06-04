@@ -47,6 +47,7 @@ function TextContent({ meta, tour, dispatch }) {
   const reset = () => {
     if (meta.typographyKey) dispatch({ type: 'RESET_TYPOGRAPHY_SECTION', section: meta.typographyKey });
     if (meta.positionKey)   dispatch({ type: 'RESET_POSITION', key: meta.positionKey });
+    if (meta.resetElemPos)  meta.resetElemPos(dispatch);
   };
 
   return (
@@ -110,19 +111,37 @@ function TextContent({ meta, tour, dispatch }) {
             }
           </div>
 
-          {/* Per-element X/Y offset — stored in tour.typography[key].x / .y */}
-          <div style={row2}>
-            <div>
-              <label style={lbl}>X — {typo.x ?? 0}px</label>
-              <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={typo.x ?? 0}
-                onChange={e => setT('x', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
+          {/* X/Y: per-element override when available (itinerary fields), else global typography */}
+          {meta.getElemPos ? (() => {
+            const ep = meta.getElemPos(tour);
+            return (
+              <div style={row2}>
+                <div>
+                  <label style={lbl}>X — {ep.x ?? 0}px</label>
+                  <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={ep.x ?? 0}
+                    onChange={e => meta.setElemPos(dispatch, 'x', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
+                </div>
+                <div>
+                  <label style={lbl}>Y — {ep.y ?? 0}px</label>
+                  <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={ep.y ?? 0}
+                    onChange={e => meta.setElemPos(dispatch, 'y', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
+                </div>
+              </div>
+            );
+          })() : (
+            <div style={row2}>
+              <div>
+                <label style={lbl}>X — {typo.x ?? 0}px</label>
+                <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={typo.x ?? 0}
+                  onChange={e => setT('x', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
+              </div>
+              <div>
+                <label style={lbl}>Y — {typo.y ?? 0}px</label>
+                <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={typo.y ?? 0}
+                  onChange={e => setT('y', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
+              </div>
             </div>
-            <div>
-              <label style={lbl}>Y — {typo.y ?? 0}px</label>
-              <input type="range" min={POS_MIN} max={POS_MAX} step={1} value={typo.y ?? 0}
-                onChange={e => setT('y', parseInt(e.target.value, 10))} style={{ width:'100%' }} />
-            </div>
-          </div>
+          )}
         </>
       )}
 

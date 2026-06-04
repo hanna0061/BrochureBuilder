@@ -214,6 +214,42 @@ function reducer(state, action) {
         },
       };
 
+    case 'UPDATE_ITINERARY_ELEMENT_POS':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          itinerary: state.tour.itinerary.map((day, i) => {
+            if (i !== action.index) return day;
+            const curPos = day.positions ?? {};
+            return {
+              ...day,
+              positions: {
+                ...curPos,
+                [action.field]: {
+                  ...(curPos[action.field] ?? { x: 0, y: 0 }),
+                  [action.axis]: action.value,
+                },
+              },
+            };
+          }),
+        },
+      };
+
+    case 'RESET_ITINERARY_ELEMENT_POS': {
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          itinerary: state.tour.itinerary.map((day, i) => {
+            if (i !== action.index) return day;
+            const { [action.field]: _removed, ...restPos } = day.positions ?? {};
+            return { ...day, positions: restPos };
+          }),
+        },
+      };
+    }
+
     case 'UPDATE_GRID_PHOTO':
       return {
         ...state,
