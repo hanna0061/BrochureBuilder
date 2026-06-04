@@ -1,37 +1,37 @@
 // =============================================================================
-// PAGE 4 LOCKED — APPROVED DESIGN — DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+// PAGE 4 LOCKED — FINAL APPROVED DESIGN
 //
-// Status : FINAL APPROVAL — 2026-06-03
+// Status : FINAL TYPOGRAPHY LOCK — 2026-06-04
 // Approved by: hanaodeh3@gmail.com
 //
-// APPROVED TYPOGRAPHY (source of truth — P4_TYPO below):
-//   Terms Title      EB Garamond  25px  400  lh 1.00  ls 0em
-//   Terms Intro      Inter         9px  400  lh 1.45  ls 0em
-//   Terms Body       Inter        10px  400  lh 1.20  ls 0.025em  ← APPROVED 2026-06-03 (66% fill, single page)
-//   Terms Disclaimer Inter        9.5px 400  lh 1.40  ls 0em
-//   Terms Footer     EB Garamond  25px  600  lh 1.00  ls -0.01em
-//   Footer Contact   Inter        11px  400  lh 1.20  ls 0.02em
+// APPROVED TYPOGRAPHY DEFAULTS (source of truth — P4_TYPO below):
+//   Terms Title      Times New Roman  28px  400  lh 1.30  ls -0.04em
+//   Terms Intro      Inter             9px  400  lh 1.45  ls 0em
+//   Terms Body       Inter            10px  400  lh 1.15  ls -0.005em
+//   Terms Disclaimer Inter           11.5px 400  lh 1.40  ls 0em
+//   Terms Footer     EB Garamond      25px  600  lh 1.00  ls -0.01em
+//   Footer Contact   Inter            11px  400  lh 1.20  ls 0.02em
 //
 // ISOLATION: This file does NOT import typoStyle() or TYPOGRAPHY_DEFAULTS.
-// All style values come exclusively from P4_TYPO. Future changes to the global
-// typography system cannot alter Page 4 rendering.
+// All style values come exclusively from P4_TYPO. getP4Typo() layers user
+// overrides on top of the frozen defaults, honoring: fontFamily, fontSize,
+// fontWeight, lineHeight, letterSpacing, color, x, y.
+// margin* and padding* are not passed through (they affect document flow).
 //
 // What CANNOT change Page 4:
-//   ✗ Editing TYPOGRAPHY_DEFAULTS in typography.js
-//   ✗ Dispatching UPDATE_TYPOGRAPHY / RESET_TYPOGRAPHY_SECTION
-//   ✗ Adding x / y / margin / padding to the typography system (blocked in getP4Typo)
-//   ✗ Changing shared editor controls, TypoPanel, or FloatingEditor internals
+//   ✗ Layout, structure, spacing engine, footer layout, page sizing
+//   ✗ Content distribution, Letter page sizing logic (1056px constant)
 //   ✗ Global CSS changes outside .p4-* rules
 //
-// What CAN still change Page 4 (requires explicit user action):
-//   ✓ Intentional typography edits via editor panels (layered via getP4Typo)
-//   ✓ Intentional position moves via editor (positionStyle / getPosition)
+// What CAN change Page 4 (requires explicit user action):
+//   ✓ Typography — fontFamily, fontSize, fontWeight, lineHeight, letterSpacing,
+//     color, x, y — all editable via click-to-edit panel and Typography sidebar
 //   ✓ Content edits (title text, body text, disclaimer)
 //   ✓ Bug fixes that prevent crashes or broken rendering
-//   ✓ Any change with explicit written approval
+//   ✓ Any structural change with explicit written approval
 //
-// Remaining shared dependencies to audit before changing:
-//   src/styles/brochure.css   — .p4-* rules (line ~965) and .brochure-page
+// Shared dependencies:
+//   src/styles/brochure.css   — .p4-* rules and .brochure-page
 //   src/data/colors.js        — colorVars() / --color-* CSS variables used by .p4-*
 //   src/data/positions.js     — positionStyle() for 'terms' and 'footer' keys
 //   src/data/logos.js         — getLogo() / logoStyle() for footer logo
@@ -46,28 +46,29 @@ import { positionStyle, getPosition } from '../../data/positions';
 import { getLogo, logoStyle } from '../../data/logos';
 
 // =============================================================================
-// PAGE 4 FROZEN TYPOGRAPHY
+// PAGE 4 FROZEN TYPOGRAPHY — FINAL LOCK 2026-06-04
 // These values match the approved design exactly. They are independent of
 // TYPOGRAPHY_DEFAULTS and will never be affected by global typography changes.
 // =============================================================================
 const P4_FONT = Object.freeze({
   serif: "'EB Garamond', Georgia, serif",
+  tnr:   "'Times New Roman', Georgia, serif",
   sans:  "'Inter', 'Helvetica Neue', Arial, sans-serif",
 });
 
 const P4_TYPO = Object.freeze({
-  termsTitle:      { fontFamily: P4_FONT.serif,  fontSize: 25,   fontWeight: 400, lineHeight: 1.00, letterSpacing: 0      },
-  termsIntro:      { fontFamily: P4_FONT.sans,   fontSize: 9,    fontWeight: 400, lineHeight: 1.45, letterSpacing: 0      },
-  termsBody:       { fontFamily: P4_FONT.sans,   fontSize: 10,   fontWeight: 400, lineHeight: 1.20, letterSpacing: 0.025  }, // APPROVED 2026-06-03 (66% fill; all content fits single page)
-  termsDisclaimer: { fontFamily: P4_FONT.sans,   fontSize: 9.5,  fontWeight: 400, lineHeight: 1.40, letterSpacing: 0,     color: '#000000' },
-  termsFooter:     { fontFamily: P4_FONT.serif,  fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01  },
-  footerContact:   { fontFamily: P4_FONT.sans,   fontSize: 11,   fontWeight: 400, lineHeight: 1.20, letterSpacing: 0.02,  color: '#000000' },
-  footerParagraph: { fontFamily: P4_FONT.sans,   fontSize: 12,   fontWeight: 400, lineHeight: 1.50, letterSpacing: 0      },
+  termsTitle:      { fontFamily: P4_FONT.tnr,   fontSize: 28,   fontWeight: 400, lineHeight: 1.30, letterSpacing: -0.04   }, // APPROVED 2026-06-04
+  termsIntro:      { fontFamily: P4_FONT.sans,  fontSize: 9,    fontWeight: 400, lineHeight: 1.45, letterSpacing: 0       },
+  termsBody:       { fontFamily: P4_FONT.sans,  fontSize: 10,   fontWeight: 400, lineHeight: 1.15, letterSpacing: -0.005  }, // APPROVED 2026-06-04
+  termsDisclaimer: { fontFamily: P4_FONT.sans,  fontSize: 11.5, fontWeight: 400, lineHeight: 1.40, letterSpacing: 0,      color: '#000000' }, // APPROVED 2026-06-04
+  termsFooter:     { fontFamily: P4_FONT.serif, fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01   },
+  footerContact:   { fontFamily: P4_FONT.sans,  fontSize: 11,   fontWeight: 400, lineHeight: 1.20, letterSpacing: 0.02,   color: '#000000' },
+  footerParagraph: { fontFamily: P4_FONT.sans,  fontSize: 12,   fontWeight: 400, lineHeight: 1.50, letterSpacing: 0       },
 });
 
 // Converts a P4_TYPO entry to a React inline style object.
 // Intentionally does NOT call the global typoStyle() — this keeps Page 4
-// isolated from future changes to that function (margin, padding, x, y, etc.).
+// isolated from future changes to that function (margin, padding, etc.).
 function p4Style(t) {
   const s = {
     fontFamily:    t.fontFamily,
@@ -77,6 +78,9 @@ function p4Style(t) {
     letterSpacing: `${t.letterSpacing}em`,
   };
   if (t.color) s.color = t.color;
+  const x = t.x ?? 0;
+  const y = t.y ?? 0;
+  if (x !== 0 || y !== 0) s.transform = `translate(${x}px, ${y}px)`;
   return s;
 }
 
@@ -84,22 +88,23 @@ function p4Style(t) {
 //
 // WHY: P4_TYPO provides immutable defaults so global TYPOGRAPHY_DEFAULTS
 // changes never silently alter Page 4. But intentional user edits made through
-// the editor (font family, size, weight, etc.) must still take effect.
+// the editor (font family, size, weight, x, y, etc.) must still take effect.
 //
-// The layout-affecting fields (x, y, margin*, padding*) introduced by the
-// typography expansion are explicitly excluded so Page 4 layout stays frozen.
+// margin* and padding* are excluded — they affect document flow and are not
+// part of the standard typography editing model.
 function getP4Typo(tour, key) {
   const base     = P4_TYPO[key];
   const override = tour?.typography?.[key];
   if (!override) return base;
   const merged = { ...base };
-  // Only the 6 core visual properties are honoured — never layout offsets
   if (override.fontFamily    != null) merged.fontFamily    = override.fontFamily;
   if (override.fontSize      != null) merged.fontSize      = override.fontSize;
   if (override.fontWeight    != null) merged.fontWeight    = override.fontWeight;
   if (override.lineHeight    != null) merged.lineHeight    = override.lineHeight;
   if (override.letterSpacing != null) merged.letterSpacing = override.letterSpacing;
   if (override.color         != null) merged.color         = override.color;
+  if (override.x             != null) merged.x             = override.x;
+  if (override.y             != null) merged.y             = override.y;
   return merged;
 }
 
@@ -220,23 +225,23 @@ export default function Page4Terms({ tour }) {
     const fH = footerRef.current.getBoundingClientRect().height || 0;
     const dH = disclaimerRef.current.getBoundingClientRect().height || 0;
     const contentPad = 9 + 6; // .p4-content padding: 9px top, 6px bottom
-    const avail = Math.max(200, Math.floor(1016 - hH - fH - dH - contentPad - 4));
+    const avail = Math.max(200, Math.floor(1056 - hH - fH - dH - contentPad - 4));
     setAvailableH(avail);
   }, []);
 
   // Measure natural content height and compute light compression if it overflows.
-  // Uses P4_TYPO.termsBody directly — never reads from tour.typography.
+  // Uses getP4Typo() so user font-size/line-height overrides are respected during compression.
   useLayoutEffect(() => {
     if (!measureRef.current || availableH == null) return;
     const els = Array.from(measureRef.current.children);
     const natural = els.reduce((s, el) => s + el.getBoundingClientRect().height, 0);
-    if (natural <= availableH) {
+    if (natural <= 2 * availableH) {
       setTermsCompression(null);
       return;
     }
 
-    const baseBody = P4_TYPO.termsBody; // frozen — never from getTypo()
-    const gapFrac = Math.min(1, (natural - availableH) / natural);
+    const baseBody = getP4Typo(tour, 'termsBody'); // effective style — includes user overrides
+    const gapFrac = Math.min(1, (natural - 2 * availableH) / natural);
     const newGap  = Math.max(0, Math.round(12 * (1 - gapFrac)));
 
     const compressedBody = {
@@ -253,8 +258,7 @@ export default function Page4Terms({ tour }) {
 
   const contentStyle = {
     ...positionStyle(getPosition(positions, 'terms')),
-    height:     availableH ? `${availableH}px` : undefined,
-    overflow:   availableH ? 'visible' : undefined,
+    maxHeight:  availableH ? `${availableH}px` : undefined,
     columnFill: 'balance',
   };
 

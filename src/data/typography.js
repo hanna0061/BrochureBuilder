@@ -67,20 +67,17 @@ export const TYPOGRAPHY_DEFAULTS = Object.freeze({
   paymentValues:      { fontFamily: 'Inter',        fontSize: 9,    fontWeight: 700, lineHeight: 1.30, letterSpacing:  0     },
   paymentDue:         { fontFamily: 'Inter',        fontSize: 9,    fontWeight: 400, lineHeight: 1.30, letterSpacing:  0     },
 
-  // PAGE 4 LOCKED — APPROVED DESIGN
+  // PAGE 4 LOCKED — FINAL APPROVED DESIGN 2026-06-04
+  // These defaults must stay in sync with P4_TYPO in Page4Terms.jsx.
+  // Reset operations restore to these values. New brochures start from these values.
   // Do not modify without explicit approval.
-  // Keys below (termsTitle → termsFooter) drive Page 4 layout.
-  // footerContact and footerParagraph are also used by Page 4 footer — see note on those keys.
-  // Terms page — 5 independent sections
-  termsTitle:       { fontFamily: 'EB Garamond', fontSize: 25,   fontWeight: 400, lineHeight: 1.00, letterSpacing:  0     },
-  termsIntro:       { fontFamily: 'Inter',        fontSize: 9,    fontWeight: 400, lineHeight: 1.45, letterSpacing:  0     },
-  termsBody:        { fontFamily: 'Inter',        fontSize: 10,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.025 },
-  termsDisclaimer:  { fontFamily: 'Inter',        fontSize: 9.5,  fontWeight: 400, lineHeight: 1.40, letterSpacing:  0,     color: '#000000' },
-  termsFooter:      { fontFamily: 'EB Garamond', fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01  },
+  termsTitle:       { fontFamily: 'Times New Roman', fontSize: 28,   fontWeight: 400, lineHeight: 1.30, letterSpacing: -0.04   }, // APPROVED 2026-06-04
+  termsIntro:       { fontFamily: 'Inter',           fontSize: 9,    fontWeight: 400, lineHeight: 1.45, letterSpacing:  0      },
+  termsBody:        { fontFamily: 'Inter',           fontSize: 10,   fontWeight: 400, lineHeight: 1.15, letterSpacing: -0.005  }, // APPROVED 2026-06-04
+  termsDisclaimer:  { fontFamily: 'Inter',           fontSize: 11.5, fontWeight: 400, lineHeight: 1.40, letterSpacing:  0,     color: '#000000' }, // APPROVED 2026-06-04
+  termsFooter:      { fontFamily: 'EB Garamond',     fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01   },
 
-  // Footer (Pages 2–4)
-  // NOTE: footerContact and footerParagraph are used by Page 4 footer (LOCKED).
-  // Do not change footerContact or footerParagraph without verifying Page 4 is unaffected.
+  // Footer (Page 4) — kept in sync with P4_TYPO.footerContact
   footer:           { fontFamily: 'EB Garamond', fontSize: 25,   fontWeight: 600, lineHeight: 1.00, letterSpacing: -0.01  },
   footerParagraph:  { fontFamily: 'Inter',        fontSize: 12,   fontWeight: 400, lineHeight: 1.50, letterSpacing:  0     },
   footerContact:    { fontFamily: 'Inter',        fontSize: 11,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.02,  color: '#000000' },

@@ -2,12 +2,14 @@ import React from 'react';
 import { useBrochure } from '../../context/BrochureContext';
 import { FONT_OPTIONS, WEIGHT_OPTIONS, TYPOGRAPHY_DEFAULTS, getTypo } from '../../data/typography';
 
-const FS_MIN = 6;
-const FS_MAX = 72;
-const LH_MIN = 0.8;
-const LH_MAX = 3;
-const LS_MIN = -0.2;
-const LS_MAX = 0.5;
+const FS_MIN  = 6;
+const FS_MAX  = 72;
+const LH_MIN  = 0.8;
+const LH_MAX  = 3;
+const LS_MIN  = -0.2;
+const LS_MAX  = 0.5;
+const POS_MIN = -200;
+const POS_MAX = 200;
 
 function clamp(v, min, max) {
   const n = parseFloat(v);
@@ -93,6 +95,45 @@ function TypoGroup({ label, sectionKey, current, onSet, onReset }) {
           style={{ width: '100%' }}
         />
       </div>
+
+      {/* Color */}
+      <div className="field" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+        <label className="field__label" style={{ marginBottom: 0 }}>Color</label>
+        <input
+          type="color"
+          value={current.color || '#000000'}
+          onChange={e => onSet('color', e.target.value)}
+          style={{ width: 32, height: 24, border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: 0 }}
+        />
+        {current.color
+          ? <button type="button" className="typo-group__reset" onClick={() => onSet('color', null)}>Clear</button>
+          : <span style={{ fontSize: 9, color: '#aaa', fontFamily: "'Inter', sans-serif" }}>default</span>
+        }
+      </div>
+
+      {/* X / Y Position */}
+      <div className="field" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        <div>
+          <label className="field__label">X — {current.x ?? 0}px</label>
+          <input
+            type="range"
+            min={POS_MIN} max={POS_MAX} step={1}
+            value={current.x ?? 0}
+            onChange={e => onSet('x', parseInt(e.target.value, 10))}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div>
+          <label className="field__label">Y — {current.y ?? 0}px</label>
+          <input
+            type="range"
+            min={POS_MIN} max={POS_MAX} step={1}
+            value={current.y ?? 0}
+            onChange={e => onSet('y', parseInt(e.target.value, 10))}
+            style={{ width: '100%' }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -146,12 +187,13 @@ export default function TypographySection() {
       {group('Why Travel Heading', 'whyTravelHeading')}
       {group('Why Travel Body Text', 'whyTravel')}
 
-      <span className="field-group-label">Terms &amp; Conditions</span>
-      {group('Terms & Conditions', 'terms')}
-
-      <span className="field-group-label">Global Elements</span>
-      {group('Footer Text', 'footer')}
-      {/* Navbar removed from brochure — navbar key kept internally for data compatibility */}
+      <span className="field-group-label">Terms &amp; Conditions — Page 4</span>
+      {group('Terms Title', 'termsTitle')}
+      {group('Terms Intro', 'termsIntro')}
+      {group('Terms Body', 'termsBody')}
+      {group('Terms Disclaimer', 'termsDisclaimer')}
+      {group('Footer Company Name', 'termsFooter')}
+      {group('Footer Contact', 'footerContact')}
 
     </div>
   );
