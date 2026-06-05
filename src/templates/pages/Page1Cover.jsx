@@ -128,30 +128,26 @@ export default function Page1Cover({ tour, company }) {
           );
         })}
 
-        {/* Portrait overlay — explicit grid-column/row 1/-1 anchors it to the full
-            grid area so position:absolute always resolves to the grid container,
-            not an auto-placed single cell (cross-browser fix). */}
-        <div className="p1-grid__portrait-layer">
-          {portrait?.src && (
-            <div
-              className={`p1-portrait${hl('portrait')}`}
+        {/* Priest portrait — optional circular overlay at grid center */}
+        {portrait?.src && (
+          <div
+            className={`p1-portrait${hl('portrait')}`}
+            style={{
+              transform: `translate(calc(-50% + ${portrait.x ?? 0}px), calc(-50% + ${portrait.y ?? 0}px))`,
+            }}
+            {...sel('portrait')}
+          >
+            <img
+              src={portrait.src}
+              alt=""
+              className="p1-portrait__img"
               style={{
-                transform: `translate(calc(-50% + ${portrait.x ?? 0}px), calc(-50% + ${portrait.y ?? 0}px))`,
+                width:  `${portrait.size ?? 160}px`,
+                height: `${portrait.size ?? 160}px`,
               }}
-              {...sel('portrait')}
-            >
-              <img
-                src={portrait.src}
-                alt=""
-                className="p1-portrait__img"
-                style={{
-                  width:  `${portrait.size ?? 160}px`,
-                  height: `${portrait.size ?? 160}px`,
-                }}
-              />
-            </div>
-          )}
-        </div>
+            />
+          </div>
+        )}
       </div>
 
       {/* Tour info bar */}

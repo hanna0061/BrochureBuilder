@@ -321,32 +321,14 @@
   position: relative;
 }
 
-/* ── Portrait overlay — spans the entire 2×2 grid; unambiguous containing block ── */
-/* grid-column/row 1/-1 gives an explicit grid area so that position: absolute
-   resolves relative to the full grid, not an auto-placed single cell (cross-browser
-   fix for Chrome/Firefox/Safari inconsistency with absolutely positioned grid items). */
-.p1-grid__portrait-layer {
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
-  /* No flex centering — Chrome's print engine collapses the cross-axis height of an
-     absolutely-positioned flex container before grid tracks propagate, causing the
-     portrait to jump to the top of the grid in PDF. top/left 50% on the child is
-     used instead; it resolves against the layer's USED height (from inset: 0),
-     which is identical on screen and in print. */
-}
-
-/* ── Priest portrait — centered via top/left 50% within the layer ── */
+/* ── Priest portrait — circular overlay centered at grid intersection ── */
 .p1-portrait {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 10;
   cursor: pointer;
-  pointer-events: auto;
-  /* transform applied inline: translate(calc(-50% + Xpx), calc(-50% + Ypx)) */
+  /* transform is applied inline: translate(calc(-50% + Xpx), calc(-50% + Ypx)) */
 }
 
 .p1-portrait__img {
@@ -362,7 +344,6 @@
 
 @media print {
   .p1-portrait { cursor: default; }
-  .p1-grid__portrait-layer { pointer-events: none; }
 }
 
 .p1-grid__cell {
@@ -602,12 +583,11 @@
   padding: 0;
 }
 
-/* Pricing bar — overlaps the bottom of the hero, gradient from light-transparent to dark-opaque */
+/* Pricing bar — sits directly below the hero image; no overlap */
 .p3-price-bar {
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  margin-top: -42px;
   /*
    * --color-pricing-bar-rgb is set by colorVars() as "R, G, B" when a custom
    * color is chosen. Each stop's fallback preserves the original blue-family
@@ -616,16 +596,9 @@
    * Changing the color only replaces the RGB channels — opacity layers (0.45,
    * 0.65, 0.90), gradient direction, and backdrop-filter are NEVER modified.
    */
-  background: linear-gradient(
-    to bottom,
-    rgba(var(--color-pricing-bar-rgb, 40, 110, 190), 0.45) 0%,
-    rgba(var(--color-pricing-bar-rgb, 20,  80, 150), 0.65) 50%,
-    rgba(var(--color-pricing-bar-rgb, 10,  45, 110), 0.90) 100%
-  );
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  text-align: center;
-  padding: 12px 24px 13px;
+  background: var(--color-navy);
+     text-align: center;
+  padding: 7px 24px 7px;
   display: flex;
   align-items: center;
   justify-content: center;
