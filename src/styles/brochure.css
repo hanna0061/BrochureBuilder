@@ -321,14 +321,27 @@
   position: relative;
 }
 
-/* ── Priest portrait — circular overlay centered at grid intersection ── */
-.p1-portrait {
+/* ── Portrait overlay — spans the entire 2×2 grid; unambiguous containing block ── */
+/* grid-column/row 1/-1 gives an explicit grid area so that position: absolute
+   resolves relative to the full grid, not an auto-placed single cell (cross-browser
+   fix for Chrome/Firefox/Safari inconsistency with absolutely positioned grid items). */
+.p1-grid__portrait-layer {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
   z-index: 10;
+}
+
+/* ── Priest portrait — centered by flex parent; transform applies fine adjustment ── */
+.p1-portrait {
   cursor: pointer;
-  /* transform is applied inline: translate(calc(-50% + Xpx), calc(-50% + Ypx)) */
+  pointer-events: auto;
+  /* transform applied inline: translate(Xpx, Ypx) — flex handles the 50%/50% centering */
 }
 
 .p1-portrait__img {
@@ -344,6 +357,7 @@
 
 @media print {
   .p1-portrait { cursor: default; }
+  .p1-grid__portrait-layer { pointer-events: none; }
 }
 
 .p1-grid__cell {

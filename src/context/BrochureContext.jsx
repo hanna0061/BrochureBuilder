@@ -25,6 +25,20 @@ function migrateTour(tour) {
     }
   }
 
+  // Normalize coverPortrait — ensure all four fields are present or the whole value is null.
+  // Partial objects (e.g. from hand-edited JSON or future schema changes) get defaults filled in.
+  // An absent src means "no portrait", so we collapse to null to keep state unambiguous.
+  const rawPortrait = tour.coverPortrait;
+  const coverPortrait =
+    rawPortrait && rawPortrait.src
+      ? {
+          src:  rawPortrait.src,
+          size: rawPortrait.size ?? 160,
+          x:    rawPortrait.x   ?? 0,
+          y:    rawPortrait.y   ?? 0,
+        }
+      : null;
+
   return {
     ...tour,
     typography:     typo,
@@ -34,6 +48,7 @@ function migrateTour(tour) {
     logos,
     notIncluded:    tour.notIncluded    ?? [],
     infoBlocks:     tour.infoBlocks     ?? [],
+    coverPortrait,
   };
 }
 
