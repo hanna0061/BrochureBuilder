@@ -67,6 +67,7 @@ export default function Page1Cover({ tour, company }) {
   const { grid } = tour.photos;
   const coverLogo = getLogo(tour.logos, 'cover');
   const coverLogoStyle = logoStyle(coverLogo);
+  const portrait = tour.coverPortrait;
 
   return (
     <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>
@@ -126,6 +127,27 @@ export default function Page1Cover({ tour, company }) {
             </div>
           );
         })}
+
+        {/* Priest portrait — optional circular overlay at grid center */}
+        {portrait?.src && (
+          <div
+            className={`p1-portrait${hl('portrait')}`}
+            style={{
+              transform: `translate(calc(-50% + ${portrait.x ?? 0}px), calc(-50% + ${portrait.y ?? 0}px))`,
+            }}
+            {...sel('portrait')}
+          >
+            <img
+              src={portrait.src}
+              alt=""
+              className="p1-portrait__img"
+              style={{
+                width:  `${portrait.size ?? 160}px`,
+                height: `${portrait.size ?? 160}px`,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Tour info bar */}

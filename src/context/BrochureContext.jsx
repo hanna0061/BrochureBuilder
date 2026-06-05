@@ -276,6 +276,18 @@ function reducer(state, action) {
         },
       };
 
+    case 'UPDATE_COVER_PORTRAIT':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          coverPortrait: {
+            ...(state.tour.coverPortrait ?? { src: null, size: 160, x: 0, y: 0 }),
+            [action.field]: action.value,
+          },
+        },
+      };
+
     case 'UPDATE_INCLUSION':
       return {
         ...state,
@@ -570,6 +582,7 @@ function loadSavedTour() {
       const parsed = JSON.parse(saved);
       if (!parsed.terms) parsed.terms = defaultBrochure.terms;
       if (!parsed.whyUs) parsed.whyUs = defaultBrochure.whyUs;
+      if (!parsed.notIncluded?.length) parsed.notIncluded = defaultBrochure.notIncluded;
       // Migrate infoBlocks: old format used plain body strings; new format uses bullets arrays.
       // If any block is missing bullets, replace the entire array from the default JSON.
       const needsInfoMigration = !parsed.infoBlocks?.length ||

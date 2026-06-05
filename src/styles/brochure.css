@@ -154,6 +154,10 @@
     orphans: 3;
     widows: 3;
   }
+
+  .p3-why__body p {
+    hyphens: auto;
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -314,6 +318,32 @@
   grid-template-rows: 1fr 1fr;
   gap: 3px;
   background-color: var(--color-white);
+  position: relative;
+}
+
+/* ── Priest portrait — circular overlay centered at grid intersection ── */
+.p1-portrait {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  cursor: pointer;
+  /* transform is applied inline: translate(calc(-50% + Xpx), calc(-50% + Ypx)) */
+}
+
+.p1-portrait__img {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #ffffff;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.45),
+    0 1px 6px  rgba(0, 0, 0, 0.20);
+  pointer-events: none;
+}
+
+@media print {
+  .p1-portrait { cursor: default; }
 }
 
 .p1-grid__cell {
@@ -598,6 +628,7 @@
 .p3-pricing-section {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
   background: #e8e8e8;
   padding: 0;
 }
@@ -925,6 +956,51 @@
   margin: 0;
   overflow-wrap: break-word;
   cursor: pointer;
+}
+
+/* Why Us section — navy title bar + centered body text */
+.p3-why {
+  padding: 32px 28px 12px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.p3-why__title {
+  background-color: var(--color-navy);
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-white);
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin: 0 0 8px 0;
+  padding: 3px 24px;
+  cursor: pointer;
+}
+
+.p3-why__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.p3-why__body p {
+  font-family: var(--font-sans);
+  text-align: center;
+  font-size: 8.5px;
+  line-height: 1.55;
+  color: black;
+  margin: 0 0 15px 0;
+  max-width: 680px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.p3-why__body p:last-child {
+  margin-bottom: 20px;
 }
 
 /* =============================================================================

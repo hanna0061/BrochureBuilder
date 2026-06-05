@@ -2,6 +2,7 @@ import React from 'react';
 import { typoStyle, getTypo } from '../../data/typography';
 import { colorVars } from '../../data/colors';
 import { getImagePosition } from '../../data/imagePositions';
+import { positionStyle, getPosition } from '../../data/positions';
 import { useBrochure } from '../../context/BrochureContext';
 import { usePreview } from '../../context/PreviewContext';
 import { useSelection } from '../../context/SelectionContext';
@@ -22,6 +23,7 @@ export default function Page3Pricing({ tour, company }) {
   };
 
   const typo = tour.typography;
+  const positions = tour.positions;
   const heroPos = getImagePosition(tour.imagePositions, 'pricingHero');
 
   // One style variable per element — no shared keys on Page 3
@@ -40,10 +42,15 @@ export default function Page3Pricing({ tour, company }) {
   const paymentLabelStyle    = typoStyle(getTypo(typo, 'paymentLabels'));
   const paymentValueStyle    = typoStyle(getTypo(typo, 'paymentValues'));
   const paymentDueStyle      = typoStyle(getTypo(typo, 'paymentDue'));
+  const whyHeadingStyle      = typoStyle(getTypo(typo, 'whyTravelHeading'));
+  const whyBodyStyle         = typoStyle(getTypo(typo, 'whyTravel'));
 
   const { pricingHero } = tour.photos;
   const notIncluded = tour.notIncluded ?? [];
   const infoBlocks  = tour.infoBlocks  ?? [];
+  const whyContent    = tour.whyUs;
+  const whyHeading    = whyContent?.heading ?? `Why Travel with ${company.shortName ?? 'Pax Via'}?`;
+  const whyParagraphs = whyContent?.paragraphs?.length > 0 ? whyContent.paragraphs : [];
   const hasLandOnly = !!(tour.price?.landOnlyDisplay || tour.price?.landOnly);
 
   return (
@@ -298,6 +305,38 @@ export default function Page3Pricing({ tour, company }) {
               ) : null}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Why Travel With Us ── */}
+      {whyParagraphs.length > 0 && (
+        <div className="p3-why" style={positionStyle(getPosition(positions, 'whyTravel'))}>
+          <h3
+            className="p3-why__title"
+            style={whyHeadingStyle}
+            {...floatSel({
+              id: 'whyUs', label: 'Why Travel Heading', typographyKey: 'whyTravelHeading',
+              getValue: (t) => t.whyUs?.heading ?? '',
+              setValue: (d, val) => d({ type: 'UPDATE_WHY_FIELD', field: 'heading', value: val }),
+            })}
+          >
+            {whyHeading}
+          </h3>
+          <div className="p3-why__body">
+            {whyParagraphs.map((para, i) => (
+              <p
+                key={i}
+                style={whyBodyStyle}
+                {...floatSel({
+                  id: 'whyUs', label: `Why Travel Paragraph ${i + 1}`, typographyKey: 'whyTravel', textRows: 5,
+                  getValue: (t) => t.whyUs?.paragraphs?.[i] ?? '',
+                  setValue: (d, val) => d({ type: 'UPDATE_WHY_PARAGRAPH', index: i, value: val }),
+                })}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
         </div>
       )}
     </div>

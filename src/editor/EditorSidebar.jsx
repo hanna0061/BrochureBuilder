@@ -3,6 +3,7 @@ import { SelectionContext } from '../context/SelectionContext';
 import TourInfoSection from './sections/TourInfoSection';
 import DestinationsSection from './sections/DestinationsSection';
 import ImagesSection from './sections/ImagesSection';
+import PortraitSection from './sections/PortraitSection';
 import ItinerarySection from './sections/ItinerarySection';
 import PricingSection from './sections/PricingSection';
 import TermsSection from './sections/TermsSection';
@@ -16,6 +17,7 @@ const SECTIONS = [
   { id: 'tourInfo',      title: 'Tour Info',             Component: TourInfoSection },
   { id: 'destinations',  title: 'Destinations',           Component: DestinationsSection },
   { id: 'images',        title: 'Images',                 Component: ImagesSection },
+  { id: 'portrait',      title: 'Priest Portrait',        Component: PortraitSection },
   { id: 'itinerary',     title: 'Itinerary',              Component: ItinerarySection },
   { id: 'pricing',       title: 'Pricing & Inclusions',   Component: PricingSection },
   { id: 'terms',         title: 'Terms & Conditions',     Component: TermsSection },

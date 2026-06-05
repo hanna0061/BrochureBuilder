@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
 /** Single-line or multiline text field */
 export function TextField({ label, value, onChange, multiline, rows, placeholder }) {
@@ -26,30 +26,16 @@ export function TextField({ label, value, onChange, multiline, rows, placeholder
   );
 }
 
-/** Image field with URL input + file upload (with blob URL memory cleanup) */
+/** Image field with URL input + file upload */
 export function ImageField({ label, value, onChange, heroAspect }) {
-  const prevBlobUrl = useRef(null);
-
   const handleFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (prevBlobUrl.current?.startsWith('blob:')) {
-      URL.revokeObjectURL(prevBlobUrl.current);
-    }
-    const url = URL.createObjectURL(file);
-    prevBlobUrl.current = url;
-    onChange(url);
+    const reader = new FileReader();
+    reader.onload = (ev) => onChange(ev.target.result);
+    reader.readAsDataURL(file);
     e.target.value = '';
   };
-
-  // Revoke on unmount
-  useEffect(() => {
-    return () => {
-      if (prevBlobUrl.current?.startsWith('blob:')) {
-        URL.revokeObjectURL(prevBlobUrl.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="field">
