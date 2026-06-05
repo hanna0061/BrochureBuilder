@@ -266,9 +266,6 @@ export default function Page3Pricing({ tour, company }) {
         </div>
       </div>
 
-      {/* ── Blue divider ── */}
-      <div className="p3-bottom-divider" />
-
       {/* ── Information Section ── */}
       {infoBlocks.length > 0 && (
         <div className="p3-info-section">
