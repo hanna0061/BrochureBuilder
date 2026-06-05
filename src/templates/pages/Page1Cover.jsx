@@ -136,7 +136,7 @@ export default function Page1Cover({ tour, company }) {
             <div
               className={`p1-portrait${hl('portrait')}`}
               style={{
-                transform: `translate(${portrait.x ?? 0}px, ${portrait.y ?? 0}px)`,
+                transform: `translate(calc(-50% + ${portrait.x ?? 0}px), calc(-50% + ${portrait.y ?? 0}px))`,
               }}
               {...sel('portrait')}
             >

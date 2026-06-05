@@ -330,18 +330,23 @@
   grid-row: 1 / -1;
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
   z-index: 10;
+  /* No flex centering — Chrome's print engine collapses the cross-axis height of an
+     absolutely-positioned flex container before grid tracks propagate, causing the
+     portrait to jump to the top of the grid in PDF. top/left 50% on the child is
+     used instead; it resolves against the layer's USED height (from inset: 0),
+     which is identical on screen and in print. */
 }
 
-/* ── Priest portrait — centered by flex parent; transform applies fine adjustment ── */
+/* ── Priest portrait — centered via top/left 50% within the layer ── */
 .p1-portrait {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   cursor: pointer;
   pointer-events: auto;
-  /* transform applied inline: translate(Xpx, Ypx) — flex handles the 50%/50% centering */
+  /* transform applied inline: translate(calc(-50% + Xpx), calc(-50% + Ypx)) */
 }
 
 .p1-portrait__img {
