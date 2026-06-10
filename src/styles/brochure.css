@@ -141,9 +141,11 @@
     break-after: auto;
   }
 
-  /* Inside a spread, pages must NOT trigger individual page breaks —
-     the spread itself is the page boundary. */
-  .print-spread .brochure-page {
+  /* Inside a spread or .print-page wrapper, the container owns the page
+     boundary — suppress the inner .brochure-page break to avoid a blank
+     page being inserted between every two printed pages. */
+  .print-spread .brochure-page,
+  .print-page .brochure-page {
     page-break-after: auto !important;
     break-after: auto !important;
   }
