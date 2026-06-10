@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from 'react';
+import React, { useRef, useState, useCallback, useContext } from 'react';
 import { AuthContext } from './components/AuthGate';
 import { SelectionProvider } from './context/SelectionContext';
 import { useReactToPrint } from 'react-to-print';
@@ -6,6 +6,7 @@ import EditorSidebar from './editor/EditorSidebar';
 import FloatingEditor from './editor/FloatingEditor';
 import BrochurePreview from './preview/BrochurePreview';
 import PrintLayout from './print/PrintLayout';
+import PrintSpreadLayout from './print/PrintSpreadLayout';
 import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
 import { runAllChecks } from './safety/checks';
@@ -46,8 +47,11 @@ export default function App() {
   const auth = useContext(AuthContext);
   const logout = auth?.logout;
   const printLayoutRef = useRef(null);
+  const printSpreadRef = useRef(null);
   const { saveProject, loadProject } = useProjectSave();
   const [exportWarnings, setExportWarnings] = useState(null);
+  const [pendingExportFn, setPendingExportFn] = useState(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
   const doPrint = useReactToPrint({
     content: () => printLayoutRef.current,
@@ -73,18 +77,47 @@ export default function App() {
     `,
   });
 
-  const handleExportClick = () => {
+  const doPrintSpread = useReactToPrint({
+    content: () => printSpreadRef.current,
+    documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure 11x17 Spread`,
+    pageStyle: `
+      @page {
+        size: 17in 11in;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 1632px;
+          margin: 0;
+          padding: 0;
+          background: white;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `,
+  });
+
+  const triggerExport = useCallback((exportFn) => {
+    setExportMenuOpen(false);
     const warnings = runAllChecks(state.tour);
     if (warnings.length > 0) {
       setExportWarnings(warnings);
+      setPendingExportFn(() => exportFn);
     } else {
-      doPrint();
+      exportFn();
     }
-  };
+  }, [state.tour]);
 
   const confirmExport = () => {
     setExportWarnings(null);
-    doPrint();
+    if (pendingExportFn) {
+      pendingExportFn();
+      setPendingExportFn(null);
+    }
   };
 
   return (
@@ -119,13 +152,38 @@ export default function App() {
               style={{ display: 'none' }}
             />
           </label>
-          <button
-            className="btn btn--cta-bar btn--sm"
-            onClick={handleExportClick}
-            type="button"
-          >
-            Export PDF
-          </button>
+          <div className={`export-dropdown${exportMenuOpen ? ' export-dropdown--open' : ''}`}>
+            <button
+              className="btn btn--cta-bar btn--sm"
+              type="button"
+              onClick={() => setExportMenuOpen(o => !o)}
+              onBlur={(e) => {
+                if (!e.currentTarget.closest('.export-dropdown').contains(e.relatedTarget)) {
+                  setExportMenuOpen(false);
+                }
+              }}
+            >
+              Export ▾
+            </button>
+            <div className="export-dropdown__menu" role="menu">
+              <button
+                className="export-dropdown__item"
+                type="button"
+                role="menuitem"
+                onClick={() => triggerExport(doPrint)}
+              >
+                Export Letter PDF
+              </button>
+              <button
+                className="export-dropdown__item"
+                type="button"
+                role="menuitem"
+                onClick={() => triggerExport(doPrintSpread)}
+              >
+                Export 11×17 Spread PDF
+              </button>
+            </div>
+          </div>
           <button
             className="btn btn--cta-bar btn--sm app-header__action-btn"
             onClick={() => { if (logout) logout(); }}
@@ -145,6 +203,7 @@ export default function App() {
       </SelectionProvider>
 
       <PrintLayout printRef={printLayoutRef} />
+      <PrintSpreadLayout printSpreadRef={printSpreadRef} />
 
       {exportWarnings && (
         <ExportWarningDialog

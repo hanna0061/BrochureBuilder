@@ -210,57 +210,91 @@ export default function Page4Terms({ tour }) {
     .filter(Boolean);
 
   // Layout measurement/compression state
-  const headerRef     = useRef(null);
-  const footerRef     = useRef(null);
-  const disclaimerRef = useRef(null);
-  const measureRef    = useRef(null);
-  const contentRef    = useRef(null);
-  const [availableH, setAvailableH] = useState(null);
+  const headerRef      = useRef(null);
+  const footerRef      = useRef(null);
+  const disclaimerRef  = useRef(null);
+  const measureRef     = useRef(null);       // body paragraphs only, at column width
+  const measureIntroRef = useRef(null);      // intro paragraphs at full content width
+  const contentRef     = useRef(null);
+  const [availableH,       setAvailableH]       = useState(null);
+  const [introH,           setIntroH]           = useState(0);
+  const [bodyColH,         setBodyColH]         = useState(null);
+  const [splitIdx,         setSplitIdx]         = useState(null);
   const [termsCompression, setTermsCompression] = useState(null);
 
-  // Compute available vertical space for terms content
+  // Correct column width for the new explicit flex layout.
+  // .p4-content padding = 18px each side → content width = 816 - 36 = 780px
+  // Two columns with 14px gap → (780 - 14) / 2 = 383px
+  const BODY_COL_MEAS_W = 383;
+  const INTRO_MEAS_W    = 780;
+
+  // Phase 0 — available total height for .p4-content
   useLayoutEffect(() => {
     if (!headerRef.current || !footerRef.current || !disclaimerRef.current) return;
     const hH = headerRef.current.getBoundingClientRect().height || 0;
     const fH = footerRef.current.getBoundingClientRect().height || 0;
     const dH = disclaimerRef.current.getBoundingClientRect().height || 0;
-    const contentPad = 9 + 6; // .p4-content padding: 9px top, 6px bottom
+    const contentPad = 9 + 6;
     const avail = Math.max(200, Math.floor(1056 - hH - fH - dH - contentPad - 4));
     setAvailableH(avail);
   }, []);
 
-  // Measure natural content height and compute light compression if it overflows.
-  // Uses getP4Typo() so user font-size/line-height overrides are respected during compression.
+  // Phase 1 — measure intro height at full content width
+  useLayoutEffect(() => {
+    if (!measureIntroRef.current || availableH == null) return;
+    const iH = measureIntroRef.current.getBoundingClientRect().height || 0;
+    setIntroH(Math.ceil(iH));
+  }, [availableH, introParagraphs.length, tour?.typography?.termsIntro]);
+
+  // Phase 2 — measure body paragraphs at column width → compute split + compression.
+  // Uses getP4Typo() so user font-size/line-height overrides are respected.
   useLayoutEffect(() => {
     if (!measureRef.current || availableH == null) return;
-    const els = Array.from(measureRef.current.children);
-    const natural = els.reduce((s, el) => s + el.getBoundingClientRect().height, 0);
-    if (natural <= 2 * availableH) {
+
+    // Per-column height = total available minus intro area minus safety gap
+    const colH = Math.max(80, availableH - introH - 4);
+    setBodyColH(colH);
+
+    const els     = Array.from(measureRef.current.children);
+    const heights = els.map(el => Math.ceil(el.getBoundingClientRect().height));
+    const n       = heights.length;
+    if (n === 0) { setSplitIdx(0); return; }
+
+    // Find the split index that minimises the maximum column height (best balance).
+    let bestIdx = Math.ceil(n / 2);
+    let bestMax = Infinity;
+    for (let i = 1; i < n; i++) {
+      const c1 = heights.slice(0, i).reduce((s, h) => s + h, 0);
+      const c2 = heights.slice(i).reduce((s, h) => s + h, 0);
+      const m  = Math.max(c1, c2);
+      if (m < bestMax) { bestMax = m; bestIdx = i; }
+    }
+    setSplitIdx(bestIdx);
+
+    const natural = heights.reduce((s, h) => s + h, 0);
+    if (natural <= 2 * colH) {
       setTermsCompression(null);
       return;
     }
 
-    const baseBody = getP4Typo(tour, 'termsBody'); // effective style — includes user overrides
-    const gapFrac = Math.min(1, (natural - 2 * availableH) / natural);
-    const newGap  = Math.max(0, Math.round(12 * (1 - gapFrac)));
-
+    const baseBody = getP4Typo(tour, 'termsBody');
+    const gapFrac  = Math.min(1, (natural - 2 * colH) / natural);
+    const newGap   = Math.max(0, Math.round(12 * (1 - gapFrac)));
     const compressedBody = {
       ...baseBody,
       lineHeight: Math.max(1.1, baseBody.lineHeight * (1 - Math.min(0.12, gapFrac * 0.5))),
       fontSize:   Math.max(8,   baseBody.fontSize   * (1 - Math.min(0.10, gapFrac * 0.8))),
     };
-
     setTermsCompression({ paragraphGap: newGap, compressedBody });
-  }, [availableH, introParagraphs.length, bodyParagraphs.length, tour?.typography?.termsBody]);
-  // tour.typography.termsBody is included so compression re-runs when the user
-  // changes the terms body font size or line height. Layout fields (x, y, etc.)
-  // are ignored by getP4Typo so they cannot trigger re-layout.
+  }, [availableH, introH, bodyParagraphs.length, tour?.typography?.termsBody]);
 
-  const contentStyle = {
-    ...positionStyle(getPosition(positions, 'terms')),
-    maxHeight:  availableH ? `${availableH}px` : undefined,
-    columnFill: 'balance',
-  };
+  // contentStyle no longer carries maxHeight or columnFill — those were the
+  // cross-engine incompatible properties. Only the user position offset remains.
+  const contentStyle = positionStyle(getPosition(positions, 'terms'));
+
+  // Effective split index during the first render (before effects run):
+  // use the midpoint so both columns show content immediately.
+  const effectiveSplitIdx = splitIdx ?? Math.ceil(bodyParagraphs.length / 2);
 
   // Compressed body style uses p4Style (not typoStyle) so it stays isolated
   const bodyStyleCompressed = termsCompression
@@ -274,23 +308,44 @@ export default function Page4Terms({ tour }) {
         <p className="p4-header__title" style={termsTitleStyle} {...floatSel(FLOAT_TERMS_HEADER)}>{headerTitle}</p>
       </div>
 
-      {/* Off-screen measurement container */}
-      <div ref={measureRef} aria-hidden="true" style={{ position: 'fixed', left: -9999, top: 0, width: 374, visibility: 'hidden' }}>
+      {/* Off-screen: intro paragraphs at full content width */}
+      <div ref={measureIntroRef} aria-hidden="true" style={{ position: 'fixed', left: -9999, top: 0, width: INTRO_MEAS_W, visibility: 'hidden', pointerEvents: 'none' }}>
         {introParagraphs.map((para, i) => (
-          <p key={`m-intro-${i}`} className="p4-intro" style={termsIntroStyle}>{para}</p>
+          <p key={`mi-${i}`} className="p4-intro" style={termsIntroStyle}>{para}</p>
         ))}
+      </div>
+
+      {/* Off-screen: body paragraphs at actual column width for split and compression */}
+      <div ref={measureRef} aria-hidden="true" style={{ position: 'fixed', left: -9999, top: 0, width: BODY_COL_MEAS_W, visibility: 'hidden', pointerEvents: 'none' }}>
         {bodyParagraphs.map((para, i) => (
-          <p key={`m-body-${i}`} className="p4-section__body" style={termsBodyStyle}>{para}</p>
+          <p key={`mb-${i}`} className="p4-section__body" style={termsBodyStyle}>{para}</p>
         ))}
       </div>
 
       <div ref={contentRef} className={`p4-content${hl('terms')}`} style={contentStyle} {...sel('terms')}>
+
+        {/* Intro: full content width (above columns) */}
         {introParagraphs.map((para, i) => (
           <p key={`intro-${i}`} className="p4-intro" style={termsIntroStyle} {...floatSel(FLOAT_TERMS_INTRO)}>{para}</p>
         ))}
-        {bodyParagraphs.map((para, i) => (
-          <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
-        ))}
+
+        {/* Explicit two-column flex layout — engine-safe replacement for column-count */}
+        <div
+          className="p4-columns"
+          style={bodyColH ? { height: `${bodyColH}px` } : undefined}
+        >
+          <div className="p4-col">
+            {bodyParagraphs.slice(0, effectiveSplitIdx).map((para, i) => (
+              <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
+            ))}
+          </div>
+          <div className="p4-col">
+            {bodyParagraphs.slice(effectiveSplitIdx).map((para, i) => (
+              <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
+            ))}
+          </div>
+        </div>
+
       </div>
 
       <div className="p4-disclaimer" ref={disclaimerRef}>

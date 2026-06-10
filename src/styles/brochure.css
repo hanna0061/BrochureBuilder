@@ -141,11 +141,12 @@
     break-after: auto;
   }
 
-  /* Inside a spread or .print-page wrapper, the container owns the page
-     boundary — suppress the inner .brochure-page break to avoid a blank
-     page being inserted between every two printed pages. */
+  /* Inside a spread, .print-page, or .print-spread-sheet wrapper, the
+     container owns the page boundary — suppress the inner .brochure-page
+     break to avoid a blank page between every two printed pages. */
   .print-spread .brochure-page,
-  .print-page .brochure-page {
+  .print-page .brochure-page,
+  .print-spread-sheet .brochure-page {
     page-break-after: auto !important;
     break-after: auto !important;
   }
@@ -1036,8 +1037,26 @@
   min-height: 0;
   padding: 9px 18px 6px;
   overflow: hidden;
-  column-count: 2;
-  column-gap: 14px;
+  /* column-count / column-gap removed: CSS column-fill:balance is not reliably
+     rendered by Windows XPS/GDI (MS Print to PDF, OneNote, physical printers).
+     Replaced by .p4-columns / .p4-col with a JS-computed split point. */
+}
+
+/* Explicit two-column flex layout — print-engine-safe replacement for column-count.
+   The split index is computed in JS so no print engine needs to run a column-balance
+   algorithm. Works identically in Chrome, MS Print to PDF, OneNote, and physical
+   printers. */
+.p4-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.p4-col {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .p4-intro {
@@ -1151,6 +1170,28 @@
 }
 
 .print-page--last {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+/* ── 11×17 Landscape Spread Sheet ──────────────────────────────────────────
+   Two letter pages (816px each) side-by-side on one 17in×11in sheet.
+   Used exclusively by PrintSpreadLayout — has no effect on the letter export.
+   ─────────────────────────────────────────────────────────────────────────── */
+.print-spread-sheet {
+  width: 1632px;   /* 17in at 96dpi — two 816px pages */
+  height: 1056px;  /* 11in at 96dpi */
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+  page-break-after: always;
+  break-after: page;
+}
+
+.print-spread-sheet--last {
   page-break-after: auto;
   break-after: auto;
 }
