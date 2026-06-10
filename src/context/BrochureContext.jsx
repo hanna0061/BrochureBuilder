@@ -9,6 +9,10 @@ import { POSITION_DEFAULTS } from '../data/positions';
 function migrateTour(tour) {
   const typo = tour.typography ? { ...tour.typography } : {};
   for (const key of Object.keys(TYPOGRAPHY_DEFAULTS)) {
+    // P4_TYPO_KEYS are owned by P4_TYPO in Page4Terms.jsx. Skipping auto-fill here
+    // ensures that absent keys fall back to the frozen P4_TYPO approved defaults via
+    // getP4Typo() rather than silently baking in old TYPOGRAPHY_DEFAULTS values.
+    if (P4_TYPO_KEYS.has(key)) continue;
     if (!typo[key]) typo[key] = { ...TYPOGRAPHY_DEFAULTS[key] };
   }
 
@@ -53,15 +57,50 @@ function migrateTour(tour) {
 }
 
 const BrochureContext = createContext(null);
-const STORAGE_KEY = 'paxvia_brochure_draft';
+const STORAGE_KEY   = 'paxvia_brochure_draft';
+const SCHEMA_VERSION = '2026.06.print-fix';
+
+// P4 typography keys are owned by P4_TYPO in Page4Terms.jsx (frozen approved design 2026-06-04).
+// migrateTour() must NOT auto-fill these from TYPOGRAPHY_DEFAULTS — doing so creates stored
+// values that override P4_TYPO frozen defaults via getP4Typo(), causing old font sizes to
+// persist across deployments. Old drafts that already have these set are cleared by
+// applyLegacyMigration() so the frozen defaults take effect.
+const P4_TYPO_KEYS = new Set([
+  'termsTitle', 'termsIntro', 'termsBody', 'termsDisclaimer',
+  'termsFooter', 'footerContact', 'footerParagraph',
+]);
+
+// Applies to drafts saved before SCHEMA_VERSION was introduced.
+// Clears stale auto-filled P4 typography overrides so P4_TYPO frozen defaults
+// (Page4Terms.jsx) take effect rather than old TYPOGRAPHY_DEFAULTS values.
+// Portrait positioning is re-normalized by the coverPortrait block in migrateTour().
+// This function mutates `parsed` in place — called only from load/import paths.
+function applyLegacyMigration(parsed) {
+  if (parsed.typography) {
+    const typo = { ...parsed.typography };
+    for (const key of P4_TYPO_KEYS) delete typo[key];
+    parsed.typography = typo;
+  }
+  // eslint-disable-next-line no-console
+  console.warn('[BrochureContext] Legacy draft migrated to schema', SCHEMA_VERSION,
+    '— Page 4 typography reset to approved locked defaults. User edits on other pages are preserved.');
+}
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_TOUR':
-      return { ...state, tour: migrateTour(action.payload) };
+    case 'SET_TOUR': {
+      const payload = { ...action.payload };
+      // Imported project files (useProjectSave.loadProject) may be old drafts
+      // without _schemaVersion. Apply the same migration as loadSavedTour().
+      if (!payload._schemaVersion) {
+        applyLegacyMigration(payload);
+        payload._schemaVersion = SCHEMA_VERSION;
+      }
+      return { ...state, tour: migrateTour(payload) };
+    }
 
     case 'RESET_TOUR':
-      return { ...state, tour: migrateTour(defaultBrochure) };
+      return { ...state, tour: migrateTour({ ...defaultBrochure, _schemaVersion: SCHEMA_VERSION }) };
 
     case 'UPDATE_TYPOGRAPHY': {
       const currentSection = state.tour.typography?.[action.section] || {};
@@ -595,6 +634,15 @@ function loadSavedTour() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+
+      // Schema version check — any draft without _schemaVersion is pre-versioning
+      // and must be migrated before use. Subsequent schema bumps can add else-if
+      // branches here for incremental migrations.
+      if (!parsed._schemaVersion) {
+        applyLegacyMigration(parsed);
+        parsed._schemaVersion = SCHEMA_VERSION;
+      }
+
       if (!parsed.terms) parsed.terms = defaultBrochure.terms;
       if (!parsed.whyUs) parsed.whyUs = defaultBrochure.whyUs;
       if (!parsed.notIncluded?.length) parsed.notIncluded = defaultBrochure.notIncluded;
@@ -608,7 +656,7 @@ function loadSavedTour() {
   } catch {
     // ignore parse errors — fall through to default
   }
-  return migrateTour(defaultBrochure);
+  return migrateTour({ ...defaultBrochure, _schemaVersion: SCHEMA_VERSION });
 }
 
 export function BrochureProvider({ children }) {
@@ -618,10 +666,11 @@ export function BrochureProvider({ children }) {
     terms: termsData,
   });
 
-  // Persist tour to localStorage on every change
+  // Persist tour to localStorage on every change.
+  // Always stamps _schemaVersion so future loads can detect and migrate old drafts.
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tour));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state.tour, _schemaVersion: SCHEMA_VERSION }));
     } catch {
       // quota exceeded or private browsing — silently ignore
     }

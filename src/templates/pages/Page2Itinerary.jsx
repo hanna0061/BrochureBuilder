@@ -49,6 +49,91 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
 
   const pageDays = days ?? tour.itinerary;
   const breakAt  = colBreakIdx ?? Math.ceil(pageDays.length / 2);
+  const col1Days = pageDays.slice(0, breakAt);
+  const col2Days = pageDays.slice(breakAt);
+
+  // Renders one day card. Called for each column separately so column-specific
+  // spacing (sp) is pre-resolved before the call.
+  const renderDay = (day, gi, sp) => {
+    const pos     = day.positions ?? {};
+    const elemPos = (field) => pos[field] ?? { x: 0, y: 0 };
+    const getEP   = (field) => (t) => t.itinerary[gi]?.positions?.[field] ?? { x: 0, y: 0 };
+    const setEP   = (field) => (d, axis, value) => d({ type: 'UPDATE_ITINERARY_ELEMENT_POS', index: gi, field, axis, value });
+    const resetEP = (field) => (d) => d({ type: 'RESET_ITINERARY_ELEMENT_POS', index: gi, field });
+
+    return (
+      <div
+        key={day.day ?? gi}
+        className="p2-day"
+        style={sp != null ? { paddingBlock: sp } : undefined}
+      >
+        <p className="p2-day__title-line">
+          <span
+            className="p2-day__label"
+            style={headingPerDayStyle(dayLabelStyle, elemPos('label'))}
+            {...floatSel({
+              id: 'itinerary', label: `Day ${day.day} Label`, typographyKey: 'itineraryDayLabel',
+              getValue: (t) => t.itinerary[gi]?.label ?? '',
+              setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'label', value: val }),
+              getElemPos: getEP('label'), setElemPos: setEP('label'), resetElemPos: resetEP('label'),
+            })}
+          >{day.label}:</span>
+          {' '}
+          <span
+            className="p2-day__heading"
+            style={headingPerDayStyle(headingStyle, elemPos('heading'))}
+            {...floatSel({
+              id: 'itinerary', label: `Day ${day.day} Heading`, typographyKey: 'itineraryHeading',
+              getValue: (t) => t.itinerary[gi]?.heading ?? '',
+              setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'heading', value: val }),
+              getElemPos: getEP('heading'), setElemPos: setEP('heading'), resetElemPos: resetEP('heading'),
+            })}
+          >{day.heading}</span>
+        </p>
+        <p
+          className="p2-day__body"
+          style={perDayStyle(bodyStyle, elemPos('body'))}
+          {...floatSel({
+            id: 'itinerary', label: `Day ${day.day} Body`, typographyKey: 'itineraryBody', textRows: 4,
+            getValue: (t) => t.itinerary[gi]?.body ?? '',
+            setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'body', value: val }),
+            getElemPos: getEP('body'), setElemPos: setEP('body'), resetElemPos: resetEP('body'),
+          })}
+        >{day.body}</p>
+        {(day.overnight || day.meals) && (
+          <p className="p2-day__overnight">
+            {day.overnight && (
+              <span style={{ display: 'inline-block', ...perDayStyle(overnightStyle, elemPos('overnight')) }}>
+                <span className="p2-overnight-lbl">Overnight:</span>{' '}
+                <span
+                  {...floatSel({
+                    id: 'itinerary', label: `Day ${day.day} Overnight`, typographyKey: 'itineraryOvernight',
+                    getValue: (t) => t.itinerary[gi]?.overnight ?? '',
+                    setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'overnight', value: val }),
+                    getElemPos: getEP('overnight'), setElemPos: setEP('overnight'), resetElemPos: resetEP('overnight'),
+                  })}
+                >{day.overnight}</span>
+              </span>
+            )}
+            {day.overnight && day.meals && '  ·  '}
+            {day.meals && (
+              <span style={{ display: 'inline-block', ...perDayStyle(mealsStyle, elemPos('meals')) }}>
+                <span className="p2-overnight-lbl">Meals:</span>{' '}
+                <span
+                  {...floatSel({
+                    id: 'itinerary', label: `Day ${day.day} Meals`, typographyKey: 'itineraryMeals',
+                    getValue: (t) => t.itinerary[gi]?.meals ?? '',
+                    setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'meals', value: val }),
+                    getElemPos: getEP('meals'), setElemPos: setEP('meals'), resetElemPos: resetEP('meals'),
+                  })}
+                >{day.meals}</span>
+              </span>
+            )}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>
@@ -77,95 +162,25 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
           </header>
         )}
 
+        {/* Explicit two-column flex layout — engine-safe replacement for column-count.
+            The JS-computed breakAt index pre-determines which days go in each column
+            so no print engine needs to run a column-balance algorithm. */}
         <div
           className={`p2-grid${isFirstPage ? '' : ' p2-grid--full'}`}
           style={availableColH ? { height: `${availableColH}px` } : undefined}
         >
-          {pageDays.map((day, index) => {
-            const gi  = tour.itinerary.findIndex(d => d.day === day.day);
-            const sp  = (daySpacingCol2 != null && index >= breakAt) ? daySpacingCol2 : daySpacing;
-            const pos = day.positions ?? {};
-
-
-            // Per-element position helpers bound to this day's index (gi).
-            const elemPos  = (field) => pos[field] ?? { x: 0, y: 0 };
-            const getEP    = (field) => (t) => t.itinerary[gi]?.positions?.[field] ?? { x: 0, y: 0 };
-            const setEP    = (field) => (d, axis, value) => d({ type: 'UPDATE_ITINERARY_ELEMENT_POS', index: gi, field, axis, value });
-            const resetEP  = (field) => (d) => d({ type: 'RESET_ITINERARY_ELEMENT_POS', index: gi, field });
-
-            return (
-              <div
-                key={day.day ?? index}
-                className={`p2-day${index === breakAt ? ' p2-day--col-break' : ''}`}
-                style={sp != null ? { paddingBlock: sp } : undefined}
-              >
-                <p className="p2-day__title-line">
-                  <span
-                    className="p2-day__label"
-                    style={headingPerDayStyle(dayLabelStyle, elemPos('label'))}
-                    {...floatSel({
-                      id: 'itinerary', label: `Day ${day.day} Label`, typographyKey: 'itineraryDayLabel',
-                      getValue: (t) => t.itinerary[gi]?.label ?? '',
-                      setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'label', value: val }),
-                      getElemPos: getEP('label'), setElemPos: setEP('label'), resetElemPos: resetEP('label'),
-                    })}
-                  >{day.label}:</span>
-                  {' '}
-                  <span
-                    className="p2-day__heading"
-                    style={headingPerDayStyle(headingStyle, elemPos('heading'))}
-                    {...floatSel({
-                      id: 'itinerary', label: `Day ${day.day} Heading`, typographyKey: 'itineraryHeading',
-                      getValue: (t) => t.itinerary[gi]?.heading ?? '',
-                      setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'heading', value: val }),
-                      getElemPos: getEP('heading'), setElemPos: setEP('heading'), resetElemPos: resetEP('heading'),
-                    })}
-                  >{day.heading}</span>
-                </p>
-                <p
-                  className="p2-day__body"
-                  style={perDayStyle(bodyStyle, elemPos('body'))}
-                  {...floatSel({
-                    id: 'itinerary', label: `Day ${day.day} Body`, typographyKey: 'itineraryBody', textRows: 4,
-                    getValue: (t) => t.itinerary[gi]?.body ?? '',
-                    setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'body', value: val }),
-                    getElemPos: getEP('body'), setElemPos: setEP('body'), resetElemPos: resetEP('body'),
-                  })}
-                >{day.body}</p>
-                {(day.overnight || day.meals) && (
-                  <p className="p2-day__overnight">
-                    {day.overnight && (
-                      <span style={{ display: 'inline-block', ...perDayStyle(overnightStyle, elemPos('overnight')) }}>
-                        <span className="p2-overnight-lbl">Overnight:</span>{' '}
-                        <span
-                          {...floatSel({
-                            id: 'itinerary', label: `Day ${day.day} Overnight`, typographyKey: 'itineraryOvernight',
-                            getValue: (t) => t.itinerary[gi]?.overnight ?? '',
-                            setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'overnight', value: val }),
-                            getElemPos: getEP('overnight'), setElemPos: setEP('overnight'), resetElemPos: resetEP('overnight'),
-                          })}
-                        >{day.overnight}</span>
-                      </span>
-                    )}
-                    {day.overnight && day.meals && '  ·  '}
-                    {day.meals && (
-                      <span style={{ display: 'inline-block', ...perDayStyle(mealsStyle, elemPos('meals')) }}>
-                        <span className="p2-overnight-lbl">Meals:</span>{' '}
-                        <span
-                          {...floatSel({
-                            id: 'itinerary', label: `Day ${day.day} Meals`, typographyKey: 'itineraryMeals',
-                            getValue: (t) => t.itinerary[gi]?.meals ?? '',
-                            setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'meals', value: val }),
-                            getElemPos: getEP('meals'), setElemPos: setEP('meals'), resetElemPos: resetEP('meals'),
-                          })}
-                        >{day.meals}</span>
-                      </span>
-                    )}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+          <div className="p2-col">
+            {col1Days.map((day) => {
+              const gi = tour.itinerary.findIndex(d => d.day === day.day);
+              return renderDay(day, gi, daySpacing);
+            })}
+          </div>
+          <div className="p2-col">
+            {col2Days.map((day) => {
+              const gi = tour.itinerary.findIndex(d => d.day === day.day);
+              return renderDay(day, gi, daySpacingCol2 ?? daySpacing);
+            })}
+          </div>
         </div>
       </div>
 

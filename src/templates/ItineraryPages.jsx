@@ -4,20 +4,20 @@ import { typoStyle, getTypo } from '../data/typography';
 
 // ── Page geometry — must match brochure.css ──────────────────────────────────
 const PAGE_H          = 1056;
-const BODY_PAD_TOP    = 18;   // .p2-body { padding: 18px 24px 12px }
-const BODY_PAD_BOTTOM = 12;
-const SECTION_HDR_MARGIN_B = 12; // .p2-section-header { margin-bottom: 12px }
-const COLUMN_WIDTH    = 374;  // (816 − 48 padding − 20 gap) / 2
+const BODY_PAD_TOP    = 15;   // .p2-body { padding: 15px 15px 5px }
+const BODY_PAD_BOTTOM = 5;
+const SECTION_HDR_MARGIN_B = 2; // .p2-section-header { margin-bottom: 2px }
+const COLUMN_WIDTH    = 383;  // (816 − 30 padding − 20 gap) / 2
 
 // Inner content height of .p2-body.
 // Page 2 renders no pg-header and no pg-footer — full PAGE_H minus body padding only.
-const BODY_CONTENT_H = PAGE_H - BODY_PAD_TOP - BODY_PAD_BOTTOM; // 1026
+const BODY_CONTENT_H = PAGE_H - BODY_PAD_TOP - BODY_PAD_BOTTOM; // 1036
 
 // Conservative initial estimate before the section header is measured.
 // Real value is measured in useLayoutEffect below.
-const SECTION_HDR_ESTIMATE = 56; // eyebrow ~14px + heading ~28px + margin 12px + slop
+const SECTION_HDR_ESTIMATE = 46; // eyebrow ~14px + heading ~28px + margin 2px + slop
 const INIT_AVAIL_COL_H =
-  BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4; // 954
+  BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4; // 984
 
 // Minimal day renderer for off-screen height measurement.
 function MeasureDay({ day, headingStyle, bodyStyle, daySpacing }) {

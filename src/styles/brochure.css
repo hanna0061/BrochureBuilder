@@ -151,8 +151,7 @@
     break-after: auto !important;
   }
 
-  /* Suppress orphans/widows in dense text blocks */
-  .p2-day__body,
+  /* Suppress orphans/widows in Page 4 body text (CSS column context) */
   .p4-section__body {
     orphans: 3;
     widows: 3;
@@ -485,25 +484,31 @@
 }
 
 .p2-grid {
-  column-count: 2;
-  column-gap: 20px;
+  /* Explicit two-column flex layout — print-engine-safe replacement for column-count.
+     CSS column-fill:balance is not reliably rendered by Windows XPS/GDI
+     (MS Print to PDF, OneNote, physical printers). Split index is computed in JS
+     so no print engine needs to run a column-balance algorithm.
+     Works identically in Chrome, MS Print to PDF, OneNote, and physical printers. */
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
   height: calc(100% - 60px); /* conservative fallback; JS overrides with measured value */
-  overflow:visible;
+  overflow: hidden;
 }
 
 .p2-grid--full {
   height: 100%;
 }
 
-/* Day entry — flows naturally in CSS columns, no card borders */
-.p2-day {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  padding-block: 5px;
+.p2-col {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.p2-day--col-break {
-  break-before: column;
+/* Day entry */
+.p2-day {
+  padding-block: 5px;
 }
 
 /* Inline title: "Day 1: Heading" on one line */
