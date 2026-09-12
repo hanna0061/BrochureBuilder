@@ -1,0 +1,301 @@
+/* =============================================================
+   LAYOUT.CSS — Container, Grid & Section Systems
+   Pax Via Tours & Travel — Pilgrimage Website
+   ============================================================= */
+
+/* ─────────────────────────────────────────────
+   CONTAINER
+   ─────────────────────────────────────────────
+   The core layout wrapper. All content-bearing
+   sections use .container to limit line length
+   and center content at wide viewports.
+
+   Max-width: 1100px (brochure proportions)
+   Padding: fluid clamp for all screen sizes
+   ───────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Narrow variant for readable long-form text (T&C, Why Us) */
+.container--narrow {
+  max-width: 800px;
+}
+
+/* Wide variant for full-width photo/visual sections */
+.container--wide {
+  max-width: 1300px;
+}
+
+/* ─────────────────────────────────────────────
+   FULL-BLEED SECTIONS
+   ─────────────────────────────────────────────
+   Some sections (navy banners, pricing hero)
+   break out of the container and stretch
+   edge-to-edge. The .full-bleed class handles this. */
+
+.full-bleed {
+  width: 100vw;
+  margin-inline: calc(-1 * var(--container-pad));
+}
+
+/* ─────────────────────────────────────────────
+   SECTION WRAPPER
+   ─────────────────────────────────────────────
+   Standard vertical rhythm for content sections.
+   Applied to every <section> on the tour page. */
+
+.section {
+  padding-block: var(--section-py);
+}
+
+.section--tight {
+  padding-block: var(--space-8);
+}
+
+.section--flush {
+  padding-block: 0;
+}
+
+.section--navy {
+  background-color: var(--color-navy);
+}
+
+.section--off-white {
+  background-color: var(--color-off-white);
+}
+
+/* ─────────────────────────────────────────────
+   SECTION HEADER
+   ─────────────────────────────────────────────
+   Reusable header block for section titles.
+   Used in Itinerary, Pricing, etc. */
+
+.section-header {
+  margin-bottom: var(--space-10);
+}
+
+.section-header--centered {
+  text-align: center;
+}
+
+.section-header__eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-badge-gold);
+  margin-bottom: var(--space-2);
+}
+
+.section-header__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+  color: var(--color-text-heading);
+  margin-bottom: var(--space-4);
+}
+
+.section-header__subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-body);
+  color: var(--color-text-muted);
+  max-width: 60ch;
+}
+
+.section-header--centered .section-header__subtitle {
+  margin-inline: auto;
+}
+
+.section-header__title--on-dark {
+  color: var(--color-text-on-dark);
+}
+
+.section-header__subtitle--on-dark {
+  color: var(--color-text-on-dark-muted);
+}
+
+/* ─────────────────────────────────────────────
+   TWO-COLUMN GRID
+   ─────────────────────────────────────────────
+   Used by: Itinerary (two halves), Pricing (price + inclusions)
+   Mobile: single column. Desktop: two equal columns. */
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+/* ─────────────────────────────────────────────
+   TOUR CARDS GRID (Homepage)
+   ─────────────────────────────────────────────
+   1 col → 2 col → 3 col responsive grid. */
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+/* ─────────────────────────────────────────────
+   PHOTO GRID 2×2
+   ─────────────────────────────────────────────
+   Core brochure visual identity — the 2×2 cover grid.
+   White gaps (--photo-grid-gap) between cells are
+   the signature of the brochure's cover design. */
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--photo-grid-gap);
+  background-color: var(--color-white);  /* Gap color = white lines */
+  width: 100%;
+}
+
+.photo-grid__cell {
+  aspect-ratio: var(--photo-grid-aspect);
+  overflow: hidden;
+  background-color: var(--color-off-white);
+}
+
+.photo-grid__cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--transition-slow);
+  display: block;
+}
+
+.photo-grid__cell:hover img {
+  transform: scale(1.04);
+}
+
+/* ─────────────────────────────────────────────
+   PRICING GRID
+   ─────────────────────────────────────────────
+   Left column: price, options, payment table
+   Right column: inclusions list */
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
+  padding-block: var(--space-10);
+}
+
+/* ─────────────────────────────────────────────
+   ITINERARY GRID
+   ─────────────────────────────────────────────
+   Two-column text layout matching brochure Page 2.
+   Days 1–6 in left column, Days 7–12 in right. */
+
+.itinerary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  column-gap: var(--space-10);
+}
+
+/* ─────────────────────────────────────────────
+   STACK LAYOUT
+   ─────────────────────────────────────────────
+   A vertical stack with consistent spacing.
+   Applied to sections that stack their children. */
+
+.stack > * + * {
+  margin-top: var(--space-6);
+}
+
+.stack--tight > * + * {
+  margin-top: var(--space-3);
+}
+
+.stack--loose > * + * {
+  margin-top: var(--space-12);
+}
+
+/* ─────────────────────────────────────────────
+   INLINE CLUSTER
+   ─────────────────────────────────────────────
+   Horizontally arranged items that wrap. */
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ─────────────────────────────────────────────
+   COVER SECTION
+   ─────────────────────────────────────────────
+   The full cover area (hero + strip + grid + info bar).
+   Matches the visual weight of brochure Page 1. */
+
+.cover-section {
+  background-color: var(--color-white);
+}
+
+/* ─────────────────────────────────────────────
+   FULL-WIDTH BARS
+   ─────────────────────────────────────────────
+   Navy-background bars that stretch edge-to-edge.
+   Used for: destination strip, tour info bar, PRICING header. */
+
+.bar {
+  width: 100%;
+  background-color: var(--color-navy);
+  color: var(--color-text-on-dark);
+}
+
+.bar--inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--space-5);
+  padding-inline: var(--container-pad);
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE GRID OVERRIDES
+   Placed here as layout-level overrides, not component-level.
+   All breakpoint-specific overrides also in responsive.css. */
+
+@media (min-width: 768px) {
+  .grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-2col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .itinerary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

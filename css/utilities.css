@@ -1,0 +1,261 @@
+/* =============================================================
+   UTILITIES.CSS — Reusable Utility Classes
+   Pax Via Tours & Travel — Pilgrimage Website
+   Single-purpose, composable helper classes.
+   ============================================================= */
+
+/* ─────────────────────────────────────────────
+   ACCESSIBILITY
+   ─────────────────────────────────────────────
+   Visually hide content while keeping it accessible
+   to screen readers and keyboard navigation. */
+
+.u-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.u-visually-hidden--focusable:focus,
+.u-visually-hidden--focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ─────────────────────────────────────────────
+   DISPLAY
+   ───────────────────────────────────────────── */
+
+.u-block         { display: block; }
+.u-inline-block  { display: inline-block; }
+.u-inline        { display: inline; }
+.u-flex          { display: flex; }
+.u-inline-flex   { display: inline-flex; }
+.u-grid          { display: grid; }
+.u-hidden        { display: none; }
+
+/* ─────────────────────────────────────────────
+   FLEX HELPERS
+   ───────────────────────────────────────────── */
+
+.u-flex-row          { flex-direction: row; }
+.u-flex-col          { flex-direction: column; }
+.u-flex-wrap         { flex-wrap: wrap; }
+.u-flex-nowrap       { flex-wrap: nowrap; }
+.u-flex-1            { flex: 1; }
+.u-flex-auto         { flex: auto; }
+.u-flex-none         { flex: none; }
+.u-flex-shrink-0     { flex-shrink: 0; }
+
+.u-items-start       { align-items: flex-start; }
+.u-items-center      { align-items: center; }
+.u-items-end         { align-items: flex-end; }
+.u-items-stretch     { align-items: stretch; }
+
+.u-justify-start     { justify-content: flex-start; }
+.u-justify-center    { justify-content: center; }
+.u-justify-end       { justify-content: flex-end; }
+.u-justify-between   { justify-content: space-between; }
+.u-justify-around    { justify-content: space-around; }
+
+.u-gap-2   { gap: var(--space-2); }
+.u-gap-3   { gap: var(--space-3); }
+.u-gap-4   { gap: var(--space-4); }
+.u-gap-6   { gap: var(--space-6); }
+.u-gap-8   { gap: var(--space-8); }
+.u-gap-10  { gap: var(--space-10); }
+
+/* ─────────────────────────────────────────────
+   TEXT ALIGNMENT
+   ───────────────────────────────────────────── */
+
+.u-text-left    { text-align: left; }
+.u-text-center  { text-align: center; }
+.u-text-right   { text-align: right; }
+
+/* ─────────────────────────────────────────────
+   TEXT TRANSFORM
+   ───────────────────────────────────────────── */
+
+.u-uppercase    { text-transform: uppercase; }
+.u-lowercase    { text-transform: lowercase; }
+.u-capitalize   { text-transform: capitalize; }
+.u-normal-case  { text-transform: none; }
+
+/* ─────────────────────────────────────────────
+   FONT WEIGHT
+   ───────────────────────────────────────────── */
+
+.u-font-normal  { font-weight: 400; }
+.u-font-medium  { font-weight: 500; }
+.u-font-semi    { font-weight: 600; }
+.u-font-bold    { font-weight: 700; }
+
+/* ─────────────────────────────────────────────
+   FONT STYLE
+   ───────────────────────────────────────────── */
+
+.u-italic  { font-style: italic; }
+.u-normal  { font-style: normal; }
+
+/* ─────────────────────────────────────────────
+   FONT FAMILIES
+   ───────────────────────────────────────────── */
+
+.u-font-serif  { font-family: var(--font-serif); }
+.u-font-sans   { font-family: var(--font-sans); }
+
+/* ─────────────────────────────────────────────
+   TEXT COLORS
+   ───────────────────────────────────────────── */
+
+.u-color-navy       { color: var(--color-navy); }
+.u-color-white      { color: var(--color-white); }
+.u-color-heading    { color: var(--color-text-heading); }
+.u-color-body       { color: var(--color-text-body); }
+.u-color-muted      { color: var(--color-text-muted); }
+.u-color-gold       { color: var(--color-badge-gold); }
+.u-color-on-dark    { color: var(--color-text-on-dark); }
+
+/* ─────────────────────────────────────────────
+   BACKGROUND COLORS
+   ───────────────────────────────────────────── */
+
+.u-bg-navy       { background-color: var(--color-navy); }
+.u-bg-white      { background-color: var(--color-white); }
+.u-bg-off-white  { background-color: var(--color-off-white); }
+
+/* ─────────────────────────────────────────────
+   SPACING — MARGIN
+   ───────────────────────────────────────────── */
+
+.u-mt-0   { margin-top: 0; }
+.u-mt-2   { margin-top: var(--space-2); }
+.u-mt-4   { margin-top: var(--space-4); }
+.u-mt-6   { margin-top: var(--space-6); }
+.u-mt-8   { margin-top: var(--space-8); }
+.u-mt-12  { margin-top: var(--space-12); }
+
+.u-mb-0   { margin-bottom: 0; }
+.u-mb-2   { margin-bottom: var(--space-2); }
+.u-mb-4   { margin-bottom: var(--space-4); }
+.u-mb-6   { margin-bottom: var(--space-6); }
+.u-mb-8   { margin-bottom: var(--space-8); }
+.u-mb-12  { margin-bottom: var(--space-12); }
+
+.u-mx-auto { margin-inline: auto; }
+
+/* ─────────────────────────────────────────────
+   SPACING — PADDING
+   ───────────────────────────────────────────── */
+
+.u-p-4   { padding: var(--space-4); }
+.u-p-6   { padding: var(--space-6); }
+.u-p-8   { padding: var(--space-8); }
+
+.u-py-4  { padding-block: var(--space-4); }
+.u-py-6  { padding-block: var(--space-6); }
+.u-py-8  { padding-block: var(--space-8); }
+.u-py-12 { padding-block: var(--space-12); }
+
+.u-px-4  { padding-inline: var(--space-4); }
+.u-px-6  { padding-inline: var(--space-6); }
+.u-px-8  { padding-inline: var(--space-8); }
+
+/* ─────────────────────────────────────────────
+   OVERFLOW
+   ───────────────────────────────────────────── */
+
+.u-overflow-hidden  { overflow: hidden; }
+.u-overflow-auto    { overflow: auto; }
+
+/* ─────────────────────────────────────────────
+   POSITION
+   ───────────────────────────────────────────── */
+
+.u-relative  { position: relative; }
+.u-absolute  { position: absolute; }
+.u-sticky    { position: sticky; }
+.u-fixed     { position: fixed; }
+
+/* ─────────────────────────────────────────────
+   SIZING
+   ───────────────────────────────────────────── */
+
+.u-w-full   { width: 100%; }
+.u-h-full   { height: 100%; }
+.u-max-w-prose { max-width: 65ch; }
+
+/* ─────────────────────────────────────────────
+   ASPECT RATIO
+   ───────────────────────────────────────────── */
+
+.u-aspect-video   { aspect-ratio: 16 / 9; }
+.u-aspect-photo   { aspect-ratio: 4 / 3; }   /* Primary brochure photo ratio */
+.u-aspect-square  { aspect-ratio: 1 / 1; }
+
+/* ─────────────────────────────────────────────
+   OBJECT FIT (for img inside aspect-ratio containers)
+   ───────────────────────────────────────────── */
+
+.u-object-cover   { object-fit: cover; }
+.u-object-contain { object-fit: contain; }
+.u-object-center  { object-position: center; }
+
+/* ─────────────────────────────────────────────
+   BORDER
+   ───────────────────────────────────────────── */
+
+.u-border-top    { border-top: 1px solid var(--color-divider); }
+.u-border-bottom { border-bottom: 1px solid var(--color-divider); }
+
+/* ─────────────────────────────────────────────
+   SHADOW
+   ───────────────────────────────────────────── */
+
+.u-shadow-sm  { box-shadow: var(--shadow-sm); }
+.u-shadow-md  { box-shadow: var(--shadow-md); }
+
+/* ─────────────────────────────────────────────
+   TRANSITION
+   ───────────────────────────────────────────── */
+
+.u-transition      { transition: all var(--transition-base); }
+.u-transition-fast { transition: all var(--transition-fast); }
+
+/* ─────────────────────────────────────────────
+   TRUNCATE (single-line text overflow)
+   ───────────────────────────────────────────── */
+
+.u-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────
+   POINTER EVENTS
+   ───────────────────────────────────────────── */
+
+.u-pointer-none   { pointer-events: none; }
+.u-pointer-auto   { pointer-events: auto; }
+.u-cursor-pointer { cursor: pointer; }
+
+/* ─────────────────────────────────────────────
+   PRINT UTILITIES
+   ───────────────────────────────────────────── */
+
+@media print {
+  .u-print-hidden  { display: none !important; }
+  .u-print-visible { display: block !important; }
+}

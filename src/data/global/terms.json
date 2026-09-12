@@ -1,0 +1,62 @@
+[
+  {
+    "id": "booking",
+    "heading": "BOOKING & REGISTRATION",
+    "body": "A non-refundable deposit of $500.00 per person is required to reserve your place on the tour. Registration is complete upon receipt of deposit and completed enrollment form. Space is limited and reservations are confirmed on a first-come, first-served basis. Pax Via Tours & Travel reserves the right to cancel any tour that does not meet minimum participation requirements."
+  },
+  {
+    "id": "payment",
+    "heading": "PAYMENT SCHEDULE",
+    "body": "Payments must be received by the dates specified in your reservation confirmation. Failure to submit payments by the stated deadlines may result in cancellation of your reservation without refund of previous payments. All payments are to be made payable to Pax Via Tours & Travel. We accept check, money order, or credit card (processing fee may apply)."
+  },
+  {
+    "id": "cancellation",
+    "heading": "CANCELLATIONS & REFUNDS",
+    "body": "All cancellations must be submitted in writing to Pax Via Tours & Travel. Cancellation fees: 90+ days before departure — deposit forfeited; 89–60 days — 50% of total tour cost; 59–30 days — 75% of total tour cost; 29 days or less — 100% of total tour cost. No refunds for unused services, missed flights, or voluntary early return."
+  },
+  {
+    "id": "airfare",
+    "heading": "AIRFARE",
+    "body": "International airfare is included as specified in the tour program. Seat assignments, meal preferences, and frequent flyer credits are subject to airline policies and availability. Pax Via Tours is not responsible for flight delays, cancellations, or schedule changes by the airline. Domestic flights to/from the international gateway city are not included unless stated."
+  },
+  {
+    "id": "accommodations",
+    "heading": "ACCOMMODATIONS",
+    "body": "Hotel accommodations are based on double occupancy. Single room supplements are available at an additional charge, subject to availability. Room assignments are made by the hotel. Pax Via Tours & Travel is not responsible for hotel reassignments due to overbooking, renovation, or other circumstances beyond our control."
+  },
+  {
+    "id": "health",
+    "heading": "HEALTH & MEDICAL",
+    "body": "Participants are responsible for their own health and medical requirements. We strongly recommend consulting your physician before travel. Pax Via Tours & Travel is not responsible for medical expenses incurred during the tour. Travelers with disabilities or special needs must notify us in writing at time of registration."
+  },
+  {
+    "id": "insurance",
+    "heading": "TRAVEL INSURANCE",
+    "body": "Travel protection insurance is strongly recommended for all participants. Pax Via Tours & Travel offers comprehensive travel insurance through a third-party provider. Coverage includes trip cancellation, medical emergencies, evacuation, and baggage loss. Details available at www.paxvia.com/travel-protection. Insurance must be purchased within 14 days of initial deposit for pre-existing condition coverage."
+  },
+  {
+    "id": "passports",
+    "heading": "PASSPORTS & VISAS",
+    "body": "All travelers must hold a valid U.S. passport for the duration of the tour plus six months beyond the return date. It is the traveler's sole responsibility to obtain any required visas. Pax Via Tours & Travel is not responsible for denied boarding or entry resulting from improper documentation."
+  },
+  {
+    "id": "conduct",
+    "heading": "CODE OF CONDUCT",
+    "body": "This is a Catholic pilgrimage tour. All participants are expected to maintain a spirit of prayer, reverence, and charity throughout the journey. Pax Via Tours & Travel reserves the right to remove any participant whose behavior is deemed disruptive or disrespectful without refund."
+  },
+  {
+    "id": "liability",
+    "heading": "LIABILITY",
+    "body": "Pax Via Tours & Travel acts as an agent for airlines, hotels, and other service providers and is not liable for any injury, damage, loss, delay, or irregularity that may occur due to defect of any vehicle or the acts or omissions of any carrier, hotel, or other supplier. Pax Via Tours & Travel is not liable for losses caused by delays, illness, weather, strikes, acts of God, government actions, or other causes beyond our control."
+  },
+  {
+    "id": "itinerary-changes",
+    "heading": "ITINERARY CHANGES",
+    "body": "Pax Via Tours & Travel reserves the right to alter itineraries, accommodations, or services when necessary due to circumstances beyond our control, including weather, political unrest, natural disasters, or supplier unavailability. Equivalent substitutions will be made wherever possible without additional cost to the participant."
+  },
+  {
+    "id": "prices",
+    "heading": "PRICING & SURCHARGES",
+    "body": "Tour prices are based on current airfare, fuel costs, taxes, and exchange rates at time of publication. Pax Via Tours & Travel reserves the right to impose surcharges if significant cost increases occur prior to departure. Participants will be notified of any surcharges exceeding $100 per person at least 30 days prior to departure."
+  }
+]

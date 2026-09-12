@@ -1,0 +1,441 @@
+/* =============================================================
+   STYLE.CSS — Global Base Styles & Typography
+   Pax Via Tours & Travel — Pilgrimage Website
+
+   Load order in <head>:
+   1. variables.css  (tokens)
+   2. reset.css      (normalize)
+   3. style.css      (THIS FILE — base styles)
+   4. utilities.css  (helpers)
+   5. layout.css     (containers & grids)
+   6. components.css (component styles)
+   7. responsive.css (media queries — always last)
+   ============================================================= */
+
+/* ─────────────────────────────────────────────
+   DOCUMENT BASE
+   ─────────────────────────────────────────────
+   Set the foundational font, color, and size
+   for the entire document. All other typography
+   inherits from or overrides these. */
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  color: var(--color-text-body);
+  background-color: var(--color-white);
+}
+
+/* ─────────────────────────────────────────────
+   HEADING SYSTEM
+   ─────────────────────────────────────────────
+   EB Garamond for all structural headings.
+   Sizes, weights, and spacing per brochure analysis. */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--color-text-heading);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+  margin-bottom: var(--space-4);
+}
+
+h1 {
+  font-size: var(--text-display);
+  font-weight: 600;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+h4 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+h5 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+h6 {
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+/* Headings on dark (navy) backgrounds */
+.on-dark h1,
+.on-dark h2,
+.on-dark h3,
+.on-dark h4,
+.on-dark h5,
+.on-dark h6 {
+  color: var(--color-text-on-dark);
+}
+
+/* ─────────────────────────────────────────────
+   BODY TEXT
+   ─────────────────────────────────────────────
+   Paragraphs in body sections use the standard
+   line-height and bottom margin for reading rhythm. */
+
+p {
+  font-size: var(--text-base);
+  line-height: var(--lh-body);
+  color: var(--color-text-body);
+  margin-bottom: var(--space-4);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lead paragraph — larger intro text */
+.text-lead {
+  font-size: var(--text-md);
+  line-height: var(--lh-body);
+  color: var(--color-text-body);
+}
+
+/* ─────────────────────────────────────────────
+   LINKS
+   ─────────────────────────────────────────────
+   Default link style. Component-specific link
+   styles are in components.css. */
+
+a {
+  color: var(--color-navy);
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-navy-light);
+}
+
+.on-dark a {
+  color: var(--color-text-on-dark-muted);
+}
+
+.on-dark a:hover {
+  color: var(--color-text-on-dark);
+}
+
+/* ─────────────────────────────────────────────
+   SMALL TEXT & LABELS
+   ─────────────────────────────────────────────
+   Used for captions, footnotes, metadata. */
+
+small,
+.text-small {
+  font-size: var(--text-sm);
+  line-height: var(--lh-dense);
+}
+
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--lh-dense);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* UI labels — Inter, uppercase, letter-spaced */
+.text-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────────
+   LISTS (CONTENT)
+   ─────────────────────────────────────────────
+   Content lists (not navigation) keep bullets visible.
+   The inclusions list uses this pattern. */
+
+.list-content {
+  padding-left: var(--space-5);
+}
+
+.list-content li {
+  font-size: var(--text-base);
+  line-height: var(--lh-body);
+  color: var(--color-text-body);
+  margin-bottom: var(--space-3);
+  position: relative;
+}
+
+.list-content li::before {
+  content: "•";
+  position: absolute;
+  left: calc(-1 * var(--space-5));
+  color: var(--color-badge-gold);
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────
+   STRONG / EM
+   ───────────────────────────────────────────── */
+
+strong, b {
+  font-weight: 700;
+  color: var(--color-text-heading);
+}
+
+em, i {
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────
+   BUTTON BASE
+   ─────────────────────────────────────────────
+   All buttons extend this base. Variants are
+   in components.css (.btn--primary, etc.) */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 0.75em 2em;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 44px;           /* Minimum touch target */
+  line-height: var(--lh-label);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary CTA — Navy background, white text (from "Book Now" bar) */
+.btn--primary {
+  background-color: var(--color-navy);
+  color: var(--color-white);
+  border-color: var(--color-navy);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-navy-light);
+  border-color: var(--color-navy-light);
+  color: var(--color-white);
+}
+
+/* CTA on dark background — White button */
+.btn--cta-bar {
+  background-color: transparent;
+  color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+.btn--cta-bar:hover {
+  background-color: var(--color-white);
+  color: var(--color-navy);
+}
+
+/* Ghost — outline only */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-navy);
+  border-color: var(--color-navy);
+}
+
+.btn--ghost:hover {
+  background-color: var(--color-navy);
+  color: var(--color-white);
+}
+
+/* Gold accent button */
+.btn--gold {
+  background-color: var(--color-badge-gold);
+  color: var(--color-white);
+  border-color: var(--color-badge-gold);
+}
+
+.btn--gold:hover {
+  background-color: var(--color-badge-gold-light);
+  border-color: var(--color-badge-gold-light);
+}
+
+/* Size variants */
+.btn--sm {
+  font-size: var(--text-sm);
+  padding: 0.5em 1.25em;
+  min-height: 36px;
+}
+
+.btn--lg {
+  font-size: var(--text-md);
+  padding: 0.875em 2.5em;
+  min-height: 52px;
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────
+   IMAGE BASE
+   ─────────────────────────────────────────────
+   All images are responsive by default via reset.css.
+   These are additional quality-of-life defaults. */
+
+img {
+  vertical-align: middle;
+  transition: transform var(--transition-slow);
+}
+
+/* ─────────────────────────────────────────────
+   DIVIDER
+   ─────────────────────────────────────────────
+   Used between itinerary day entries. */
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-divider);
+  border: none;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────
+   SKIP LINK (Accessibility)
+   ─────────────────────────────────────────────
+   Allows keyboard users to skip to main content. */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  background: var(--color-navy);
+  color: var(--color-white);
+  padding: var(--space-3) var(--space-6);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  z-index: var(--z-toast);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ─────────────────────────────────────────────
+   DATA FIELD PLACEHOLDER
+   ─────────────────────────────────────────────
+   Visual indicator for [data-field] slots that
+   have not yet been populated by JS. Dev-only:
+   remove in production build. */
+
+[data-field]:empty::before {
+  content: attr(data-field);
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--text-sm);
+  opacity: 0.5;
+}
+
+/* ─────────────────────────────────────────────
+   ERROR STATE
+   ─────────────────────────────────────────────
+   Shown when tour JSON fails to load. */
+
+.error-state {
+  text-align: center;
+  padding: var(--space-20) var(--container-pad);
+}
+
+.error-state__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  color: var(--color-text-heading);
+  margin-bottom: var(--space-4);
+}
+
+.error-state__message {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-8);
+}
+
+.error-state__contact {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-navy);
+}
+
+/* ─────────────────────────────────────────────
+   SCROLL ENTRANCE ANIMATIONS
+   ─────────────────────────────────────────────
+   [data-animate] starts hidden/offset.
+   JS (IntersectionObserver) adds .is-visible
+   when the element enters the viewport.
+   Skipped for users who prefer reduced motion. */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-animate] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.55s ease-out,
+      transform 0.55s ease-out;
+  }
+
+  [data-animate].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ─────────────────────────────────────────────
+   LOADING STATE
+   ─────────────────────────────────────────────
+   Shown while tour data is being fetched. */
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.loading-state__text {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
