@@ -162,7 +162,8 @@
      break to avoid a blank page between every two printed pages. */
   .print-spread .brochure-page,
   .print-page .brochure-page,
-  .print-spread-sheet .brochure-page {
+  .print-spread-sheet .brochure-page,
+  .print-page12-spread .brochure-page {
     page-break-after: auto !important;
     break-after: auto !important;
   }
@@ -479,6 +480,7 @@
    .brochure-page--full stay untouched, so Pages 1, 3, 4 are unaffected. */
 .brochure-page--itinerary {
   box-shadow: inset 0 0 0 1px var(--color-divider);
+  background-color: #FFFFFF;
 }
 
 .p2-body {
@@ -599,6 +601,18 @@
    PAGE 3 — PRICING
    Hero image with overlay title → Two-column table → Why Travel section
    ───────────────────────────────────────────── */
+
+/* Page-3-only background override — pure white, edge to edge.
+   Only overrides the background-color it would otherwise inherit from the
+   shared .brochure-page rule (line ~107, #f2f2f2); Pages 1 keeps that rule
+   unchanged. .p3-hero, .p3-price-bar, and .p3-pricing-section (which paints
+   the payment table's gray, line ~663) all set their own background, so
+   they are unaffected by this — only the areas with no own background
+   (e.g. .p3-why) show through to white. Same pattern as
+   .brochure-page--itinerary for Page 2 and .brochure-page--terms for Page 4. */
+.brochure-page--pricing {
+  background-color: #FFFFFF;
+}
 
 /* Hero Image */
 .p3-hero {
@@ -1251,3 +1265,31 @@
    Sheet 1 and the Letter export (.print-page) were never affected either
    way. If a real physical duplex test still needs a fold-axis correction,
    it belongs in the OS/printer-driver duplex setting, not here. */
+
+/* ── Page 1 + Page 2 folded-brochure spread ────────────────────────────────
+   ONE 17in×11in (1632×1056px) landscape sheet: Page 2 (Itinerary) on the
+   LEFT, Page 1 (Cover) on the RIGHT — so that opening the fold from the
+   right reveals the cover. Used exclusively by PrintPage12SpreadLayout.jsx;
+   deliberately a dedicated class (not a reuse of .print-spread-sheet) so
+   this feature cannot affect the existing Full Spread or Letter exports.
+   No transform/rotation is applied — both pages render fully upright.
+   Each slot is a fixed, non-growing/non-shrinking 816×1056px box (flex:
+   0 0 816px) so the two pages sit flush with no gap and cannot be resized
+   or redistributed by the browser. */
+.print-page12-spread {
+  width: 1632px;   /* 17in at 96dpi — two 816px pages */
+  height: 1056px;  /* 11in at 96dpi */
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+
+.print-page12-spread__slot {
+  width: 816px;
+  height: 1056px;
+  flex: 0 0 816px;
+  overflow: hidden;
+}

@@ -54,7 +54,7 @@ export default function Page3Pricing({ tour, company }) {
   const hasLandOnly = !!(tour.price?.landOnlyDisplay || tour.price?.landOnly);
 
   return (
-    <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>
+    <div className="brochure-page brochure-page--full brochure-page--pricing" style={colorVars(tour.colors)}>
 
       {/* ── Hero Image ── */}
       <div className={`p3-hero${hl('images')}`} {...floatSel({

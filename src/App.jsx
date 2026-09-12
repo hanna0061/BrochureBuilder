@@ -7,6 +7,7 @@ import FloatingEditor from './editor/FloatingEditor';
 import BrochurePreview from './preview/BrochurePreview';
 import PrintLayout from './print/PrintLayout';
 import PrintSpreadLayout from './print/PrintSpreadLayout';
+import PrintPage12SpreadLayout from './print/PrintPage12SpreadLayout';
 import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
 import { runAllChecks } from './safety/checks';
@@ -48,6 +49,7 @@ export default function App() {
   const logout = auth?.logout;
   const printLayoutRef = useRef(null);
   const printSpreadRef = useRef(null);
+  const printPage12SpreadRef = useRef(null);
   const { saveProject, loadProject } = useProjectSave();
   const [exportWarnings, setExportWarnings] = useState(null);
   const [pendingExportFn, setPendingExportFn] = useState(null);
@@ -80,6 +82,30 @@ export default function App() {
   const doPrintSpread = useReactToPrint({
     content: () => printSpreadRef.current,
     documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure 11x17 Spread`,
+    pageStyle: `
+      @page {
+        size: 17in 11in;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 1632px;
+          margin: 0;
+          padding: 0;
+          background: white;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `,
+  });
+
+  const doPrintPage12Spread = useReactToPrint({
+    content: () => printPage12SpreadRef.current,
+    documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure Page 1+2 Spread`,
     pageStyle: `
       @page {
         size: 17in 11in;
@@ -182,6 +208,14 @@ export default function App() {
               >
                 Export 11×17 Spread PDF
               </button>
+              <button
+                className="export-dropdown__item"
+                type="button"
+                role="menuitem"
+                onClick={() => triggerExport(doPrintPage12Spread)}
+              >
+                Print Page 1 + 2 Spread
+              </button>
             </div>
           </div>
           <button
@@ -204,6 +238,7 @@ export default function App() {
 
       <PrintLayout printRef={printLayoutRef} />
       <PrintSpreadLayout printSpreadRef={printSpreadRef} />
+      <PrintPage12SpreadLayout printPage12SpreadRef={printPage12SpreadRef} />
 
       {exportWarnings && (
         <ExportWarningDialog
