@@ -10,6 +10,8 @@ import PrintSpreadLayout from './print/PrintSpreadLayout';
 import PrintPage12SpreadLayout from './print/PrintPage12SpreadLayout';
 import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
+import { useRecentProjects } from './hooks/useRecentProjects';
+import ProjectsMenu from './projects/ProjectsMenu';
 import { runAllChecks } from './safety/checks';
 
 function ExportWarningDialog({ warnings, onExport, onCancel }) {
@@ -50,10 +52,18 @@ export default function App() {
   const printLayoutRef = useRef(null);
   const printSpreadRef = useRef(null);
   const printPage12SpreadRef = useRef(null);
-  const { saveProject, loadProject } = useProjectSave();
+  const { saveProject, loadProject, newProject, currentFileName } = useProjectSave();
+  const { recentProjects, addRecentProject, removeRecentProject, clearRecentProjects } = useRecentProjects();
   const [exportWarnings, setExportWarnings] = useState(null);
   const [pendingExportFn, setPendingExportFn] = useState(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  const handleSaveProject = useCallback(async () => {
+    const result = await saveProject();
+    if (result?.saved) {
+      addRecentProject({ fileName: result.fileName });
+    }
+  }, [saveProject, addRecentProject]);
 
   const doPrint = useReactToPrint({
     content: () => printLayoutRef.current,
@@ -158,26 +168,24 @@ export default function App() {
           <span className="app-header__name">Brochure Builder</span>
         </div>
         <div className="app-header__actions">
-          <span className="app-header__tour-name">{state.tour.titleShort}</span>
+          <span className="app-header__tour-name">
+            {currentFileName ? currentFileName.replace(/\.json$/i, '') : 'Untitled Project'}
+          </span>
+          <ProjectsMenu
+            loadProject={loadProject}
+            newProject={newProject}
+            recentProjects={recentProjects}
+            onProjectOpened={addRecentProject}
+            removeRecentProject={removeRecentProject}
+            clearRecentProjects={clearRecentProjects}
+          />
           <button
             className="btn btn--cta-bar btn--sm app-header__action-btn"
-            onClick={saveProject}
+            onClick={handleSaveProject}
             type="button"
           >
             Save Project
           </button>
-          <label className="btn btn--cta-bar btn--sm app-header__action-btn">
-            Load Project
-            <input
-              type="file"
-              accept=".json"
-              onChange={(e) => {
-                if (e.target.files?.[0]) loadProject(e.target.files[0]);
-                e.target.value = '';
-              }}
-              style={{ display: 'none' }}
-            />
-          </label>
           <div className={`export-dropdown${exportMenuOpen ? ' export-dropdown--open' : ''}`}>
             <button
               className="btn btn--cta-bar btn--sm"
