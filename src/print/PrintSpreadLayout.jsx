@@ -17,30 +17,32 @@ import { useBrochure } from '../context/BrochureContext';
  * Folded reading order is Cover → Itinerary → Pricing → Terms.
  *
  * IMPOSITION FIX — HISTORY (do not reintroduce a content-level rotation):
- * Sheet 2 used to carry `.print-spread-sheet--backside { transform:
- * rotate(180deg) }`, meant to pre-compensate a physical duplex unit's
- * mechanical flip. That broke Chrome Print Preview (and Save-to-PDF,
- * Microsoft Print to PDF, OneNote): react-to-print (v2.x) renders this
- * component into one hidden iframe and calls window.print() on it — the
- * SAME rendered content is what Print Preview displays and what any print
- * destination receives. There is no separate "preview" render vs "output"
- * render to diverge, so any CSS transform applied here shows up identically
- * everywhere, including the on-screen preview the user is looking at. A
- * physical duplex printer's mechanical fold/flip axis is a property of the
- * printer/driver, not of the page content, so it cannot be corrected by
- * rotating the source — doing so only ever makes the preview wrong too.
+ * Sheet 2 has twice carried a rotate(180deg) rule intended to compensate a
+ * physical duplex unit's mechanical flip — first whole-sheet, then scoped
+ * to just Page 2/Page 3's own boxes via `.print-spread-sheet__rotate180`.
+ * Both were removed.
  *
- * Current behavior: both sheets render upright, matching what Chrome Print
- * Preview shows. If an actual physical duplex print run still comes out
- * misfolded, the fix belongs in the OS print dialog's duplex option (e.g.
- * "Flip on Short Edge" vs "Flip on Long Edge" for this 17×11 landscape job),
- * not in this file — that setting is exactly the printer-driver-level
- * decoupling point between "what the page looks like" and "how the
- * physical sheet gets flipped." This has not been re-verified against a
- * real physical duplex printer since the rotation was removed.
+ * `src/print/DuplexProofPreview.jsx` (reachable at ?duplexProof=1) exists
+ * specifically to settle this without needing a physical printer: it models
+ * "duplex + Flip on Short Edge" on a landscape sheet as the real physical
+ * operation it is — a 180° rotation of the whole rigid sheet about a
+ * VERTICAL axis (the short edges) — using CSS `rotateY(180deg)`, a genuine
+ * 3D rotation computed by the browser, applied to Sheet 2's actual rendered
+ * content via the standard two-sided "flip card" technique. That computed
+ * (not assumed) result: content already rotated 180° in the print file
+ * stays upside-down after the simulated flip (the flip-card's own
+ * compensation cancels at the container level, it does not undo an
+ * additional rotation baked into the content); content authored upright
+ * stays upright after the flip. Both sheets render upright here, matching
+ * that finding and matching Chrome Print Preview / Save-to-PDF. If a real
+ * physical duplex run still comes out misfolded, re-run the Duplex Proof
+ * Preview against the actual observed result before touching this file
+ * again — the fix belongs wherever that simulation points, not by default
+ * back to a content rotation.
  *
  * This component is hidden off-screen and is only used by useReactToPrint
- * with @page { size: 17in 11in }. It has no effect on the letter export path.
+ * with @page { size: 17in 11in }. It has no effect on the letter export,
+ * the Page 1 + 2 Spread export, or Registration Form printing.
  */
 export default function PrintSpreadLayout({ printSpreadRef }) {
   const { state } = useBrochure();
@@ -59,7 +61,8 @@ export default function PrintSpreadLayout({ printSpreadRef }) {
     >
       <div ref={printSpreadRef}>
 
-        {/* Sheet 1 / OUTSIDE: Terms (back cover, left) | Cover (front cover, right) */}
+        {/* Sheet 1 / OUTSIDE: Terms (back cover, left) | Cover (front cover, right).
+            Front side of the duplex sheet — never rotated. */}
         <div className="print-spread-sheet">
           <Page4Terms tour={tour} company={company} terms={terms} />
           <Page1Cover tour={tour} company={company} />

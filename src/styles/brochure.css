@@ -1256,15 +1256,15 @@
   break-after: auto;
 }
 
-/* NOTE: Sheet 2 previously carried a `.print-spread-sheet--backside` rule
-   with `transform: rotate(180deg)` to pre-compensate a physical duplex
-   printer's mechanical flip. That rule has been removed — see the
-   imposition-fix comment in PrintSpreadLayout.jsx for why a content-level
-   transform is the wrong tool for this (it rotates Chrome Print Preview and
-   every render output identically, since there is only one rendered page).
-   Sheet 1 and the Letter export (.print-page) were never affected either
-   way. If a real physical duplex test still needs a fold-axis correction,
-   it belongs in the OS/printer-driver duplex setting, not here. */
+/* NOTE: Sheet 2 previously carried a `.print-spread-sheet__rotate180` rule
+   (transform: rotate(180deg) on Page 2/Page 3's own boxes) meant to
+   pre-compensate a physical duplex unit's mechanical flip. It was removed
+   after src/print/DuplexProofPreview.jsx (?duplexProof=1) showed, via a
+   genuine CSS 3D rotateY(180deg) simulation of a duplex short-edge flip,
+   that content already rotated 180° in the print file remains upside-down
+   after that physical flip — the rotation did not achieve its goal. Both
+   sheets now render upright, matching Chrome Print Preview. See the
+   imposition-fix comment in PrintSpreadLayout.jsx for the full history. */
 
 /* ── Page 1 + Page 2 folded-brochure spread ────────────────────────────────
    ONE 17in×11in (1632×1056px) landscape sheet: Page 2 (Itinerary) on the

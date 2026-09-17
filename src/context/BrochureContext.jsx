@@ -4,6 +4,42 @@ import companyData from '../data/global/company.json';
 import termsData from '../data/global/terms.json';
 import { TYPOGRAPHY_DEFAULTS } from '../data/typography';
 import { POSITION_DEFAULTS } from '../data/positions';
+import registrationFormDefaults from '../registration/registrationFormDefaults';
+
+// Deep-merges one saved passenger object with its defaults, including its
+// labels/values/checked sub-groups — same backfill reasoning as
+// mergeRegistrationForm below, just one level deeper.
+function mergePassenger(saved, defaults) {
+  const s = saved || {};
+  return {
+    ...defaults,
+    ...s,
+    labels: { ...defaults.labels, ...(s.labels || {}) },
+    values: { ...defaults.values, ...(s.values || {}) },
+    checked: { ...defaults.checked, ...(s.checked || {}) },
+  };
+}
+
+// Deep-merges a saved registrationForm (which may be from an older schema
+// missing newer sub-fields, or entirely absent on pre-feature projects) with
+// the current defaults, one level deep into its grouped fields — mirrors
+// how the rest of this file backfills missing keys rather than overwriting
+// whatever the project file already has.
+function mergeRegistrationForm(saved) {
+  const s = saved || {};
+  return {
+    ...registrationFormDefaults,
+    ...s,
+    payment: { ...registrationFormDefaults.payment, ...(s.payment || {}) },
+    accommodation: { ...registrationFormDefaults.accommodation, ...(s.accommodation || {}) },
+    footer: { ...registrationFormDefaults.footer, ...(s.footer || {}) },
+    passenger1: mergePassenger(s.passenger1, registrationFormDefaults.passenger1),
+    passenger2: mergePassenger(s.passenger2, registrationFormDefaults.passenger2),
+    emergencyContact: { ...registrationFormDefaults.emergencyContact, ...(s.emergencyContact || {}) },
+    badgeNames: { ...registrationFormDefaults.badgeNames, ...(s.badgeNames || {}) },
+    typography: { ...(s.typography || {}) },
+  };
+}
 
 // Forward-migrate a loaded tour so all keys are present (typography, colors, positions).
 function migrateTour(tour) {
@@ -53,6 +89,7 @@ function migrateTour(tour) {
     notIncluded:    tour.notIncluded    ?? [],
     infoBlocks:     tour.infoBlocks     ?? [],
     coverPortrait,
+    registrationForm: mergeRegistrationForm(tour.registrationForm),
   };
 }
 
@@ -226,6 +263,66 @@ function reducer(state, action) {
           },
         },
       };
+
+    // Updates one field of registrationForm's editable content.
+    //   - top-level field:      { field, value }
+    //   - one nested group:     { group: 'payment', field: 'deposit', value }
+    //   - two nested groups:    { group: 'passenger1', subgroup: 'values', field: 'lastName', value }
+    // (subgroup covers passenger1/passenger2's labels/values/checked). This
+    // never adds/removes keys — registrationForm's structure itself is
+    // fixed, defined once in registrationFormDefaults.js.
+    case 'UPDATE_REGISTRATION_FORM': {
+      const rf = state.tour.registrationForm;
+      let nextRf;
+      if (action.subgroup) {
+        nextRf = {
+          ...rf,
+          [action.group]: {
+            ...rf[action.group],
+            [action.subgroup]: { ...rf[action.group][action.subgroup], [action.field]: action.value },
+          },
+        };
+      } else if (action.group) {
+        nextRf = { ...rf, [action.group]: { ...rf[action.group], [action.field]: action.value } };
+      } else {
+        nextRf = { ...rf, [action.field]: action.value };
+      }
+      return {
+        ...state,
+        tour: { ...state.tour, registrationForm: nextRf },
+      };
+    }
+
+    // Mirrors UPDATE_TYPOGRAPHY / RESET_TYPOGRAPHY_SECTION above, scoped to
+    // registrationForm's own typography map (see registrationFormTypography.js)
+    // instead of the brochure's state.tour.typography.
+    case 'UPDATE_REGISTRATION_TYPOGRAPHY': {
+      const rf = state.tour.registrationForm;
+      const currentSection = rf.typography?.[action.section] || {};
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          registrationForm: {
+            ...rf,
+            typography: {
+              ...rf.typography,
+              [action.section]: { ...currentSection, [action.field]: action.value },
+            },
+          },
+        },
+      };
+    }
+
+    case 'RESET_REGISTRATION_TYPOGRAPHY_SECTION': {
+      const rf = state.tour.registrationForm;
+      const nextTypo = { ...rf.typography };
+      delete nextTypo[action.section];
+      return {
+        ...state,
+        tour: { ...state.tour, registrationForm: { ...rf, typography: nextTypo } },
+      };
+    }
 
     case 'UPDATE_ITINERARY_DAY':
       return {

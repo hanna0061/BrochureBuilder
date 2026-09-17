@@ -12,6 +12,10 @@ import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
 import { useRecentProjects } from './hooks/useRecentProjects';
 import ProjectsMenu from './projects/ProjectsMenu';
+import RegistrationFormEditor from './registration/RegistrationFormEditor';
+import RegistrationFormWorkspace from './registration/RegistrationFormWorkspace';
+import RegistrationFormPrint from './registration/RegistrationFormPrint';
+import DuplexProofPreview from './print/DuplexProofPreview';
 import { runAllChecks } from './safety/checks';
 
 function ExportWarningDialog({ warnings, onExport, onCancel }) {
@@ -47,16 +51,30 @@ function ExportWarningDialog({ warnings, onExport, onCancel }) {
 
 export default function App() {
   const { state } = useBrochure();
+
+  // Developer-only duplex-flip physical simulation — reached only via
+  // ?duplexProof=1 in the URL, never linked from the normal UI/workflow.
+  // Isolated early return; does not affect the normal render path below,
+  // PrintSpreadLayout.jsx, or any print output.
+  if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('duplexProof') === '1') {
+    return <DuplexProofPreview />;
+  }
+
   const auth = useContext(AuthContext);
   const logout = auth?.logout;
   const printLayoutRef = useRef(null);
   const printSpreadRef = useRef(null);
   const printPage12SpreadRef = useRef(null);
+  const registrationFormPrintRef = useRef(null);
   const { saveProject, loadProject, newProject, currentFileName } = useProjectSave();
   const { recentProjects, addRecentProject, removeRecentProject, clearRecentProjects } = useRecentProjects();
   const [exportWarnings, setExportWarnings] = useState(null);
   const [pendingExportFn, setPendingExportFn] = useState(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  // Which document/page the main workspace currently shows — mirrors the
+  // brochure's own EditorSidebar+BrochurePreview pairing, just swapped for
+  // RegistrationFormEditor+RegistrationFormWorkspace when active.
+  const [activeView, setActiveView] = useState('brochure'); // 'brochure' | 'registrationForm'
 
   const handleSaveProject = useCallback(async () => {
     const result = await saveProject();
@@ -124,6 +142,33 @@ export default function App() {
       @media print {
         html, body {
           width: 1632px;
+          margin: 0;
+          padding: 0;
+          background: white;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `,
+  });
+
+  // Isolated from the three brochure print handlers above — own ref, own
+  // page size, own hidden target (mounted below, always present regardless
+  // of which workspace view is currently active).
+  const doPrintRegistrationForm = useReactToPrint({
+    content: () => registrationFormPrintRef.current,
+    documentTitle: `${state.tour.registrationForm.tourNumber || 'Registration'} — Registration Form`,
+    pageStyle: `
+      @page {
+        size: 8.5in 11in;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 816px;
           margin: 0;
           padding: 0;
           background: white;
@@ -224,8 +269,26 @@ export default function App() {
               >
                 Print Page 1 + 2 Spread
               </button>
+              <button
+                className="export-dropdown__item"
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  doPrintRegistrationForm();
+                }}
+              >
+                Print Registration Form
+              </button>
             </div>
           </div>
+          <button
+            className="btn btn--cta-bar btn--sm app-header__action-btn"
+            onClick={() => setActiveView((v) => (v === 'registrationForm' ? 'brochure' : 'registrationForm'))}
+            type="button"
+          >
+            {activeView === 'registrationForm' ? '← Back to Brochure' : 'Registration Form'}
+          </button>
           <button
             className="btn btn--cta-bar btn--sm app-header__action-btn"
             onClick={() => { if (logout) logout(); }}
@@ -238,8 +301,17 @@ export default function App() {
 
       <SelectionProvider>
         <div className="app-body">
-          <EditorSidebar />
-          <BrochurePreview />
+          {activeView === 'registrationForm' ? (
+            <>
+              <RegistrationFormEditor />
+              <RegistrationFormWorkspace />
+            </>
+          ) : (
+            <>
+              <EditorSidebar />
+              <BrochurePreview />
+            </>
+          )}
         </div>
         <FloatingEditor />
       </SelectionProvider>
@@ -247,6 +319,14 @@ export default function App() {
       <PrintLayout printRef={printLayoutRef} />
       <PrintSpreadLayout printSpreadRef={printSpreadRef} />
       <PrintPage12SpreadLayout printPage12SpreadRef={printPage12SpreadRef} />
+
+      {/* Always mounted off-screen, independent of which workspace view is
+          currently visible, so "Export ▾ → Print Registration Form" works
+          regardless — same guarantee the three brochure print targets above
+          already have. */}
+      <div aria-hidden="true" style={{ position: 'fixed', top: 0, left: '-699999px', pointerEvents: 'none', zIndex: -1 }}>
+        <RegistrationFormPrint registrationForm={state.tour.registrationForm} printRef={registrationFormPrintRef} />
+      </div>
 
       {exportWarnings && (
         <ExportWarningDialog
