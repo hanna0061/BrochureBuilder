@@ -11,6 +11,7 @@ import FooterSection from './sections/FooterSection';
 import ColorsSection from './sections/ColorsSection';
 import PositionsSection from './sections/PositionsSection';
 import LogosSection from './sections/LogosSection';
+import TextElementsSection from './sections/TextElementsSection';
 import { useBrochure } from '../context/BrochureContext';
 
 const SECTIONS = [
@@ -22,6 +23,7 @@ const SECTIONS = [
   { id: 'pricing',       title: 'Pricing & Inclusions',   Component: PricingSection },
   { id: 'terms',         title: 'Terms & Conditions',     Component: TermsSection },
   { id: 'footer',        title: 'Footer',                 Component: FooterSection },
+  { id: 'textElements',  title: 'Text Elements (Textgram)', Component: TextElementsSection },
   { id: 'colors',        title: 'Colors',                 Component: ColorsSection },
   { id: 'positions',     title: 'Content Positions',      Component: PositionsSection },
   { id: 'logos',         title: 'Logos',                  Component: LogosSection },

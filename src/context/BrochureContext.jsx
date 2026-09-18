@@ -4,6 +4,7 @@ import companyData from '../data/global/company.json';
 import termsData from '../data/global/terms.json';
 import { TYPOGRAPHY_DEFAULTS } from '../data/typography';
 import { POSITION_DEFAULTS } from '../data/positions';
+import { TEXT_ELEMENT_DEFAULTS, makeTextElementId } from '../data/textElements';
 import registrationFormDefaults from '../registration/registrationFormDefaults';
 
 // Deep-merges one saved passenger object with its defaults, including its
@@ -30,12 +31,29 @@ function mergeRegistrationForm(saved) {
   return {
     ...registrationFormDefaults,
     ...s,
-    payment: { ...registrationFormDefaults.payment, ...(s.payment || {}) },
-    accommodation: { ...registrationFormDefaults.accommodation, ...(s.accommodation || {}) },
+    // checked deep-merges one level further (same treatment as
+    // mergePassenger's own `checked` below) so a project saved before the
+    // Check Discount/Travel Insurance/Accommodation checkboxes existed
+    // safely defaults every new option to false instead of leaving it
+    // undefined.
+    payment: {
+      ...registrationFormDefaults.payment,
+      ...(s.payment || {}),
+      checked: { ...registrationFormDefaults.payment.checked, ...(s.payment?.checked || {}) },
+    },
+    accommodation: {
+      ...registrationFormDefaults.accommodation,
+      ...(s.accommodation || {}),
+      checked: { ...registrationFormDefaults.accommodation.checked, ...(s.accommodation?.checked || {}) },
+    },
     footer: { ...registrationFormDefaults.footer, ...(s.footer || {}) },
     passenger1: mergePassenger(s.passenger1, registrationFormDefaults.passenger1),
     passenger2: mergePassenger(s.passenger2, registrationFormDefaults.passenger2),
-    emergencyContact: { ...registrationFormDefaults.emergencyContact, ...(s.emergencyContact || {}) },
+    emergencyContact: {
+      ...registrationFormDefaults.emergencyContact,
+      ...(s.emergencyContact || {}),
+      labels: { ...registrationFormDefaults.emergencyContact.labels, ...(s.emergencyContact?.labels || {}) },
+    },
     badgeNames: { ...registrationFormDefaults.badgeNames, ...(s.badgeNames || {}) },
     typography: { ...(s.typography || {}) },
   };
@@ -86,6 +104,7 @@ function migrateTour(tour) {
     positions:      tour.positions      ?? {},
     imagePositions: tour.imagePositions ?? {},
     logos,
+    textElements:   tour.textElements   ?? [],
     notIncluded:    tour.notIncluded    ?? [],
     infoBlocks:     tour.infoBlocks     ?? [],
     coverPortrait,
@@ -223,6 +242,67 @@ function reducer(state, action) {
       return {
         ...state,
         tour: { ...state.tour, imagePositions: {} },
+      };
+
+    // Textgram — freeform text boxes. See src/data/textElements.js.
+    case 'ADD_TEXT_ELEMENT':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          textElements: [...(state.tour.textElements ?? []), action.element],
+        },
+      };
+
+    case 'UPDATE_TEXT_ELEMENT':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          textElements: (state.tour.textElements ?? []).map((el) =>
+            el.id === action.id ? { ...el, [action.field]: action.value } : el
+          ),
+        },
+      };
+
+    case 'DUPLICATE_TEXT_ELEMENT': {
+      const src = (state.tour.textElements ?? []).find((el) => el.id === action.id);
+      if (!src) return state;
+      const copy = { ...src, id: makeTextElementId(), x: src.x + 16, y: src.y + 16 };
+      return {
+        ...state,
+        tour: { ...state.tour, textElements: [...state.tour.textElements, copy] },
+      };
+    }
+
+    case 'DELETE_TEXT_ELEMENT':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          textElements: (state.tour.textElements ?? []).filter((el) => el.id !== action.id),
+        },
+      };
+
+    case 'RESET_TEXT_ELEMENT_STYLE':
+      return {
+        ...state,
+        tour: {
+          ...state.tour,
+          textElements: (state.tour.textElements ?? []).map((el) =>
+            el.id === action.id
+              ? {
+                  ...el,
+                  fontFamily:     TEXT_ELEMENT_DEFAULTS.fontFamily,
+                  fontSize:       TEXT_ELEMENT_DEFAULTS.fontSize,
+                  fontWeight:     TEXT_ELEMENT_DEFAULTS.fontWeight,
+                  lineHeight:     TEXT_ELEMENT_DEFAULTS.lineHeight,
+                  letterSpacing:  TEXT_ELEMENT_DEFAULTS.letterSpacing,
+                  color:          TEXT_ELEMENT_DEFAULTS.color,
+                }
+              : el
+          ),
+        },
       };
 
     case 'UPDATE_LOGO':

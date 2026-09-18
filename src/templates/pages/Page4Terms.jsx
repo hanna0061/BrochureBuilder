@@ -44,6 +44,7 @@ import defaultBrochure from '../../data/brochures/poland-czech-medjugorje.json';
 import { colorVars } from '../../data/colors';
 import { positionStyle, getPosition } from '../../data/positions';
 import { getLogo, logoStyle } from '../../data/logos';
+import TextgramLayer from '../components/TextgramLayer';
 
 // =============================================================================
 // PAGE 4 FROZEN TYPOGRAPHY — FINAL LOCK 2026-06-04
@@ -365,6 +366,8 @@ export default function Page4Terms({ tour }) {
           &nbsp;&nbsp;·&nbsp;&nbsp;{companyData.cst}
         </span>
       </div>
+
+      <TextgramLayer page="terms" />
 
     </div>
   );

@@ -7,6 +7,8 @@ import { getLogo } from '../data/logos';
 import { getImagePosition, IMAGE_POSITION_DEFAULTS } from '../data/imagePositions';
 import { COLOR_DEFAULTS } from '../data/colors';
 import { ImageField } from './fields/Field';
+import { getRegTypo, REG_TYPO_GROUP_LABELS } from '../registration/registrationFormTypography';
+import RegTypoFields from '../registration/RegTypoFields';
 
 const PANEL_W   = 268;
 const FS_MIN    = 6,    FS_MAX    = 72;
@@ -37,6 +39,11 @@ const resetBtn = {
   color: '#888', letterSpacing: '0.04em', textTransform: 'uppercase',
   alignSelf: 'flex-start', fontFamily: "'Inter',sans-serif",
 };
+const textareaSt = {
+  width: '100%', padding: '5px 7px', border: '1px solid #d5d5e0', borderRadius: 4,
+  fontSize: 11, fontFamily: 'inherit', boxSizing: 'border-box', resize: 'vertical',
+  lineHeight: 1.4, color: '#222',
+};
 
 function TextContent({ meta, tour, dispatch }) {
   const typo = meta.typographyKey ? getTypo(tour.typography, meta.typographyKey) : null;
@@ -59,9 +66,7 @@ function TextContent({ meta, tour, dispatch }) {
           value={meta.getValue(tour) ?? ''}
           onChange={e => meta.setValue(dispatch, e.target.value)}
           rows={meta.textRows || 2}
-          style={{ width:'100%', padding:'5px 7px', border:'1px solid #d5d5e0', borderRadius:4,
-            fontSize:11, fontFamily:'inherit', boxSizing:'border-box', resize:'vertical',
-            lineHeight:1.4, color:'#222' }}
+          style={textareaSt}
         />
       </div>
 
@@ -176,6 +181,151 @@ function TextContent({ meta, tour, dispatch }) {
         </div>
       )}
 
+      <button type="button" onClick={reset} style={resetBtn}>Reset</button>
+    </>
+  );
+}
+
+function TextgramContent({ meta, tour, dispatch }) {
+  const el = (tour.textElements ?? []).find((e) => e.id === meta.id);
+  if (!el) return null;
+
+  const set = (field, value) => dispatch({ type: 'UPDATE_TEXT_ELEMENT', id: el.id, field, value });
+  const reset = () => dispatch({ type: 'RESET_TEXT_ELEMENT_STYLE', id: el.id });
+  const duplicate = () => dispatch({ type: 'DUPLICATE_TEXT_ELEMENT', id: el.id });
+  const remove = () => dispatch({ type: 'DELETE_TEXT_ELEMENT', id: el.id });
+
+  return (
+    <>
+      {/* Text */}
+      <div>
+        <label style={lbl}>Text</label>
+        <textarea
+          value={el.text ?? ''}
+          onChange={e => set('text', e.target.value)}
+          rows={3}
+          style={{ width:'100%', padding:'5px 7px', border:'1px solid #d5d5e0', borderRadius:4,
+            fontSize:11, fontFamily:'inherit', boxSizing:'border-box', resize:'vertical',
+            lineHeight:1.4, color:'#222' }}
+        />
+      </div>
+
+      {/* Typography — same fields/ranges as every other brochure text element */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 76px', gap:6 }}>
+        <div>
+          <label style={lbl}>Font</label>
+          <select value={el.fontFamily ?? ''} onChange={e => set('fontFamily', e.target.value)} style={selSt}>
+            {FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+        <div>
+          <label style={lbl}>Weight</label>
+          <select value={el.fontWeight ?? 400} onChange={e => set('fontWeight', parseInt(e.target.value, 10))} style={selSt}>
+            {WEIGHT_OPTIONS.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={row2}>
+        <div>
+          <label style={lbl}>Size — {el.fontSize}px</label>
+          <input type="range" min={FS_MIN} max={FS_MAX} step={0.5} value={el.fontSize ?? 16}
+            onChange={e => set('fontSize', clamp(e.target.value, FS_MIN, FS_MAX))} style={{ width:'100%' }} />
+        </div>
+        <div>
+          <label style={lbl}>Line Ht — {(el.lineHeight ?? LH_MIN).toFixed(2)}</label>
+          <input type="range" min={LH_MIN} max={LH_MAX} step={0.05} value={el.lineHeight ?? 1.3}
+            onChange={e => set('lineHeight', clamp(e.target.value, LH_MIN, LH_MAX))} style={{ width:'100%' }} />
+        </div>
+      </div>
+      <div>
+        <label style={lbl}>Spacing — {(el.letterSpacing ?? 0).toFixed(3)}em</label>
+        <input type="range" min={LS_MIN} max={LS_MAX} step={0.005} value={el.letterSpacing ?? 0}
+          onChange={e => set('letterSpacing', clamp(e.target.value, LS_MIN, LS_MAX))} style={{ width:'100%' }} />
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+        <label style={{ ...lbl, marginBottom:0 }}>Color</label>
+        <input type="color"
+          value={el.color || '#000000'}
+          onChange={e => set('color', e.target.value)}
+          style={{ width:32, height:24, border:'1px solid #d5d5e0', borderRadius:3, cursor:'pointer', padding:0 }} />
+      </div>
+
+      {/* Position — freeform absolute placement, unique to Textgram boxes.
+          Number inputs (not sliders) since page-absolute coords span 0–816/1056,
+          well beyond the ±200px range used by every other element's offset. */}
+      <div style={row2}>
+        <div>
+          <label style={lbl}>X — {Math.round(el.x)}px</label>
+          <input type="number" value={Math.round(el.x)} step={1}
+            onChange={e => set('x', parseFloat(e.target.value) || 0)} style={selSt} />
+        </div>
+        <div>
+          <label style={lbl}>Y — {Math.round(el.y)}px</label>
+          <input type="number" value={Math.round(el.y)} step={1}
+            onChange={e => set('y', parseFloat(e.target.value) || 0)} style={selSt} />
+        </div>
+      </div>
+      <div style={row2}>
+        <div>
+          <label style={lbl}>Width — {Math.round(el.width)}px</label>
+          <input type="number" min={20} value={Math.round(el.width)} step={1}
+            onChange={e => set('width', Math.max(20, parseFloat(e.target.value) || 20))} style={selSt} />
+        </div>
+        <div>
+          <label style={lbl}>Height — {Math.round(el.height)}px</label>
+          <input type="number" min={16} value={Math.round(el.height)} step={1}
+            onChange={e => set('height', Math.max(16, parseFloat(e.target.value) || 16))} style={selSt} />
+        </div>
+      </div>
+
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+        <button type="button" onClick={reset} style={resetBtn}>Reset Style</button>
+        <button type="button" onClick={duplicate} style={resetBtn}>Duplicate</button>
+        <button type="button" onClick={remove} style={{ ...resetBtn, color:'#c0392b', borderColor:'#e0b4ae' }}>Delete</button>
+      </div>
+    </>
+  );
+}
+
+// Registration Form static text (labels/headings/paragraphs) — clicking any
+// of it opens this branch instead of TextContent, since RF typography is a
+// separate, parallel system (registrationForm.typography / getRegTypo /
+// UPDATE_REGISTRATION_TYPOGRAPHY — see registrationFormTypography.js) with
+// its own fields (italic/underline/textAlign, no x/y — RF geometry is
+// fixed). `meta.sectionKey` is one of REGISTRATION_TYPOGRAPHY_DEFAULTS' keys;
+// one key styles every rendered instance of that label/heading at once,
+// exactly like the sidebar's RegistrationTypoPanel already does — this
+// branch reuses that same RegTypoFields control set, not a second copy.
+//
+// TEXT content: same `meta.getValue(tour)` / `meta.setValue(dispatch, val)`
+// function-pair pattern as the brochure's own TextContent above — called
+// with THIS panel's own live (tour, dispatch) on every render, never a
+// value captured back when the click happened, so the field stays correct
+// even if the panel is left open while something else changes. Most RF
+// static text supplies these (see RegistrationFormPrint.jsx's openTypo call
+// sites); the handful of purely-fixed PDF boilerplate strings with no
+// backing data field (e.g. "Mail Check to:") omit them, so only the
+// typography controls show — exactly like before this feature.
+function RegTextContent({ meta, tour, dispatch }) {
+  const typo = getRegTypo(tour.registrationForm?.typography, meta.sectionKey);
+
+  const setT = (field, value) => dispatch({ type: 'UPDATE_REGISTRATION_TYPOGRAPHY', section: meta.sectionKey, field, value });
+  const reset = () => dispatch({ type: 'RESET_REGISTRATION_TYPOGRAPHY_SECTION', section: meta.sectionKey });
+
+  return (
+    <>
+      {meta.getValue && (
+        <div>
+          <label style={lbl}>Text</label>
+          <textarea
+            value={meta.getValue(tour) ?? ''}
+            onChange={e => meta.setValue(dispatch, e.target.value)}
+            rows={meta.textRows || 2}
+            style={textareaSt}
+          />
+        </div>
+      )}
+      <RegTypoFields current={typo} onSet={setT} />
       <button type="button" onClick={reset} style={resetBtn}>Reset</button>
     </>
   );
@@ -382,10 +532,14 @@ export default function FloatingEditor() {
 
       <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {type === 'image'
-          ? <ImageContent meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          ? <ImageContent   meta={floatingMeta} tour={tour} dispatch={dispatch} />
           : type === 'logo'
-          ? <LogoContent  meta={floatingMeta} tour={tour} dispatch={dispatch} />
-          : <TextContent  meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          ? <LogoContent    meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          : type === 'textgram'
+          ? <TextgramContent meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          : type === 'regText'
+          ? <RegTextContent meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          : <TextContent    meta={floatingMeta} tour={tour} dispatch={dispatch} />
         }
       </div>
     </div>

@@ -7,6 +7,7 @@ import { useBrochure } from '../../context/BrochureContext';
 import { usePreview } from '../../context/PreviewContext';
 import { useSelection } from '../../context/SelectionContext';
 import DraggableImage from '../components/DraggableImage';
+import TextgramLayer from '../components/TextgramLayer';
 
 export default function Page3Pricing({ tour, company }) {
   const { dispatch } = useBrochure();
@@ -336,6 +337,8 @@ export default function Page3Pricing({ tour, company }) {
           </div>
         </div>
       )}
+
+      <TextgramLayer page="pricing" />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { typoStyle, getTypo } from '../../data/typography';
 import { colorVars } from '../../data/colors';
 import { positionStyle, getPosition } from '../../data/positions';
 import { useSelection } from '../../context/SelectionContext';
+import TextgramLayer from '../components/TextgramLayer';
 
 // Applies per-element position as CSS transform (for label, body, overnight, meals).
 // When per-day x/y is set: strips global transform and replaces with per-day translate.
@@ -183,6 +184,8 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
           </div>
         </div>
       </div>
+
+      <TextgramLayer page="itinerary" />
 
     </div>
   );

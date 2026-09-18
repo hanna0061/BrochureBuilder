@@ -45,8 +45,24 @@ export default function BrochurePreview() {
   const { tour, company } = state;
   const panelRef = useRef(null);
   const [scale, setScale] = useState(0.65);
-  const [dragMode, setDragMode] = useState(false);
+  const [dragMode, setDragModeRaw] = useState(false);
   const [showSafeArea, setShowSafeArea] = useState(false);
+  const [textAddMode, setTextAddModeRaw] = useState(false);
+
+  // Drag-images mode and add-text mode are mutually exclusive — each defines
+  // what a click on the page canvas means, so only one can be active.
+  const setDragMode = (updater) =>
+    setDragModeRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      if (next) setTextAddModeRaw(false);
+      return next;
+    });
+  const setTextAddMode = (updater) =>
+    setTextAddModeRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      if (next) setDragModeRaw(false);
+      return next;
+    });
 
   useEffect(() => {
     const el = panelRef.current;
@@ -62,7 +78,7 @@ export default function BrochurePreview() {
   }, []);
 
   return (
-    <PreviewContext.Provider value={{ dragMode, scale }}>
+    <PreviewContext.Provider value={{ dragMode, scale, textAddMode, setTextAddMode }}>
       <div className="preview-panel" ref={panelRef}>
 
         <div className="preview-panel__toolbar u-print-hidden">
@@ -76,6 +92,14 @@ export default function BrochurePreview() {
           </button>
           <button
             type="button"
+            className={`preview-toolbar__btn${textAddMode ? ' is-active' : ''}`}
+            onClick={() => setTextAddMode(m => !m)}
+            title="Toggle Add Text mode, then click any page to place a text box"
+          >
+            {textAddMode ? '✕ Exit Add Text' : 'Aa Add Text'}
+          </button>
+          <button
+            type="button"
             className={`preview-toolbar__btn${showSafeArea ? ' is-active' : ''}`}
             onClick={() => setShowSafeArea(m => !m)}
             title="Show printable safe area margins on each page"
@@ -85,6 +109,11 @@ export default function BrochurePreview() {
           {dragMode && (
             <span className="preview-toolbar__hint">
               Click and drag any image to reposition it
+            </span>
+          )}
+          {textAddMode && (
+            <span className="preview-toolbar__hint">
+              Click anywhere on a page to place a text box
             </span>
           )}
         </div>

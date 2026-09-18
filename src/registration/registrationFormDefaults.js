@@ -86,6 +86,12 @@ const registrationFormDefaults = {
     payableTo: 'Pax Via Tours & Travel',
     mailingAddressLine1: '9939 Hibert Street Suite 106',
     mailingAddressLine2: 'San Diego, CA 92131',
+    // Same checked-state pattern as passenger1/passenger2.checked below —
+    // one boolean per selectable option, defaulting to unchecked.
+    checked: {
+      checkDiscount: false,
+      travelInsurance: false,
+    },
   },
 
   accommodation: {
@@ -93,6 +99,11 @@ const registrationFormDefaults = {
     singleRoomText: 'Single Room ($1050 extra per person)',
     randomRoommateText:
       'Random Roommate (I understand if no roommate is found, the single supplement charge will be added to my account)',
+    checked: {
+      doubleRoom: false,
+      singleRoom: false,
+      randomRoommate: false,
+    },
   },
 
   creditCardInstruction: 'For Credit Card Payment: Scan Code or go to www.paxvia.com to register',
@@ -125,19 +136,26 @@ const registrationFormDefaults = {
   passenger1: makePassengerDefaults('Passenger #1:'),
   passenger2: makePassengerDefaults('Passenger #2:'),
 
-  // The row's own labels ("Emergency Contact:", "Relation:", "Phone:") stay
-  // fixed in RegistrationFormPrint.jsx — only these blank values are editable.
+  // The row's own labels are now editable too (via FloatingEditor's TEXT
+  // field on the label itself — see RegistrationFormPrint.jsx's openTypo
+  // calls), same as passenger1/passenger2.labels below.
   emergencyContact: {
     contact: '',
     relation: '',
     phone: '',
+    labels: {
+      contact: 'Emergency Contact:',
+      relation: 'Relation:',
+      phone: 'Phone:',
+    },
   },
 
-  // "Name for Badge (Nickname)" label stays fixed — only the value per
-  // passenger is editable.
+  // Single shared label — the PDF uses identical wording for both passenger
+  // badge rows, so one editable string covers both.
   badgeNames: {
     passenger1: '',
     passenger2: '',
+    label: 'Name for Badge (Nickname)',
   },
 
   // Populated on demand by UPDATE_REGISTRATION_TYPOGRAPHY, keyed by the

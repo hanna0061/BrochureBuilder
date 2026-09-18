@@ -32,30 +32,69 @@ export const REGISTRATION_FONT_STACKS = {
 export const REGISTRATION_FONT_OPTIONS = ['Calibri', ...FONT_OPTIONS];
 export { WEIGHT_OPTIONS };
 
-// Each default mirrors the CURRENT hard-coded CSS in registrationForm.css
-// exactly, so an unedited form renders pixel-identical to before this
-// feature — overrides only ever move the result away from today's look.
+// Each default originally mirrored the hard-coded CSS in registrationForm.css
+// exactly (an unedited form rendered pixel-identical to the source PDF).
+// Sizes below were then bumped twice — once across the whole form, then
+// again for this lower-page readability pass (signature/passport-notice/
+// footer/small-info) — modestly and proportionally (preserving which
+// element is bigger than which: main title still largest, section headings
+// still bigger than plain labels, notes/hints/footer still smallest).
+// rfPassengerValue got only a small +0.5px this round: it renders inside a
+// fixed 12px-tall `.rf-field-blank` box, the tightest overflow margin on
+// the page — verified visually (no clipping) rather than pushed further.
 export const REGISTRATION_TYPOGRAPHY_DEFAULTS = Object.freeze({
-  rfTitle:              { fontFamily: 'Calibri', fontSize: 27,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
-  rfLeader:              { fontFamily: 'Calibri', fontSize: 14,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
-  rfFormLabel:           { fontFamily: 'Calibri', fontSize: 15,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
-  rfTourNumber:          { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfPassengerHeading:    { fontFamily: 'Calibri', fontSize: 14,   fontWeight: 800, italic: false, underline: false, textAlign: 'left' },
-  rfPassengerLabel:      { fontFamily: 'Calibri', fontSize: 10.5, fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfPassengerInstruction:{ fontFamily: 'Calibri', fontSize: 9,    fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfPassengerNote:       { fontFamily: 'Calibri', fontSize: 8.5,  fontWeight: 400, italic: false, underline: false, textAlign: 'center' },
-  rfPassengerValue:      { fontFamily: 'Calibri', fontSize: 10.5, fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfEmergencyBadge:      { fontFamily: 'Calibri', fontSize: 10.5, fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfDeposit:             { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfCheckboxText:        { fontFamily: 'Calibri', fontSize: 9.5,  fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfPaymentHeading:      { fontFamily: 'Calibri', fontSize: 10,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfPaymentAddress:      { fontFamily: 'Calibri', fontSize: 10,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
-  rfCreditCard:          { fontFamily: 'Calibri', fontSize: 9.5,  fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfAcknowledgement:     { fontFamily: 'Calibri', fontSize: 8,    fontWeight: 400, italic: false, underline: false, textAlign: 'justify' },
-  rfSignature:           { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfPassportNotice:      { fontFamily: 'Calibri', fontSize: 11.5, fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
-  rfFooter:              { fontFamily: 'Calibri', fontSize: 7.5,  fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfTitle:              { fontFamily: 'Calibri', fontSize: 29,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
+  rfLeader:              { fontFamily: 'Calibri', fontSize: 15,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
+  rfFormLabel:           { fontFamily: 'Calibri', fontSize: 16,   fontWeight: 800, italic: false, underline: false, textAlign: 'center' },
+  rfTourNumber:          { fontFamily: 'Calibri', fontSize: 12,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
+  rfPassengerHeading:    { fontFamily: 'Calibri', fontSize: 15,   fontWeight: 800, italic: false, underline: false, textAlign: 'left' },
+  rfPassengerLabel:      { fontFamily: 'Calibri', fontSize: 11.5, fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfPassengerInstruction:{ fontFamily: 'Calibri', fontSize: 10,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfPassengerNote:       { fontFamily: 'Calibri', fontSize: 9.5,  fontWeight: 400, italic: false, underline: false, textAlign: 'center' },
+  rfPassengerValue:      { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfEmergencyBadge:      { fontFamily: 'Calibri', fontSize: 11.5, fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfDeposit:             { fontFamily: 'Calibri', fontSize: 12,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
+  rfCheckboxText:        { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfPaymentHeading:      { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
+  rfPaymentAddress:      { fontFamily: 'Calibri', fontSize: 11,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfCreditCard:          { fontFamily: 'Calibri', fontSize: 10.5, fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
+  rfAcknowledgement:     { fontFamily: 'Calibri', fontSize: 9,    fontWeight: 400, italic: false, underline: false, textAlign: 'justify' },
+  rfSignature:           { fontFamily: 'Calibri', fontSize: 13,   fontWeight: 700, italic: false, underline: false, textAlign: 'left' },
+  // New key (Passenger 1:/Passenger 2: signature labels) — previously had no
+  // typography binding at all and inherited a hard-coded 10px from
+  // .rf-signature-row's own CSS (see registrationForm.css). Sits one tier
+  // below rfSignature's heading size, preserving "Signature" as the more
+  // prominent of the two per the requested hierarchy.
+  rfSignatureLabel:      { fontFamily: 'Calibri', fontSize: 12,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
+  rfPassportNotice:      { fontFamily: 'Calibri', fontSize: 13.5, fontWeight: 700, italic: false, underline: false, textAlign: 'center' },
+  rfFooter:              { fontFamily: 'Calibri', fontSize: 10,   fontWeight: 400, italic: false, underline: false, textAlign: 'left' },
 });
+
+// Human-readable label per typography section key — shared by the sidebar's
+// RegistrationTypoPanel and FloatingEditor's click-on-static-text branch
+// (RegTextContent in FloatingEditor.jsx), so both name each group the same way.
+export const REG_TYPO_GROUP_LABELS = {
+  rfTitle: 'Pilgrimage Title',
+  rfLeader: 'Leader',
+  rfFormLabel: 'Form Label',
+  rfTourNumber: 'Tour Number',
+  rfPassengerHeading: 'Passenger Heading (both columns)',
+  rfPassengerLabel: 'Field Labels (both columns)',
+  rfPassengerInstruction: 'Instruction / Consent Text (both columns)',
+  rfPassengerNote: 'Expiration Note (both columns)',
+  rfPassengerValue: 'Field Values (both columns)',
+  rfEmergencyBadge: 'Emergency Contact / Badge',
+  rfDeposit: 'Deposit Line',
+  rfCheckboxText: 'Checkbox Option Text',
+  rfPaymentHeading: 'Payment Headings',
+  rfPaymentAddress: 'Payment Address',
+  rfCreditCard: 'Credit Card Instruction',
+  rfAcknowledgement: 'Acknowledgement Paragraph',
+  rfSignature: 'Signature Heading',
+  rfSignatureLabel: 'Signature Labels (Passenger 1 / 2)',
+  rfPassportNotice: 'Passport Notice',
+  rfFooter: 'Footer',
+};
 
 /** Returns the effective typography for a section: stored override merged over its default. */
 export function getRegTypo(typography, section) {

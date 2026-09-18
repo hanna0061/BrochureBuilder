@@ -8,6 +8,7 @@ import { useBrochure } from '../../context/BrochureContext';
 import { usePreview } from '../../context/PreviewContext';
 import { useSelection } from '../../context/SelectionContext';
 import DraggableImage from '../components/DraggableImage';
+import TextgramLayer from '../components/TextgramLayer';
 
 const FLOAT_TITLE = {
   id: 'tourInfo', label: 'Cover Title', typographyKey: 'coverTitle', positionKey: 'coverTitle',
@@ -208,6 +209,8 @@ export default function Page1Cover({ tour, company }) {
           </span>
         </div>
       </div>
+
+      <TextgramLayer page="cover" />
 
     </div>
   );

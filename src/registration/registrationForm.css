@@ -93,10 +93,15 @@
   margin-bottom: 3px;
 }
 
+/* No own font-size here (deliberately) — this row's text must inherit its
+   size from whichever ancestor carries the actual typography-driven inline
+   style (.rf-columns -> rfPassengerLabel, .rf-badge-row -> rfEmergencyBadge,
+   .rf-signature-row's own 10px). A hard-coded value here would silently
+   override those and make their FloatingEditor size controls do nothing —
+   exactly the bug this comment replaces. */
 .rf-field-row {
   display: flex;
   align-items: flex-end;
-  font-size: 10.5px;
   height: 23px;
   white-space: nowrap;
   overflow: hidden;
@@ -158,12 +163,66 @@
   overflow: hidden;
 }
 
+/* Also the styling for the smart-field <input> that replaced the old plain-
+   text span here — same position/size, plus a reset so a native input looks
+   identical to that span when unfocused (no border/background, transparent,
+   font inherited via inline `style` from regTypoStyle). Native horizontal
+   scroll-on-overflow keeps a too-long value's cursor visible without ever
+   resizing this fixed-width box — see the overflow policy note above. */
 .rf-field-value {
   position: absolute;
   left: 2px;
   bottom: 1px;
   white-space: nowrap;
   max-width: calc(100% - 4px);
+  width: calc(100% - 4px);
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  outline: none;
+  cursor: text;
+}
+
+/* UI-only focus affordance — never appears in print: the print target is a
+   separate, always-mounted, never-clicked instance of this same component,
+   so its inputs are never in a `:focus` state to begin with. The @media
+   print rule below is an extra belt-and-suspenders guard. */
+.rf-field-value:focus {
+  outline: 1px dashed rgba(26, 49, 96, 0.55);
+  outline-offset: 1px;
+}
+
+@media print {
+  .rf-field-value:focus {
+    outline: none;
+  }
+}
+
+/* Fixed template text made clickable to open the typography FloatingEditor —
+   cursor affordance only, no visual change to the PDF-matched appearance. */
+.rf-field-label,
+.rf-column-heading,
+.rf-instruction,
+.rf-field-note,
+.rf-deposit,
+.rf-check-line,
+.rf-payable,
+.rf-mail-to,
+.rf-mail-address,
+.rf-creditcard,
+.rf-terms,
+.rf-signature-heading,
+.rf-passport-notice,
+.rf-footer-text,
+.rf-tour-number,
+.rf-title-line,
+.rf-leader-line,
+.rf-form-label,
+.rf-accommodation-heading {
+  cursor: pointer;
 }
 
 /* ── Emergency Contact / Badge Name rows (shared, full-width and two-col) ── */
@@ -330,10 +389,13 @@
 }
 
 /* ── Passport notice ── */
+/* font-size/weight/text-align come from rfPassportNotice's inline style
+   (regTypoStyle) now — see registrationFormTypography.js; the class below
+   only keeps the vertical placement, moved down slightly for more breathing
+   room above the footer (was margin-top: 10px). Centering is the typography
+   system's textAlign:'center' default, not hard-coded here. */
 .rf-passport-notice {
-  font-size: 11.5px;
-  font-weight: 700;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 /* ── Footer (pinned to the bottom edge, like the source) ── */
@@ -350,10 +412,14 @@
   margin: 0 40px;
 }
 
+/* Height bumped from 33px to give rfFooter's larger text room (2 lines at
+   its current size + the block's own 5px top padding fit inside 40px with
+   margin to spare) — .rf-footer's own outer 44px box is unchanged, so the
+   footer's position/height on the page stays exactly where it was. */
 .rf-footer-content {
   display: flex;
   align-items: stretch;
-  height: 33px;
+  height: 40px;
 }
 
 .rf-footer-accent {

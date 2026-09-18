@@ -1,7 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import { TextField, ImageField } from '../editor/fields/Field';
 import { useBrochure } from '../context/BrochureContext';
-import { REGISTRATION_FONT_OPTIONS, WEIGHT_OPTIONS, getRegTypo } from './registrationFormTypography';
+import { getRegTypo, REG_TYPO_GROUP_LABELS } from './registrationFormTypography';
+import RegTypoFields, { CHECKBOX_INPUT_STYLE } from './RegTypoFields';
+import TextElementsSection from '../editor/sections/TextElementsSection';
+
+// Textgram overlay on the Registration Form uses the exact same
+// tour.textElements array / TextElementsSection / TextgramLayer /
+// TextgramElement / FloatingEditor as the brochure — just scoped to this
+// one page id, so its "Add Text Box" button and placed-elements list never
+// mix with the brochure's own Textgram elements (see TextElementsSection's
+// `pages` prop).
+const REGISTRATION_FORM_TEXTGRAM_PAGES = ['registrationForm'];
 
 /**
  * Registration Form editing panel — the left-hand pane of the Registration
@@ -32,13 +42,6 @@ function Group({ title, defaultOpen, children }) {
   );
 }
 
-// reset.css sets `appearance: none` on every <input> (never previously
-// exercised by a checkbox in this editor), which collapses a native
-// checkbox to 0×0 with no visible chrome. Restoring `appearance: auto`
-// locally (inline styles win over the class-based reset rule) brings back
-// a normal, clickable native checkbox without touching reset.css itself.
-const CHECKBOX_INPUT_STYLE = { appearance: 'auto', WebkitAppearance: 'auto', width: 14, height: 14, cursor: 'pointer', flexShrink: 0 };
-
 function CheckboxRow({ label, checked, onChange }) {
   return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, margin: '6px 0', cursor: 'pointer' }}>
@@ -48,126 +51,18 @@ function CheckboxRow({ label, checked, onChange }) {
   );
 }
 
-const REG_TYPO_GROUP_LABELS = {
-  rfTitle: 'Pilgrimage Title',
-  rfLeader: 'Leader',
-  rfFormLabel: 'Form Label',
-  rfTourNumber: 'Tour Number',
-  rfPassengerHeading: 'Passenger Heading (both columns)',
-  rfPassengerLabel: 'Field Labels (both columns)',
-  rfPassengerInstruction: 'Instruction / Consent Text (both columns)',
-  rfPassengerNote: 'Expiration Note (both columns)',
-  rfPassengerValue: 'Field Values (both columns)',
-  rfEmergencyBadge: 'Emergency Contact / Badge',
-  rfDeposit: 'Deposit Line',
-  rfCheckboxText: 'Checkbox Option Text',
-  rfPaymentHeading: 'Payment Headings',
-  rfPaymentAddress: 'Payment Address',
-  rfCreditCard: 'Credit Card Instruction',
-  rfAcknowledgement: 'Acknowledgement Paragraph',
-  rfSignature: 'Signature Heading',
-  rfPassportNotice: 'Passport Notice',
-  rfFooter: 'Footer',
-};
-
 // ── Registration Form's own typography sub-panel — same interaction
 // pattern as the brochure's TypoPanel (collapsible, font/weight/size/color/
 // reset), deliberately WITHOUT that panel's X/Y position and margin/padding
 // controls, since Registration Form geometry is fixed. Adds Italic/
-// Underline/Alignment, which the brochure system doesn't have.
+// Underline/Alignment, which the brochure system doesn't have. Field
+// rendering itself lives in RegTypoFields.jsx, shared with FloatingEditor's
+// click-on-static-text branch.
 function RegTypoGroup({ sectionKey, current, onSet }) {
   return (
     <div className="typo-group">
       <span className="typo-group__label">{REG_TYPO_GROUP_LABELS[sectionKey] || sectionKey}</span>
-
-      <div className="field">
-        <label className="field__label">Font Family</label>
-        <select className="field__input" value={current.fontFamily} onChange={(e) => onSet('fontFamily', e.target.value)}>
-          {REGISTRATION_FONT_OPTIONS.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="field">
-        <label className="field__label">Weight</label>
-        <select
-          className="field__input"
-          value={current.fontWeight}
-          onChange={(e) => onSet('fontWeight', parseInt(e.target.value, 10))}
-        >
-          {WEIGHT_OPTIONS.map((w) => (
-            <option key={w} value={w}>{w}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="field">
-        <label className="field__label">Size — {current.fontSize}px</label>
-        <input
-          type="range"
-          min={6}
-          max={40}
-          step={0.5}
-          value={current.fontSize}
-          onChange={(e) => onSet('fontSize', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-
-      <div className="field" style={{ display: 'flex', gap: 16 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={!!current.italic}
-            onChange={(e) => onSet('italic', e.target.checked)}
-            style={CHECKBOX_INPUT_STYLE}
-          />
-          Italic
-        </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={!!current.underline}
-            onChange={(e) => onSet('underline', e.target.checked)}
-            style={CHECKBOX_INPUT_STYLE}
-          />
-          Underline
-        </label>
-      </div>
-
-      <div className="field">
-        <label className="field__label">Alignment</label>
-        <select className="field__input" value={current.textAlign || 'left'} onChange={(e) => onSet('textAlign', e.target.value)}>
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-          <option value="justify">Justify</option>
-        </select>
-      </div>
-
-      <div className="field">
-        <label className="field__label">Color</label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <input
-            type="color"
-            value={current.color || '#000000'}
-            onChange={(e) => onSet('color', e.target.value)}
-            style={{ width: 32, height: 26, border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: 0, flexShrink: 0 }}
-          />
-          {current.color ? (
-            <button
-              type="button"
-              onClick={() => onSet('color', null)}
-              style={{ fontSize: 9, color: '#888', background: 'none', border: '1px solid #d5d5e0', borderRadius: 3, cursor: 'pointer', padding: '2px 6px' }}
-            >
-              Clear
-            </button>
-          ) : (
-            <span style={{ fontSize: 9, color: '#aaa' }}>default (black)</span>
-          )}
-        </div>
-      </div>
+      <RegTypoFields current={current} onSet={onSet} />
     </div>
   );
 }
@@ -456,7 +351,7 @@ export default function RegistrationFormEditor() {
             multiline
             rows={4}
           />
-          <RegistrationTypoPanel keys={['rfAcknowledgement', 'rfSignature']} resetLabel="Acknowledgement" />
+          <RegistrationTypoPanel keys={['rfAcknowledgement', 'rfSignature', 'rfSignatureLabel']} resetLabel="Acknowledgement" />
         </Group>
 
         <Group title="Passport Notice">
@@ -485,6 +380,10 @@ export default function RegistrationFormEditor() {
           />
           <TextField label="CST" value={rf.footer.cst} onChange={(v) => updateGroup('footer', 'cst', v)} />
           <RegistrationTypoPanel keys={['rfFooter']} resetLabel="Footer" />
+        </Group>
+
+        <Group title="Text Elements (Textgram)">
+          <TextElementsSection pages={REGISTRATION_FORM_TEXTGRAM_PAGES} />
         </Group>
       </div>
     </aside>
