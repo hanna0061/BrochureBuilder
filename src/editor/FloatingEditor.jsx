@@ -9,6 +9,7 @@ import { COLOR_DEFAULTS } from '../data/colors';
 import { ImageField } from './fields/Field';
 import { getRegTypo, REG_TYPO_GROUP_LABELS } from '../registration/registrationFormTypography';
 import RegTypoFields from '../registration/RegTypoFields';
+import { QR_DEFAULT_SIZE } from '../registration/registrationFormDefaults';
 
 const PANEL_W   = 268;
 const FS_MIN    = 6,    FS_MAX    = 72;
@@ -17,6 +18,7 @@ const LS_MIN    = -0.2, LS_MAX    = 0.5;
 const POS_MIN   = -200, POS_MAX   = 200;
 const LOGO_SZ_MIN  = 20,  LOGO_SZ_MAX  = 400;
 const LOGO_OFF_MIN = -150, LOGO_OFF_MAX = 150;
+const QR_SZ_MIN = 40, QR_SZ_MAX = 200;
 
 function clamp(v, min, max) {
   const n = parseFloat(v);
@@ -412,6 +414,84 @@ function LogoContent({ meta, tour, dispatch }) {
   );
 }
 
+// Registration Form QR Code — same architecture as ImageContent/LogoContent
+// above (an image the user can replace, via the same ImageField + FileReader
+// upload path), but no typography controls (font/weight/color/etc. make no
+// sense for an image) and a single square SIZE instead of position offsets.
+// Width and Height both read/write the exact same meta.getSize/setSize pair,
+// which is what keeps them permanently equal — there is only one underlying
+// number, so the QR can never become a rectangle.
+function QrContent({ meta, tour, dispatch }) {
+  const size = meta.getSize(tour);
+  const src = meta.getSrc(tour);
+
+  // Draft text the user is actively typing, kept separate from the
+  // committed `size` above so an intermediate keystroke — an empty field,
+  // or an out-of-range partial like "1"/"12" on the way to "120" — is never
+  // clamped/forced to a limit. Resyncs whenever the committed size changes
+  // from elsewhere (Reset Size, an external dispatch); it does NOT resync on
+  // every render, so a still-being-typed value is never clobbered.
+  const [draft, setDraft] = useState(String(size));
+  useEffect(() => { setDraft(String(size)); }, [size]);
+
+  const resetSize = () => meta.setSize(dispatch, QR_DEFAULT_SIZE);
+  const remove = () => meta.setSrc(dispatch, '');
+
+  // Only a value that's already a genuine, in-range number gets committed
+  // live — this is what lets the spinner arrows (which always emit a
+  // complete valid number) update the QR immediately, while a still-typing
+  // value that isn't a number yet, or is out of range so far, is left alone
+  // as draft-only text instead of snapping to QR_SZ_MIN/QR_SZ_MAX.
+  const handleChange = (e) => {
+    const raw = e.target.value;
+    setDraft(raw);
+    const n = parseFloat(raw);
+    if (!isNaN(n) && n >= QR_SZ_MIN && n <= QR_SZ_MAX) {
+      meta.setSize(dispatch, n);
+    }
+  };
+
+  // Finalize on blur/Enter: parse + clamp whatever's currently typed. An
+  // empty/non-numeric draft reverts to the last committed size rather than
+  // being forced to a limit.
+  const finalize = (raw) => {
+    const n = parseFloat(raw);
+    const next = isNaN(n) ? size : clamp(n, QR_SZ_MIN, QR_SZ_MAX);
+    meta.setSize(dispatch, next);
+    setDraft(String(next));
+  };
+
+  const sizeInputProps = {
+    type: 'number', min: QR_SZ_MIN, max: QR_SZ_MAX, step: 1, value: draft,
+    onChange: handleChange,
+    onBlur: (e) => finalize(e.target.value),
+    onKeyDown: (e) => { if (e.key === 'Enter') { finalize(e.target.value); e.target.blur(); } },
+    style: selSt,
+  };
+
+  return (
+    <>
+      <ImageField label="QR Code Image" value={src} onChange={val => meta.setSrc(dispatch, val)} />
+      {src && (
+        <button type="button" onClick={remove} style={{ ...resetBtn, color: '#c0392b', borderColor: '#e0b4ae' }}>
+          Remove QR Image
+        </button>
+      )}
+      <div style={row2}>
+        <div>
+          <label style={lbl}>Width — {size}px</label>
+          <input {...sizeInputProps} />
+        </div>
+        <div>
+          <label style={lbl}>Height — {size}px</label>
+          <input {...sizeInputProps} />
+        </div>
+      </div>
+      <button type="button" onClick={resetSize} style={resetBtn}>Reset Size</button>
+    </>
+  );
+}
+
 // Clamp panel to stay within the visible viewport with a safe margin.
 function clampToViewport(x, y) {
   const vw = window.innerWidth;
@@ -535,6 +615,8 @@ export default function FloatingEditor() {
           ? <ImageContent   meta={floatingMeta} tour={tour} dispatch={dispatch} />
           : type === 'logo'
           ? <LogoContent    meta={floatingMeta} tour={tour} dispatch={dispatch} />
+          : type === 'qr'
+          ? <QrContent      meta={floatingMeta} tour={tour} dispatch={dispatch} />
           : type === 'textgram'
           ? <TextgramContent meta={floatingMeta} tour={tour} dispatch={dispatch} />
           : type === 'regText'

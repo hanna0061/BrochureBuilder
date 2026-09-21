@@ -28,6 +28,24 @@
   overflow: hidden; /* one-page guarantee — see overflow policy in JSX/report */
 }
 
+/* Print pagination guard: .rf-page is exactly one 816×1056 Letter page
+   with content (the footer especially) flush against its bottom edge.
+   Without an explicit fragmentation rule, the browser's print engine is
+   still free to slice this single box across a page boundary (e.g. from a
+   sub-pixel print-resolution rounding difference) even though the box
+   itself never exceeds 1056px — silently pushing the footer/passport
+   notice onto a second, unprinted page. `break-inside: avoid` forces the
+   whole canvas to stay intact on one physical page instead of being
+   fragmented; `break-after: avoid` stops a stray trailing blank page. */
+@media print {
+  .rf-page {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+
 /* ── Header ── */
 .rf-header {
   position: relative;
@@ -226,6 +244,18 @@
 }
 
 /* ── Emergency Contact / Badge Name rows (shared, full-width and two-col) ── */
+/* overflow:hidden mirrors .rf-field-row's own containment (used by every
+   Passenger field row) — without it, this is the one row in the form whose
+   labels/values sit directly in a fixed-height flex row with nothing to
+   clip them: the row's font size is user-editable (rfEmergencyBadge, up to
+   40px via the FloatingEditor's typography Size slider) up to well beyond
+   this row's 22px band, and with no overflow rule the oversized text simply
+   painted past the row's own box — bleeding upward into Expiration Date and
+   downward through Badge Name into the Accommodation area below, since nothing
+   here reserves the box height needed to contain it. Adding overflow:hidden
+   clips any oversized content to this row's own fixed area instead, exactly
+   like every other field row already does; at the form's normal/default text
+   size (well under 22px tall) nothing here is visibly clipped. */
 .rf-emergency-row {
   display: flex;
   align-items: flex-end;
@@ -233,6 +263,7 @@
   height: 22px;
   margin-top: 6px;
   gap: 6px;
+  overflow: hidden;
 }
 
 .rf-badge-row {
@@ -324,15 +355,47 @@
   flex: 1 1 auto;
 }
 
+/* The slot is the FIXED 80×80 layout anchor — its own box never changes
+   size, so resizing the QR (see .rf-qr-visual below) can never shift the
+   credit-card text beside it or anything that follows in the page flow.
+   position:relative turns it into the positioning context for the visual. */
 .rf-qr-slot {
   flex: 0 0 auto;
   width: 80px;
   height: 80px;
+  position: relative;
+  cursor: pointer;
 }
 
-.rf-qr-slot img {
-  width: 80px;
-  height: 80px;
+/* Subtle, UI-only selection affordance — shown only in the interactive
+   workspace (the always-mounted hidden print clone never has a selection,
+   see App.jsx/RegistrationFormPrint.jsx), with an explicit print-media
+   guard below as a second layer of protection. */
+.rf-qr-slot--selected {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+}
+
+@media print {
+  .rf-qr-slot--selected {
+    outline: none;
+  }
+}
+
+/* The actual QR image/placeholder — independently sized via qrSize (inline
+   style) and centered on top of the fixed slot above via absolute
+   positioning + transform, so growing/shrinking it expands outward from the
+   slot's center without ever touching the slot's own 80×80 box model. */
+.rf-qr-visual {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rf-qr-visual img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
 }

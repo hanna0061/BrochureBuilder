@@ -7,6 +7,7 @@ import FloatingEditor from './editor/FloatingEditor';
 import BrochurePreview from './preview/BrochurePreview';
 import PrintLayout from './print/PrintLayout';
 import PrintSpreadLayout from './print/PrintSpreadLayout';
+import PrintSpreadDuplexTestLayout from './print/PrintSpreadDuplexTestLayout';
 import PrintPage12SpreadLayout from './print/PrintPage12SpreadLayout';
 import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
@@ -64,6 +65,7 @@ export default function App() {
   const logout = auth?.logout;
   const printLayoutRef = useRef(null);
   const printSpreadRef = useRef(null);
+  const printSpreadDuplexTestRef = useRef(null);
   const printPage12SpreadRef = useRef(null);
   const registrationFormPrintRef = useRef(null);
   const { saveProject, loadProject, newProject, currentFileName } = useProjectSave();
@@ -131,6 +133,34 @@ export default function App() {
     `,
   });
 
+  // Isolated test target — own ref, own hidden DOM (PrintSpreadDuplexTestLayout.jsx),
+  // same 17in×11in geometry as doPrintSpread above but pointed at the
+  // rotated-Page-2/3 version, so the manager can print both and compare
+  // physical results without either export affecting the other.
+  const doPrintSpreadDuplexTest = useReactToPrint({
+    content: () => printSpreadDuplexTestRef.current,
+    documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure 11x17 Spread (Duplex Test)`,
+    pageStyle: `
+      @page {
+        size: 17in 11in;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 1632px;
+          margin: 0;
+          padding: 0;
+          background: white;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `,
+  });
+
   const doPrintPage12Spread = useReactToPrint({
     content: () => printPage12SpreadRef.current,
     documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure Page 1+2 Spread`,
@@ -163,12 +193,13 @@ export default function App() {
     documentTitle: `${state.tour.registrationForm.tourNumber || 'Registration'} — Registration Form`,
     pageStyle: `
       @page {
-        size: 8.5in 11in;
+        size: letter portrait;
         margin: 0;
       }
       @media print {
         html, body {
           width: 816px;
+          height: 1056px;
           margin: 0;
           padding: 0;
           background: white;
@@ -265,6 +296,15 @@ export default function App() {
                 className="export-dropdown__item"
                 type="button"
                 role="menuitem"
+                title="Use this version only if the back side (Page 2/Page 3) prints upside-down on your duplex printer. Print both versions with identical printer settings (17×11, Landscape, Duplex) and keep whichever comes out upright."
+                onClick={() => triggerExport(doPrintSpreadDuplexTest)}
+              >
+                Full Spread — Duplex Test (Rotate Page 2/3)
+              </button>
+              <button
+                className="export-dropdown__item"
+                type="button"
+                role="menuitem"
                 onClick={() => triggerExport(doPrintPage12Spread)}
               >
                 Print Page 1 + 2 Spread
@@ -318,6 +358,7 @@ export default function App() {
 
       <PrintLayout printRef={printLayoutRef} />
       <PrintSpreadLayout printSpreadRef={printSpreadRef} />
+      <PrintSpreadDuplexTestLayout printSpreadDuplexTestRef={printSpreadDuplexTestRef} />
       <PrintPage12SpreadLayout printPage12SpreadRef={printPage12SpreadRef} />
 
       {/* Always mounted off-screen, independent of which workspace view is

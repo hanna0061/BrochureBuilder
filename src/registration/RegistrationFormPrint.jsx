@@ -1,6 +1,7 @@
 import React from 'react';
 import './registrationForm.css';
 import { getRegTypo, regTypoStyle } from './registrationFormTypography';
+import { QR_DEFAULT_SIZE } from './registrationFormDefaults';
 import { useBrochure } from '../context/BrochureContext';
 import { useSelection } from '../context/SelectionContext';
 import TextgramLayer from '../templates/components/TextgramLayer';
@@ -266,7 +267,7 @@ function PassengerColumn({ passengerKey, passenger, valueStyle, headingStyle, in
 
 export default function RegistrationFormPrint({ registrationForm: rf, printRef }) {
   const { dispatch } = useBrochure();
-  const { openFloating } = useSelection();
+  const { selectedId, openFloating } = useSelection();
 
   // Click on any piece of FIXED/STATIC template text -> the same FloatingEditor
   // used everywhere else in the app, scoped to the typography group that
@@ -303,6 +304,22 @@ export default function RegistrationFormPrint({ registrationForm: rf, printRef }
     (tour) => (subgroup ? tour.registrationForm[group][subgroup][field] : tour.registrationForm[group][field]),
     (d, val) => d({ type: 'UPDATE_REGISTRATION_FORM', group, subgroup, field, value: val }),
   );
+
+  // QR Code — same architecture as an 'image'/'logo' floatSel meta (getSrc/
+  // setSrc for the picture itself, same UPDATE_REGISTRATION_FORM action the
+  // sidebar's QR controls already use), plus a getSize/setSize pair for the
+  // FloatingEditor's QR-specific size branch. Clicking it opens the same
+  // shared FloatingEditor, just with type:'qr' instead of type:'image'.
+  const FLOAT_QR = {
+    id: 'qr',
+    label: 'QR Code',
+    type: 'qr',
+    getSrc: (t) => t.registrationForm.qrImage,
+    setSrc: (d, val) => d({ type: 'UPDATE_REGISTRATION_FORM', field: 'qrImage', value: val }),
+    getSize: (t) => t.registrationForm.qrSize ?? QR_DEFAULT_SIZE,
+    setSize: (d, val) => d({ type: 'UPDATE_REGISTRATION_FORM', field: 'qrSize', value: val }),
+  };
+  const qrSelected = selectedId === 'qr';
 
   const updateGroup = (group, field, value) => dispatch({ type: 'UPDATE_REGISTRATION_FORM', group, field, value });
   // Same checked-state pattern as the passenger Sex/Consent checkboxes
@@ -482,12 +499,20 @@ export default function RegistrationFormPrint({ registrationForm: rf, printRef }
             <div className="rf-creditcard" style={creditCardStyle} {...topField('rfCreditCard', 'Credit Card Instruction', 'creditCardInstruction')}>
               {rf.creditCardInstruction}
             </div>
-            <div className={`rf-qr-slot${rf.qrImage ? '' : ' rf-qr-slot--empty'}`}>
-              {rf.qrImage ? (
-                <img src={rf.qrImage} alt="Registration QR code" />
-              ) : (
-                'QR CODE'
-              )}
+            <div
+              className={`rf-qr-slot${qrSelected ? ' rf-qr-slot--selected' : ''}`}
+              onClick={(e) => { e.stopPropagation(); openFloating(FLOAT_QR, e); }}
+            >
+              <div
+                className={`rf-qr-visual${rf.qrImage ? '' : ' rf-qr-slot--empty'}`}
+                style={{ width: rf.qrSize ?? QR_DEFAULT_SIZE, height: rf.qrSize ?? QR_DEFAULT_SIZE }}
+              >
+                {rf.qrImage ? (
+                  <img src={rf.qrImage} alt="Registration QR code" />
+                ) : (
+                  'QR CODE'
+                )}
+              </div>
             </div>
           </div>
         </div>

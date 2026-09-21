@@ -252,7 +252,7 @@
 .p1-hero {
   flex-shrink: 0;
   text-align: center;
-  padding: 22px 48px 16px;
+  padding: 38px 48px 30px;
   background-color: var(--color-white);
 }
 
@@ -1265,6 +1265,26 @@
    after that physical flip — the rotation did not achieve its goal. Both
    sheets now render upright, matching Chrome Print Preview. See the
    imposition-fix comment in PrintSpreadLayout.jsx for the full history. */
+
+/* ── Full Spread "Duplex Test" rotation (isolated, opt-in) ───────────────────
+   Used ONLY by src/print/PrintSpreadDuplexTestLayout.jsx — a SEPARATE print
+   target from the production Full Spread above (PrintSpreadLayout.jsx never
+   references this class). The browser-preview-based simulation above
+   concluded no rotation is correct, but the manager's actual physical
+   duplex printer is reportedly producing an upside-down Page 2/Page 3 with
+   that same unrotated production file — a real physical result a browser
+   simulation cannot substitute for. This class exists so that question can
+   be settled with an actual test print, without editing production print
+   code back and forth. Fixed 816×1056 so rotating in place never changes
+   the sheet's own 1632×1056 footprint or pushes/resizes its sibling page. */
+.print-spread-sheet__duplex-rotate180 {
+  width: 816px;
+  height: 1056px;
+  flex-shrink: 0;
+  overflow: hidden;
+  transform: rotate(180deg);
+  transform-origin: center center;
+}
 
 /* ── Page 1 + Page 2 folded-brochure spread ────────────────────────────────
    ONE 17in×11in (1632×1056px) landscape sheet: Page 2 (Itinerary) on the

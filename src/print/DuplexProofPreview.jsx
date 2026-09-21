@@ -26,14 +26,25 @@ import './duplexProof.css';
  * Page1Cover / Page3Pricing / Page4Terms / ItineraryPages components
  * PrintSpreadLayout.jsx uses (imported independently here — that file is
  * untouched):
- *   A. NO ROTATION — this is what PrintSpreadLayout.jsx currently renders
- *      for Sheet 2 (Page 2 / Page 3 upright, unrotated).
- *   B. ROTATED (previously tried, since reverted) — kept only for
- *      reference/comparison. The rotation styling lives locally in
- *      duplexProof.css (.duplex-proof__demo-rotate180) — the production
- *      .print-spread-sheet__rotate180 rule this used to reuse no longer
- *      exists in brochure.css, since this exact tool proved it didn't
- *      achieve its goal.
+ *   A. NO ROTATION — reproduces PrintSpreadLayout.jsx's own Sheet 2 exactly
+ *      (Page 2 / Page 3 upright, unrotated) — today's production Full
+ *      Spread export.
+ *   B. ROTATED — reproduces PrintSpreadDuplexTestLayout.jsx's own Sheet 2
+ *      exactly, using that same production class
+ *      (`.print-spread-sheet__duplex-rotate180`, brochure.css) instead of a
+ *      separate local demo class, so this simulation and the actual
+ *      "Full Spread — Duplex Test" export the manager can print are
+ *      guaranteed to show the identical rotation.
+ *
+ * NOTE: this simulation previously judged Scenario B physically wrong
+ * (upside-down) based on a browser-computed rotateY(180deg) flip — see the
+ * verdict text below. That is still a browser approximation, not the
+ * manager's real printer. The manager has since reported the CURRENT
+ * production file (Scenario A, no rotation) printing upside-down on the
+ * real hardware, which is why PrintSpreadDuplexTestLayout.jsx now exists as
+ * an isolated way to test Scenario B physically instead of relying solely
+ * on this preview. Do not treat either scenario's verdict below as settled
+ * until a real physical duplex print confirms it.
  */
 
 function Sheet1({ tour, company, terms }) {
@@ -55,15 +66,22 @@ function Sheet2NoRotation({ tour, company, terms }) {
   );
 }
 
-// Reference-only: reproduces the previously-tried (since reverted) rotated
-// version, using this tool's own local demo class — see file header.
+// Matches PrintSpreadDuplexTestLayout.jsx's actual Sheet 2 markup exactly —
+// same production rotation class, so this simulation and that real print
+// target can never visually drift apart.
 function Sheet2Rotated({ tour, company, terms }) {
   return (
     <div className="print-spread-sheet">
-      <div className="duplex-proof__demo-rotate180">
-        <ItineraryPages tour={tour} company={company} renderPage={(pageEl) => pageEl} />
-      </div>
-      <div className="duplex-proof__demo-rotate180">
+      <ItineraryPages
+        tour={tour}
+        company={company}
+        renderPage={(pageEl, idx) => (
+          <div key={`itin-duplex-proof-${idx}`} className="print-spread-sheet__duplex-rotate180">
+            {pageEl}
+          </div>
+        )}
+      />
+      <div className="print-spread-sheet__duplex-rotate180">
         <Page3Pricing tour={tour} company={company} terms={terms} />
       </div>
     </div>
@@ -144,24 +162,24 @@ export default function DuplexProofPreview() {
 
       <Scenario
         id="current"
-        title="Scenario A — Current implementation (no rotation on Page 2 / Page 3)"
-        description="Reuses PrintSpreadLayout.jsx's exact current Sheet 2 markup — Page 2 / Page 3 rendered upright, no transform."
+        title="Scenario A — Standard Full Spread (no rotation on Page 2 / Page 3)"
+        description="Reuses PrintSpreadLayout.jsx's exact current Sheet 2 markup — Page 2 / Page 3 rendered upright, no transform. This is the app's normal 'Export 11×17 Spread PDF'."
         tour={tour}
         company={company}
         terms={terms}
         backContent={<Sheet2NoRotation tour={tour} company={company} terms={terms} />}
-        verdict="Computed result: Page 2 and Page 3 are authored upright. After the simulated short-edge flip, they remain UPRIGHT — matching the goal. This is what PrintSpreadLayout.jsx renders today."
+        verdict="Computed result: Page 2 and Page 3 are authored upright. After the simulated short-edge flip, they remain UPRIGHT — matching Chrome's own duplex simulation. The manager has reported this exact file printing upside-down on their real printer, which this browser simulation cannot itself explain or rule out."
       />
 
       <Scenario
-        id="rotated-reference"
-        title="Scenario B — Rotated (previously tried, since reverted — reference only)"
-        description="Page 2 / Page 3 wrapped in rotate(180deg), reproduced here via this tool's own local demo class (duplexProof.css) since the production rule was removed from brochure.css."
+        id="duplex-test"
+        title="Scenario B — Full Spread Duplex Test (Page 2 / Page 3 rotated 180°)"
+        description="Reuses PrintSpreadDuplexTestLayout.jsx's exact Sheet 2 markup — the same production `.print-spread-sheet__duplex-rotate180` class the app's 'Full Spread — Duplex Test' export button generates."
         tour={tour}
         company={company}
         terms={terms}
         backContent={<Sheet2Rotated tour={tour} company={company} terms={terms} />}
-        verdict="Computed result: Page 2 and Page 3 are rendered rotated 180° in the print file. A short-edge flip does not add a second rotation to already-authored content, so the physical result is Page 2 / Page 3 UPSIDE-DOWN — the physical page shows the same orientation as 'Back (as authored)'. This is why the rotation was reverted."
+        verdict="This browser simulation's computed result: a short-edge flip does not add a second rotation to already-authored content, so Page 2 / Page 3 would come out UPSIDE-DOWN under THIS simulation's model of the flip. That is why this rotation was reverted from production previously. However, the manager's real printer has reportedly produced an upside-down result from Scenario A (no rotation) instead — meaning this simulation's model may not match that printer's actual mechanics. Only a real physical print of the 'Full Spread — Duplex Test' export (Export ▾ menu) can settle which scenario is actually correct on that hardware."
         verdictWrong
       />
     </div>

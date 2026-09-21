@@ -34,11 +34,20 @@ import { useBrochure } from '../context/BrochureContext';
  * compensation cancels at the container level, it does not undo an
  * additional rotation baked into the content); content authored upright
  * stays upright after the flip. Both sheets render upright here, matching
- * that finding and matching Chrome Print Preview / Save-to-PDF. If a real
- * physical duplex run still comes out misfolded, re-run the Duplex Proof
- * Preview against the actual observed result before touching this file
- * again — the fix belongs wherever that simulation points, not by default
- * back to a content rotation.
+ * that finding and matching Chrome Print Preview / Save-to-PDF.
+ *
+ * UPDATE — a browser simulation is still not the manager's actual printer.
+ * The manager has reported Page 2/Page 3 physically printing upside-down
+ * from THIS exact (unrotated) file on their real duplex hardware. Rather
+ * than editing this file again on a guess, `src/print/
+ * PrintSpreadDuplexTestLayout.jsx` provides a second, fully isolated export
+ * ("Export ▾ → Full Spread — Duplex Test (Rotate Page 2/3)") that renders
+ * this same Sheet 1 + Sheet 2 layout with Page 2/Page 3 rotated 180°, so the
+ * manager can physically print BOTH versions with identical printer
+ * settings and keep whichever one actually comes out upright. This file
+ * (the standard, default Full Spread export) is untouched by that tool —
+ * do not fold the rotation back in here until a real physical print
+ * confirms which version is correct on that printer.
  *
  * This component is hidden off-screen and is only used by useReactToPrint
  * with @page { size: 17in 11in }. It has no effect on the letter export,

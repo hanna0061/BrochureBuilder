@@ -31,22 +31,6 @@
    not a hand-picked CSS class chosen to produce a desired-looking result.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Demo-only "what the previously-tried rotated version looked like" box,
-   owned entirely by this proof tool. PrintSpreadLayout.jsx no longer
-   applies any rotation to Page 2/Page 3 (that rule was removed from
-   brochure.css after this tool proved it didn't achieve its goal) — this
-   class exists purely so the proof tool can still render that comparison
-   scenario for reference, independent of production CSS. Same geometry
-   the old .print-spread-sheet__rotate180 rule used. */
-.duplex-proof__demo-rotate180 {
-  width: 816px;
-  height: 1056px;
-  flex-shrink: 0;
-  overflow: hidden;
-  transform: rotate(180deg);
-  transform-origin: center center;
-}
-
 .duplex-proof {
   min-height: 100vh;
   background: #1a1a1a;

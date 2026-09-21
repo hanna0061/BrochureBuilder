@@ -14,6 +14,12 @@
 // set/order per the PDF) — this factory is the single source of truth for
 // that shared shape, instantiated twice below into independent objects so
 // editing one passenger's content/checkboxes never touches the other's.
+// The QR slot's fixed original size (matches .rf-qr-slot's 80×80 CSS box in
+// registrationForm.css). Used both as the default `qrSize` below and as the
+// "Reset Size" target in FloatingEditor.jsx's QR panel, so there is exactly
+// one source of truth for what "original size" means.
+export const QR_DEFAULT_SIZE = 80;
+
 function makePassengerDefaults(title) {
   return {
     title,
@@ -113,6 +119,13 @@ const registrationFormDefaults = {
   // extracted from the source PDF), so this starts empty — the manager
   // must upload one via the Registration Form editor's QR Code field.
   qrImage: '',
+
+  // Rendered size (px, square) of the QR image within its fixed slot — the
+  // slot's own position/box never changes, only this. Old projects saved
+  // before this feature existed simply lack the key, and `mergeRegistrationForm`
+  // in BrochureContext.jsx backfills it from this default, so they render at
+  // the same 80×80 size they always have.
+  qrSize: QR_DEFAULT_SIZE,
 
   // The PDF's final sentence ("For Pre-Existing Medical Conditions Exclusion
   // Waiver, insurance plan must be purchased at or before the final trip
