@@ -17,37 +17,13 @@ import { useBrochure } from '../context/BrochureContext';
  * Folded reading order is Cover → Itinerary → Pricing → Terms.
  *
  * IMPOSITION FIX — HISTORY (do not reintroduce a content-level rotation):
- * Sheet 2 has twice carried a rotate(180deg) rule intended to compensate a
+ * Sheet 2 has carried a rotate(180deg) rule intended to compensate a
  * physical duplex unit's mechanical flip — first whole-sheet, then scoped
- * to just Page 2/Page 3's own boxes via `.print-spread-sheet__rotate180`.
- * Both were removed.
- *
- * `src/print/DuplexProofPreview.jsx` (reachable at ?duplexProof=1) exists
- * specifically to settle this without needing a physical printer: it models
- * "duplex + Flip on Short Edge" on a landscape sheet as the real physical
- * operation it is — a 180° rotation of the whole rigid sheet about a
- * VERTICAL axis (the short edges) — using CSS `rotateY(180deg)`, a genuine
- * 3D rotation computed by the browser, applied to Sheet 2's actual rendered
- * content via the standard two-sided "flip card" technique. That computed
- * (not assumed) result: content already rotated 180° in the print file
- * stays upside-down after the simulated flip (the flip-card's own
- * compensation cancels at the container level, it does not undo an
- * additional rotation baked into the content); content authored upright
- * stays upright after the flip. Both sheets render upright here, matching
- * that finding and matching Chrome Print Preview / Save-to-PDF.
- *
- * UPDATE — a browser simulation is still not the manager's actual printer.
- * The manager has reported Page 2/Page 3 physically printing upside-down
- * from THIS exact (unrotated) file on their real duplex hardware. Rather
- * than editing this file again on a guess, `src/print/
- * PrintSpreadDuplexTestLayout.jsx` provides a second, fully isolated export
- * ("Export ▾ → Full Spread — Duplex Test (Rotate Page 2/3)") that renders
- * this same Sheet 1 + Sheet 2 layout with Page 2/Page 3 rotated 180°, so the
- * manager can physically print BOTH versions with identical printer
- * settings and keep whichever one actually comes out upright. This file
- * (the standard, default Full Spread export) is untouched by that tool —
- * do not fold the rotation back in here until a real physical print
- * confirms which version is correct on that printer.
+ * to just Page 2/Page 3's own boxes. Both were removed and rotation was
+ * also trialed via a separate isolated test export. CONFIRMED: the manager
+ * has physically duplex-printed this exact unrotated file on their real
+ * printer and the resulting folded brochure is correct — Page 2 and Page 3
+ * both print upright. Do not add a rotation to Page 2 or Page 3 again.
  *
  * This component is hidden off-screen and is only used by useReactToPrint
  * with @page { size: 17in 11in }. It has no effect on the letter export,

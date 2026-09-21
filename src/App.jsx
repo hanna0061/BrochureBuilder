@@ -7,7 +7,6 @@ import FloatingEditor from './editor/FloatingEditor';
 import BrochurePreview from './preview/BrochurePreview';
 import PrintLayout from './print/PrintLayout';
 import PrintSpreadLayout from './print/PrintSpreadLayout';
-import PrintSpreadDuplexTestLayout from './print/PrintSpreadDuplexTestLayout';
 import PrintPage12SpreadLayout from './print/PrintPage12SpreadLayout';
 import { useBrochure } from './context/BrochureContext';
 import { useProjectSave } from './hooks/useProjectSave';
@@ -16,7 +15,6 @@ import ProjectsMenu from './projects/ProjectsMenu';
 import RegistrationFormEditor from './registration/RegistrationFormEditor';
 import RegistrationFormWorkspace from './registration/RegistrationFormWorkspace';
 import RegistrationFormPrint from './registration/RegistrationFormPrint';
-import DuplexProofPreview from './print/DuplexProofPreview';
 import { runAllChecks } from './safety/checks';
 
 function ExportWarningDialog({ warnings, onExport, onCancel }) {
@@ -53,19 +51,10 @@ function ExportWarningDialog({ warnings, onExport, onCancel }) {
 export default function App() {
   const { state } = useBrochure();
 
-  // Developer-only duplex-flip physical simulation — reached only via
-  // ?duplexProof=1 in the URL, never linked from the normal UI/workflow.
-  // Isolated early return; does not affect the normal render path below,
-  // PrintSpreadLayout.jsx, or any print output.
-  if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('duplexProof') === '1') {
-    return <DuplexProofPreview />;
-  }
-
   const auth = useContext(AuthContext);
   const logout = auth?.logout;
   const printLayoutRef = useRef(null);
   const printSpreadRef = useRef(null);
-  const printSpreadDuplexTestRef = useRef(null);
   const printPage12SpreadRef = useRef(null);
   const registrationFormPrintRef = useRef(null);
   const { saveProject, loadProject, newProject, currentFileName } = useProjectSave();
@@ -112,34 +101,6 @@ export default function App() {
   const doPrintSpread = useReactToPrint({
     content: () => printSpreadRef.current,
     documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure 11x17 Spread`,
-    pageStyle: `
-      @page {
-        size: 17in 11in;
-        margin: 0;
-      }
-      @media print {
-        html, body {
-          width: 1632px;
-          margin: 0;
-          padding: 0;
-          background: white;
-        }
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-      }
-    `,
-  });
-
-  // Isolated test target — own ref, own hidden DOM (PrintSpreadDuplexTestLayout.jsx),
-  // same 17in×11in geometry as doPrintSpread above but pointed at the
-  // rotated-Page-2/3 version, so the manager can print both and compare
-  // physical results without either export affecting the other.
-  const doPrintSpreadDuplexTest = useReactToPrint({
-    content: () => printSpreadDuplexTestRef.current,
-    documentTitle: `${state.tour.titleShort || 'Pax Via'} — Brochure 11x17 Spread (Duplex Test)`,
     pageStyle: `
       @page {
         size: 17in 11in;
@@ -296,15 +257,6 @@ export default function App() {
                 className="export-dropdown__item"
                 type="button"
                 role="menuitem"
-                title="Use this version only if the back side (Page 2/Page 3) prints upside-down on your duplex printer. Print both versions with identical printer settings (17×11, Landscape, Duplex) and keep whichever comes out upright."
-                onClick={() => triggerExport(doPrintSpreadDuplexTest)}
-              >
-                Full Spread — Duplex Test (Rotate Page 2/3)
-              </button>
-              <button
-                className="export-dropdown__item"
-                type="button"
-                role="menuitem"
                 onClick={() => triggerExport(doPrintPage12Spread)}
               >
                 Print Page 1 + 2 Spread
@@ -358,7 +310,6 @@ export default function App() {
 
       <PrintLayout printRef={printLayoutRef} />
       <PrintSpreadLayout printSpreadRef={printSpreadRef} />
-      <PrintSpreadDuplexTestLayout printSpreadDuplexTestRef={printSpreadDuplexTestRef} />
       <PrintPage12SpreadLayout printPage12SpreadRef={printPage12SpreadRef} />
 
       {/* Always mounted off-screen, independent of which workspace view is
