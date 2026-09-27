@@ -31,6 +31,12 @@ export default function TourInfoSection() {
         placeholder="Join Father… on a Pilgrimage to"
       />
       <TextField
+        label="Spiritual Director (used by Mexico City design)"
+        value={tour.spiritualDirector}
+        onChange={(v) => update('spiritualDirector', v)}
+        placeholder="Fr. Luis Varges"
+      />
+      <TextField
         label="Tour Title"
         value={tour.title}
         onChange={(v) => update('title', v)}

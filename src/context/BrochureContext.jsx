@@ -109,6 +109,15 @@ function migrateTour(tour) {
     infoBlocks:     tour.infoBlocks     ?? [],
     coverPortrait,
     registrationForm: mergeRegistrationForm(tour.registrationForm),
+    // Page 1 design variant — projects saved before this feature existed
+    // default to 'classic' so their cover renders exactly as before.
+    page1Design:        tour.page1Design ?? 'classic',
+    spiritualDirector:  tour.spiritualDirector ?? '',
+    // Design 2's own QR slot — isolated from registrationForm.qrImage/
+    // qrSize so the two QR codes are independently editable. src:null
+    // means "no QR uploaded", which Page1Design2.jsx renders as an empty
+    // placeholder in the editor and nothing at all in print.
+    page1Design2Qr: tour.page1Design2Qr ?? { src: null, size: 60 },
   };
 }
 

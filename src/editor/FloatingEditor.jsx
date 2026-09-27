@@ -61,16 +61,21 @@ function TextContent({ meta, tour, dispatch }) {
 
   return (
     <>
-      {/* Text */}
-      <div>
-        <label style={lbl}>Text</label>
-        <textarea
-          value={meta.getValue(tour) ?? ''}
-          onChange={e => meta.setValue(dispatch, e.target.value)}
-          rows={meta.textRows || 2}
-          style={textareaSt}
-        />
-      </div>
+      {/* Text — omitted when meta has no getValue/setValue, i.e. a purely
+          structural/derived label (e.g. Design 2's eyebrow or metadata
+          line) that only exposes typography controls, not raw text
+          editing. Every other caller already supplies both. */}
+      {meta.getValue && (
+        <div>
+          <label style={lbl}>Text</label>
+          <textarea
+            value={meta.getValue(tour) ?? ''}
+            onChange={e => meta.setValue(dispatch, e.target.value)}
+            rows={meta.textRows || 2}
+            style={textareaSt}
+          />
+        </div>
+      )}
 
       {/* Typography */}
       {typo && (
@@ -91,9 +96,13 @@ function TextContent({ meta, tour, dispatch }) {
           </div>
           <div style={row2}>
             <div>
+              {/* meta.fontSizeMax opts a specific element into a higher ceiling
+                  than the shared FS_MAX (e.g. Design 2's large display title,
+                  whose default already exceeds 72px) — every other caller
+                  omits it and keeps today's 6-72px range unchanged. */}
               <label style={lbl}>Size — {typo.fontSize}px</label>
-              <input type="range" min={FS_MIN} max={FS_MAX} step={0.5} value={typo.fontSize ?? 12}
-                onChange={e => setT('fontSize', clamp(e.target.value, FS_MIN, FS_MAX))} style={{ width:'100%' }} />
+              <input type="range" min={FS_MIN} max={meta.fontSizeMax ?? FS_MAX} step={0.5} value={typo.fontSize ?? 12}
+                onChange={e => setT('fontSize', clamp(e.target.value, FS_MIN, meta.fontSizeMax ?? FS_MAX))} style={{ width:'100%' }} />
             </div>
             <div>
               <label style={lbl}>Line Ht — {(typo.lineHeight ?? LH_MIN).toFixed(2)}</label>

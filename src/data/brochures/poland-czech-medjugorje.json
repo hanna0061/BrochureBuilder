@@ -1,9 +1,12 @@
 {
   "id": "poland-czech-medjugorje",
   "slug": "poland-czech-medjugorje",
+  "page1Design": "classic",
   "title": "Poland, Czeck,\n& Medjugorje",
   "titleShort": "Poland, Czech & Medjugorje",
   "leader": "Join Father Tito Cartagenas on a Pilgrimage to",
+  "spiritualDirector": "Fr. Tito Cartagenas",
+  "page1Design2Qr": { "src": null, "size": 60 },
   "tourCode": "SFO-1012/12D",
 
   "dates": {

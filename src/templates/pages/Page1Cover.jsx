@@ -9,6 +9,7 @@ import { usePreview } from '../../context/PreviewContext';
 import { useSelection } from '../../context/SelectionContext';
 import DraggableImage from '../components/DraggableImage';
 import TextgramLayer from '../components/TextgramLayer';
+import Page1Design2 from '../Page1Design2';
 
 const FLOAT_TITLE = {
   id: 'tourInfo', label: 'Cover Title', typographyKey: 'coverTitle', positionKey: 'coverTitle',
@@ -69,6 +70,13 @@ export default function Page1Cover({ tour, company }) {
   const coverLogo = getLogo(tour.logos, 'cover');
   const coverLogoStyle = logoStyle(coverLogo);
   const portrait = tour.coverPortrait;
+
+  // Design selector — tour.page1Design chooses which Page 1 layout renders.
+  // Hooks above must always run in the same order regardless of design, so
+  // this branch sits after them, right before the classic JSX below.
+  if (tour.page1Design === 'mexico-city') {
+    return <Page1Design2 tour={tour} company={company} />;
+  }
 
   return (
     <div className="brochure-page brochure-page--full" style={colorVars(tour.colors)}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { SelectionContext } from '../context/SelectionContext';
+import Page1DesignSection from './sections/Page1DesignSection';
 import TourInfoSection from './sections/TourInfoSection';
 import DestinationsSection from './sections/DestinationsSection';
 import ImagesSection from './sections/ImagesSection';
@@ -15,6 +16,7 @@ import TextElementsSection from './sections/TextElementsSection';
 import { useBrochure } from '../context/BrochureContext';
 
 const SECTIONS = [
+  { id: 'page1Design',   title: 'Page 1 Design',          Component: Page1DesignSection },
   { id: 'tourInfo',      title: 'Tour Info',             Component: TourInfoSection },
   { id: 'destinations',  title: 'Destinations',           Component: DestinationsSection },
   { id: 'images',        title: 'Images',                 Component: ImagesSection },

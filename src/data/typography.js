@@ -26,6 +26,35 @@ export const TYPOGRAPHY_DEFAULTS = Object.freeze({
   coverSubtitle:    { fontFamily: 'EB Garamond', fontSize: 13,   fontWeight: 400, lineHeight: 1.30, letterSpacing:  0.02  },
   destinationStrip: { fontFamily: 'Inter',        fontSize: 10,   fontWeight: 500, lineHeight: 1.00, letterSpacing:  0.08  },
 
+  // Cover page — Design 2 ("Mexico City") large display title/subtitle.
+  // Kept separate from coverTitle/coverSubtitle above so switching between
+  // Page 1 designs never shares — or collides on — the same stored size;
+  // Design 1's hero zone stays governed only by coverTitle/coverSubtitle.
+  // fontSize 86 is the largest size that keeps the default sample title
+  // ("Poland, Czeck,") on one line at real rendered metrics — a previous
+  // version stored 100 here and relied on a JS shrink-to-fit step to pull
+  // it down to a visually equivalent ~85px; that step is gone (it also
+  // silently blocked increasing the size — see Page1Design2.jsx), so the
+  // stored default itself now matches the previously-approved look.
+  coverTitleAlt:    { fontFamily: 'EB Garamond', fontSize: 86,   fontWeight: 700, lineHeight: 0.90, letterSpacing: -0.01  },
+  coverSubtitleAlt: { fontFamily: 'EB Garamond', fontSize: 17,   fontWeight: 400, lineHeight: 1.30, letterSpacing:  0.01  },
+
+  // Cover page — Design 2 remaining text elements, each isolated from any
+  // Design 1 key so the two designs' typography never collide. Values
+  // match Design 2's current approved CSS defaults exactly, so wiring
+  // these into typoStyle() does not change anything visually until a
+  // manager actually edits one via the floating panel.
+  coverTitleSecondaryAlt: { fontFamily: 'EB Garamond', fontSize: 44, fontWeight: 600, lineHeight: 1.08, letterSpacing: 0.02 },
+  eyebrowAlt:             { fontFamily: 'Inter',       fontSize: 13, fontWeight: 600, lineHeight: 1.15, letterSpacing: 0.24 },
+  directorLabelAlt:       { fontFamily: 'EB Garamond', fontSize: 15, fontWeight: 400, lineHeight: 1.15, letterSpacing: 0.01 },
+  directorNameAlt:        { fontFamily: 'EB Garamond', fontSize: 19, fontWeight: 700, lineHeight: 1.15, letterSpacing: 0.01 },
+  infobarDateAlt:         { fontFamily: 'EB Garamond', fontSize: 16, fontWeight: 600, lineHeight: 1.15, letterSpacing: 0.01 },
+  infobarFromLabelAlt:    { fontFamily: 'Inter',       fontSize: 9,  fontWeight: 600, lineHeight: 1.15, letterSpacing: 0.14 },
+  infobarAirportAlt:      { fontFamily: 'EB Garamond', fontSize: 20, fontWeight: 700, lineHeight: 1.15, letterSpacing: 0.02 },
+  infobarPriceAlt:        { fontFamily: 'EB Garamond', fontSize: 32, fontWeight: 700, lineHeight: 0.90, letterSpacing: -0.01 },
+  metaAlt:                { fontFamily: 'Inter',       fontSize: 10.5, fontWeight: 500, lineHeight: 1.15, letterSpacing: 0.10 },
+  taglineAlt:             { fontFamily: 'EB Garamond', fontSize: 13, fontWeight: 400, lineHeight: 1.15, letterSpacing: 0 },
+
   // Cover info bar
   infobarMonth:     { fontFamily: 'EB Garamond', fontSize: 26,   fontWeight: 400, lineHeight: 1.00, letterSpacing: -0.01  },
   infobarDateRange: { fontFamily: 'EB Garamond', fontSize: 15,   fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.01  },

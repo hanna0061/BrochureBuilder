@@ -4,6 +4,25 @@ import { useBrochure } from '../../context/BrochureContext';
 import { getImagePosition, IMAGE_POSITION_LABELS } from '../../data/imagePositions';
 import { checkImages } from '../../safety/checks';
 import SafetyBadge from '../components/SafetyBadge';
+import PrintResolutionInfo from '../components/PrintResolutionInfo';
+
+// Locate each slot's rendered <img> in the live preview (read-only; used for
+// the print-DPI readout). undefined = preview not mounted; null = slot not
+// used by the current layout (Design 2's cover uses only Photo 1, full-bleed).
+const previewPanel = () => document.querySelector('.preview-panel') ?? undefined;
+const findGridImg = (i, page1Design) => () => {
+  const panel = previewPanel();
+  if (!panel) return undefined;
+  if (page1Design === 'mexico-city') {
+    return i === 0 ? panel.querySelector('.p1alt-bg-layer img') : null;
+  }
+  return panel.querySelectorAll('.p1-grid__cell')[i]?.querySelector('img') ?? null;
+};
+const findPricingHeroImg = () => {
+  const panel = previewPanel();
+  if (!panel) return undefined;
+  return panel.querySelector('.p3-hero__img');
+};
 
 const IMAGE_KEYS = ['grid0', 'grid1', 'grid2', 'grid3', 'pricingHero'];
 const DEFAULT_POS = { x: 50, y: 50, offsetX: 0, offsetY: 0, scale: 1 };
@@ -54,6 +73,7 @@ function ImagePositionSliders({ label, pos, onSet, onReset, warning }) {
 export default function ImagesSection() {
   const { state, dispatch } = useBrochure();
   const { grid } = state.tour.photos;
+  const page1Design = state.tour.page1Design ?? 'classic';
   const imagePositions = state.tour.imagePositions ?? {};
 
   const setPos = (key, value) =>
@@ -81,6 +101,11 @@ export default function ImagesSection() {
               value={photo.src}
               onChange={(v) => dispatch({ type: 'UPDATE_GRID_PHOTO', index: i, value: v })}
             />
+            <PrintResolutionInfo
+              src={photo.src}
+              findImg={findGridImg(i, page1Design)}
+              deps={[page1Design, JSON.stringify(imagePositions[key] ?? null)]}
+            />
             <ImagePositionSliders
               label={`Photo ${i + 1}`}
               pos={getImagePosition(imagePositions, key)}
@@ -97,6 +122,11 @@ export default function ImagesSection() {
         label="Pricing Hero Image"
         value={state.tour.photos.pricingHero?.src}
         onChange={(v) => dispatch({ type: 'UPDATE_PRICING_HERO', value: v })}
+      />
+      <PrintResolutionInfo
+        src={state.tour.photos.pricingHero?.src}
+        findImg={findPricingHeroImg}
+        deps={[JSON.stringify(imagePositions.pricingHero ?? null)]}
       />
       <ImagePositionSliders
         label="Pricing Hero"

@@ -466,6 +466,436 @@
 }
 
 /* ─────────────────────────────────────────────
+   PAGE 1 — DESIGN 2 "MEXICO CITY"
+   Full-bleed photo cover with top hero text zone and
+   bottom dark-gradient info bar. See Page1Design2.jsx.
+   ───────────────────────────────────────────── */
+
+.p1alt-page {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-off-white);
+}
+
+.p1alt-bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.p1alt-bg-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.p1alt-top-veil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 320px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.32) 45%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+/* Staged transparent-to-dark transition matching the reference's four-part
+   behavior: photo untouched -> subtle darkening begins -> gradually darker
+   behind the Spiritual Director -> dark enough behind the info row -> very
+   dark near the bottom edge. Height covers roughly the same ~28% of the
+   816x1056 canvas the reference's own dark zone occupies. No blur or
+   filter is applied to the photo itself — this is an overlay only. */
+.p1alt-bottom-veil {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(to bottom,
+    rgba(6, 8, 7, 0)    0%,
+    rgba(6, 8, 7, 0.08) 25%,
+    rgba(6, 8, 7, 0.36) 45%,
+    rgba(5, 7, 6, 0.64) 65%,
+    rgba(4, 6, 5, 0.85) 85%,
+    rgba(3, 5, 4, 0.92) 100%);
+  pointer-events: none;
+}
+
+.p1alt-hero {
+  position: relative;
+  z-index: 2;
+  padding: 52px 44px 0;
+  text-align: center;
+}
+
+.p1alt-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-text-heading);
+  margin: 0 0 10px;
+}
+
+/* font-size below is only the fallback before the floating editor's stored
+   value (typoStyle()) takes over; max-width/overflow-wrap/white-space are
+   the real overflow safety net — they let the browser wrap this line (or,
+   for one unbreakably long word, break mid-word) rather than requiring a
+   JS measure-and-shrink step that would fight the manager's own size
+   choice. See the top-of-file comment for why that approach was removed. */
+.p1alt-title-primary {
+  font-family: var(--font-serif);
+  font-size: 100px;
+  font-weight: 700;
+  line-height: 0.90;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--color-text-heading);
+  margin: 0;
+  max-width: 100%;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+
+.p1alt-title-secondary {
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  /* Warm muted bronze/antique-gold — intentionally a separate, isolated
+     value from var(--color-badge-gold) (used elsewhere on this page for
+     divider lines/icons), which reads too bright/yellow at this size. */
+  color: #8A6A3D;
+  margin: 8px 0 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.p1alt-subtitle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 22px auto 0;
+  max-width: 620px;
+}
+
+/* Solid, fully-opaque fill using the same peak gold/bronze tone as the
+   bottom tagline rule's gradient center (rgb(236,200,130)) — no gradient,
+   no opacity falloff, so it reads consistently top-to-bottom-of-line
+   regardless of what part of the photo sits behind it. */
+.p1alt-subtitle-line {
+  flex: 1;
+  height: 1px;
+  max-width: 100px;
+  background-color: rgb(236, 200, 130);
+  opacity: 1;
+}
+
+.p1alt-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--color-text-heading);
+  /* Allowed to wrap (was white-space:nowrap) so a longer tour subtitle or
+     a manager-increased font size wraps within the row instead of
+     overflowing past the flanking gold lines. */
+  max-width: 100%;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+
+.p1alt-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 0 48px 22px;
+  text-align: center;
+}
+
+.p1alt-director {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-style: italic;
+  color: var(--color-white);
+  letter-spacing: 0.01em;
+  /* No divider directly under this line — this margin alone provides the
+     (modest, not oversized) breathing room before the information row. */
+  margin: 0 0 15px;
+}
+
+.p1alt-director-label {
+  white-space: nowrap;
+}
+
+/* Larger and non-italic so the dynamic director name (from
+   tour.spiritualDirector) reads clearly against the surrounding phrase —
+   prominent, but not oversized relative to it. */
+.p1alt-director-name {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.25em;
+  letter-spacing: 0.01em;
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+/* Same gold, thickness and intensity as .p1alt-tagline-rule (identical
+   colour stops: 224,184,110 ramp → 236,200,130 @ 1), but full width and
+   with the fade confined to the ends so it reads as a solid rule that
+   dissolves only at its tips. margin-bottom is 12px (was 13px with a 1px
+   rule) so the 2px thickness doesn't shift anything below it. */
+.p1alt-divider {
+  height: 2px;
+  margin: 0 0 12px;
+  background: linear-gradient(to right,
+    rgba(224, 184, 110, 0)    0%,
+    rgba(224, 184, 110, 0.55) 6%,
+    rgba(236, 200, 130, 1)    15%,
+    rgba(236, 200, 130, 1)    85%,
+    rgba(224, 184, 110, 0.55) 94%,
+    rgba(224, 184, 110, 0)    100%);
+}
+
+.p1alt-infobar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+
+.p1alt-infobar__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.p1alt-infobar__item--dates {
+  justify-content: flex-start;
+}
+
+.p1alt-infobar__item--price {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.p1alt-infobar__item--departure {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Thin gold vertical separators between the three info groups — the
+   reference brackets DATE | FROM/AIRPORT | PRICE with hairline rules
+   rather than bare grid spacing, so this is a real structural element, not
+   just a gap. Border height naturally matches each group's own content
+   height since these are the flex items themselves. */
+.p1alt-infobar__item--departure,
+.p1alt-infobar__item--price {
+  border-left: 3px solid rgba(224, 184, 110, 0.55);
+  padding-left: 18px;
+}
+
+.p1alt-infobar__icon {
+  flex-shrink: 0;
+  color: var(--color-badge-gold);
+}
+
+/* Pin the icon box explicitly so reset.css's global svg rule
+   (max-width:100%; height:auto) can never shrink it. The SVG viewBoxes are
+   cropped to the artwork bounds, so this box size is the visible icon size. */
+.p1alt-infobar__icon svg {
+  width: 31px;
+  height: 31px;
+  max-width: none;
+  transform: rotate(45deg);
+
+}
+
+/* Supplied outline calendar (512×512 PNG; drawn area 430×412, ~8% even
+   transparent margin all round). 38px box → ~31px visible calendar; width
+   follows the natural aspect ratio. The negative side margins cancel the
+   transparent padding so the artwork stays flush left and keeps the 8px
+   gap to the date text. 38px also stays within the 38.7px row height. */
+.p1alt-infobar__calendar {
+  display: block;
+  height: 38px;
+  width: auto;
+  max-width: none;
+  margin: 0 -3px;
+}
+
+.p1alt-infobar__date {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-white);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.p1alt-infobar__label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 2px;
+}
+
+.p1alt-infobar__airport {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-white);
+  letter-spacing: 0.02em;
+}
+
+/* The strongest visual element in the row — larger and heavier than the
+   date/airport fields, but proportioned against them (~1.8x the date size)
+   rather than dwarfing them the way a much bigger price did previously. */
+.p1alt-infobar__price {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-white);
+  letter-spacing: -0.01em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+/* Raised "$" — relative offset only, so the glyph moves up without
+   affecting its horizontal position, the digits, or the row height.
+   In em so it scales with any price font size set in the editor
+   (-0.2em ≈ 6px at the default 32px). */
+.p1alt-infobar__price-currency {
+  position: relative;
+  top: -0.2em;
+}
+
+/* display:inline-block makes this element's own box hug its actual text
+   (it's still centered — by .p1alt-bottom's text-align:center on its
+   inline-block children — exactly as when it was a full-width block).
+   This matters for the QR slot in the corner: a block <p> box would span
+   the full row edge-to-edge even though the visible text is short and
+   centered, which made bounding-box overlap checks against the QR a false
+   positive. Purely structural — nothing visible changes. */
+.p1alt-meta {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 8px;
+}
+
+/* Thin gold rule above the final tagline — opacity fades to fully
+   transparent at both ends instead of a hard-edged bar, per the reference. */
+.p1alt-tagline-rule {
+  height: 2px;
+  width: 50%;
+  max-width: 50%;
+  margin: 0 auto 9px;
+  background: linear-gradient(to right,
+    rgba(224, 184, 110, 0)    0%,
+    rgba(224, 184, 110, 0.55) 20%,
+    rgba(236, 200, 130, 1)    50%,
+    rgba(224, 184, 110, 0.55) 80%,
+    rgba(224, 184, 110, 0)    100%);
+}
+
+/* display:inline-block — see .p1alt-meta above for why. */
+.p1alt-tagline {
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+/* QR slot — a FIXED anchor footprint in the lower-right corner (never
+   moves the director/date/price/meta/tagline flow above it, and never
+   itself moves when resized). The actual visual — image or empty-state
+   placeholder — is centered on top of this anchor via absolute
+   positioning + translate(-50%,-50%), so growing/shrinking qr.size
+   expands outward from one fixed center point instead of shifting the
+   slot's own position. Same decoupled anchor-vs-visual pattern already
+   used by Registration Form's QR (.rf-qr-slot/.rf-qr-visual). */
+.p1alt-qr-slot {
+  position: absolute;
+  right: 48px;
+  bottom: 20px;
+  width: 56px;
+  height: 56px;
+  z-index: 3;
+  cursor: pointer;
+}
+
+.p1alt-qr-visual {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
+
+.p1alt-qr-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Subtle, editor/preview-only placeholder treatment — no image uploaded
+   yet. The @media print rule below hides it so an empty QR slot never
+   shows up as an unwanted box in printed/exported output. */
+.p1alt-qr-slot--empty .p1alt-qr-visual {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px dashed rgba(224, 184, 110, 0.85);
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p1alt-qr-slot__label {
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media print {
+  .p1alt-qr-slot--empty {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────────
    PAGE 2 — ITINERARY
    Newspaper-style two-column day entries
    ───────────────────────────────────────────── */
