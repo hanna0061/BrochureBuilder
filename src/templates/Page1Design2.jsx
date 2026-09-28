@@ -26,8 +26,7 @@ import calendarIconSrc from '../assets/p1alt-calendar-outline.png';
 // font/weight/size/color controls work on Design 2 exactly like they do
 // everywhere else in the app, without ever sharing state with Design 1's
 // coverTitle/coverSubtitle/infobar* keys. Elements with no tour field
-// backing them (eyebrow, the director label phrase, the metadata line,
-// the tagline) omit getValue/setValue so the panel shows typography
+// backing them (eyebrow, the director label phrase, the tagline) omit getValue/setValue so the panel shows typography
 // controls only, not a text box with nothing real to save.
 
 // Overflow protection for the large display title/secondary-title/subtitle
@@ -44,6 +43,21 @@ import calendarIconSrc from '../assets/p1alt-calendar-outline.png';
 // actually respects the size the manager chooses; the fixed-size, clipped
 // .brochure-page/.p1alt-page boxes remain the outer safety net that keeps
 // everything on the 816×1056 canvas.
+
+// Metadata line: the manager's own text (tour.page1Design2Meta) once they've
+// edited it in the floating editor, otherwise the line derived from the
+// tour's duration + first stop. Module-level so the floating editor's
+// getValue reads the same text the page renders, from the live tour.
+function getMetaLine(tour) {
+  if (tour.page1Design2Meta != null) return tour.page1Design2Meta;
+  const durationDays = tour.duration?.days;
+  const metaDestination = tour.stops?.[0] || tour.titleShort || '';
+  return [
+    durationDays ? `${durationDays} Days` : tour.duration?.display,
+    'Catholic Pilgrimage',
+    metaDestination,
+  ].filter(Boolean).join('  •  ');
+}
 
 const PlaneIcon = () => (
   <svg width="31" height="31" viewBox="2 2 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -122,6 +136,8 @@ export default function Page1Design2({ tour, company }) {
   };
   const FLOAT_META = {
     id: 'tourInfo', label: 'Metadata Line', typographyKey: 'metaAlt',
+    getValue: (t) => getMetaLine(t),
+    setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'page1Design2Meta', value: val }),
   };
   const FLOAT_TAGLINE = {
     id: 'tourInfo', label: 'Travel in Peace', typographyKey: 'taglineAlt',
@@ -146,13 +162,7 @@ export default function Page1Design2({ tour, company }) {
   const titlePrimary = titleLines[0] || '';
   const titleSecondary = titleLines.slice(1).join(' ');
 
-  const durationDays = tour.duration?.days;
-  const metaDestination = tour.stops?.[0] || tour.titleShort || '';
-  const metaLine = [
-    durationDays ? `${durationDays} Days` : tour.duration?.display,
-    'Catholic Pilgrimage',
-    metaDestination,
-  ].filter(Boolean).join('  •  ');
+  const metaLine = getMetaLine(tour);
 
   // Design 2's title/subtitle are large display type — their family,
   // weight, size, color and letter-spacing are all fully editable via the

@@ -909,6 +909,14 @@
    .brochure-page--full stay untouched, so Pages 1, 3, 4 are unaffected. */
 .brochure-page--itinerary {
   --p2-frame-inset: 12px;
+  /* Left line only: 18px = the app's printable safe-area margin (see
+     SafeAreaOverlay). @page margin is 0, so the PDF puts the frame exactly
+     this far from the physical sheet edge; at 12px (0.125in ≈ 3.2mm) the
+     LEFT line fell inside printers' unprintable hardware margin and was
+     dropped on paper. Top/bottom/right keep 12px — the right line is the
+     Full Spread center seam shared with Page 3 and the black info box is
+     flush against it, so it must not move. */
+  --p2-frame-inset-left: 18px;
   --p2-frame-color: #C4C4C4;
   background-color: #FFFFFF;
   isolation: isolate;
@@ -917,10 +925,12 @@
 /* The frame is a real element (not a pseudo-element) so the right-column
    footer can be its child: the footer's containing block is then the frame's
    padding box, i.e. exactly the frame's INNER border edges. box-sizing
-   border-box + no padding → inner edges at x 13–803, y 13–1043. */
+   border-box + no padding → inner edges at x 19–803, y 13–1043 (left line
+   at x 18, see --p2-frame-inset-left). */
 .p2-frame {
   position: absolute;
   inset: var(--p2-frame-inset);
+  left: var(--p2-frame-inset-left);
   box-sizing: border-box;
   padding: 0;
   border: 1px solid var(--p2-frame-color);
@@ -1026,6 +1036,11 @@
   margin: 0;
   overflow-wrap: break-word;
   word-break: break-word;
+  /* Professionally typeset: both paragraph edges align. Only the day body
+     paragraph — the "Day X: Heading" line and Overnight/Meals line stay
+     left-aligned. Justification never changes where lines wrap, so the
+     column-balance measurements in ItineraryPages.jsx are unaffected. */
+  text-align: justify;
 }
 
 .p2-day__overnight {
@@ -1095,6 +1110,33 @@
    .brochure-page--itinerary for Page 2 and .brochure-page--terms for Page 4. */
 .brochure-page--pricing {
   background-color: #FFFFFF;
+  /* Same values as Page 2's --p2-frame-inset / --p2-frame-color — keep in sync. */
+  --p3-frame-inset: 12px;
+  --p3-frame-color: #C4C4C4;
+}
+
+/* Page 3 frame — the same 1px square-cornered frame as Page 2's .p2-frame
+   (same inset, color, thickness), so Page 2 + Page 3 read as one framed
+   spread: line rows/columns at 12 and 803 / 1043, exactly like Page 2.
+   Page 3's photo, navy bars and pricing panel are full-bleed, so the frame
+   also carries a white outer ring (box-shadow spread = the inset) that
+   covers the band between the page edge and the frame line. Everything on
+   Page 3 — hero image included — therefore shows only INSIDE the frame,
+   with the same white margin as Page 2, while no Page 3 element moves or
+   resizes (layout, hero box and crop settings untouched; only the outer
+   12px of the full-bleed backgrounds is masked). Sits above the page
+   content (hero z 1, price bar z 2) and below Textgram boxes (z 30).
+   Letter print / preview: a complete four-sided frame, mirroring Page 2.
+   Full Spread: see the seam rules under .print-spread-sheet below. */
+.p3-frame {
+  position: absolute;
+  inset: var(--p3-frame-inset);
+  box-sizing: border-box;
+  border: 1px solid var(--p3-frame-color);
+  border-radius: 0;
+  box-shadow: 0 0 0 var(--p3-frame-inset) #FFFFFF;
+  pointer-events: none;
+  z-index: 3;
 }
 
 /* Hero Image */
@@ -1641,6 +1683,15 @@
   word-break: break-word;
 }
 
+/* Justified paragraph text — approved 2026-09-28 (user request: professional
+   two-column typesetting). Separate rule so the frozen .p4-intro /
+   .p4-section__body values above stay untouched. Headings, the centered
+   disclaimer and the footer are not justified. */
+.p4-intro,
+.p4-section__body {
+  text-align: justify;
+}
+
 /* Bottom disclaimer note */
 .p4-disclaimer {
   flex-shrink: 0;
@@ -1737,6 +1788,37 @@
 .print-spread-sheet--last {
   page-break-after: auto;
   break-after: auto;
+}
+
+/* Full Spread only — join Page 2's and Page 3's frames into ONE frame.
+   Page 2's right frame line (sheet x 803) is the single center line; it
+   stays exactly where it is (the black info box is flush against it).
+   - Page 3 drops its own left line and runs its top/bottom lines from its
+     left page edge (the fold), so there is no second, doubled vertical.
+     Its white ring then falls off-page on that side, so Page 3's content
+     starts at the fold — 13px right of the center line, the same white
+     gap Page 2 keeps between that line and its own content.
+   - Page 2's top/bottom lines are continued the 13px from its right frame
+     line to its right page edge, closing the gap to Page 3's lines.
+   Same rows (y 12 and y 1043), color and thickness on both sides. Letter
+   print, the preview and the Page 1 + 2 Spread don't match these rules, so
+   each page keeps its own closed frame there. */
+.print-spread-sheet .p3-frame {
+  left: 0;
+  border-left: 0;
+}
+
+.print-spread-sheet .p2-frame::after {
+  content: '';
+  position: absolute;
+  left: 100%;                      /* starts on Page 2's right frame line (x 803) */
+  top: -1px;                       /* the frame's top border row */
+  bottom: -1px;                    /* the frame's bottom border row */
+  width: calc(var(--p2-frame-inset) + 1px);   /* to the page edge (x 816) */
+  box-sizing: border-box;
+  border-top: 1px solid var(--p2-frame-color);
+  border-bottom: 1px solid var(--p2-frame-color);
+  pointer-events: none;
 }
 
 /* NOTE: Sheet 2 previously carried a `.print-spread-sheet__rotate180` rule

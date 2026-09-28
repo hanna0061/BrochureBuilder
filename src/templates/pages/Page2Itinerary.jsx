@@ -79,7 +79,7 @@ export function Page2Footer({ tour, floatSel = () => ({}) }) {
   );
 }
 
-export default function Page2Itinerary({ tour, company, days, isFirstPage = true, colBreakIdx, daySpacing, daySpacingCol2 = null, pageScale = 1, gridColH = null, availableColH = null }) {
+export default function Page2Itinerary({ tour, company, days, isFirstPage = true, colBreakIdx, splitAt = null, daySpacing, daySpacingCol2 = null, pageScale = 1, gridColH = null, availableColH = null }) {
   const typo = tour.typography;
   const { selectedId, selectElement, openFloating } = useSelection();
   const hl = (id) => selectedId === id ? ' brochure-element--selected' : '';
@@ -102,22 +102,37 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
   const col1Days = pageDays.slice(0, breakAt);
   const col2Days = pageDays.slice(breakAt);
 
+  // Column balance may continue the left column's last day into the right
+  // column (ItineraryPages Phase 1): `splitAt` is a character offset into
+  // that day's body. The left part keeps the heading; the right part holds
+  // the rest of the body plus Overnight/Meals. Ignored if stale (offset no
+  // longer inside the body, e.g. for the one layout pass after an edit).
+  const splitDay = splitAt != null ? col1Days[col1Days.length - 1] : null;
+  const isSplit  = !!splitDay && splitAt > 0 && splitAt < (splitDay.body ?? '').length;
+
   // Renders one day card. Called for each column separately so column-specific
-  // spacing (sp) is pre-resolved before the call.
-  const renderDay = (day, gi, sp) => {
+  // spacing (sp) is pre-resolved before the call. `part` is 'head' / 'tail'
+  // for the two halves of a day split across columns, else undefined.
+  const renderDay = (day, gi, sp, part) => {
     const pos     = day.positions ?? {};
     const elemPos = (field) => pos[field] ?? { x: 0, y: 0 };
     const getEP   = (field) => (t) => t.itinerary[gi]?.positions?.[field] ?? { x: 0, y: 0 };
     const setEP   = (field) => (d, axis, value) => d({ type: 'UPDATE_ITINERARY_ELEMENT_POS', index: gi, field, axis, value });
     const resetEP = (field) => (d) => d({ type: 'RESET_ITINERARY_ELEMENT_POS', index: gi, field });
 
+    const body = part === 'head' ? day.body.slice(0, splitAt).trimEnd()
+               : part === 'tail' ? day.body.slice(splitAt)
+               : day.body;
+    // The head's last line is mid-paragraph, so it is justified edge to edge.
+    const bodyPartStyle = part === 'head' ? { textAlignLast: 'justify' } : null;
+
     return (
       <div
-        key={day.day ?? gi}
+        key={`${day.day ?? gi}${part ? `-${part}` : ''}`}
         className="p2-day"
         style={sp != null ? { paddingBlock: sp } : undefined}
       >
-        <p className="p2-day__title-line">
+        {part !== 'tail' && <p className="p2-day__title-line">
           <span
             className="p2-day__label"
             style={headingPerDayStyle(dayLabelStyle, elemPos('label'))}
@@ -139,18 +154,18 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
               getElemPos: getEP('heading'), setElemPos: setEP('heading'), resetElemPos: resetEP('heading'),
             })}
           >{day.heading}</span>
-        </p>
+        </p>}
         <p
           className="p2-day__body"
-          style={perDayStyle(bodyStyle, elemPos('body'))}
+          style={{ ...perDayStyle(bodyStyle, elemPos('body')), ...bodyPartStyle }}
           {...floatSel({
             id: 'itinerary', label: `Day ${day.day} Body`, typographyKey: 'itineraryBody', textRows: 4,
             getValue: (t) => t.itinerary[gi]?.body ?? '',
             setValue: (d, val) => d({ type: 'UPDATE_ITINERARY_DAY', index: gi, field: 'body', value: val }),
             getElemPos: getEP('body'), setElemPos: setEP('body'), resetElemPos: resetEP('body'),
           })}
-        >{day.body}</p>
-        {(day.overnight || day.meals) && (
+        >{body}</p>
+        {part !== 'head' && (day.overnight || day.meals) && (
           <p className="p2-day__overnight">
             {day.overnight && (
               <span style={{ display: 'inline-block', ...perDayStyle(overnightStyle, elemPos('overnight')) }}>
@@ -226,12 +241,19 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
           style={availableColH ? { height: `${availableColH}px` } : undefined}
         >
           <div className="p2-col">
-            {col1Days.map((day) => {
+            {col1Days.map((day, i) => {
               const gi = tour.itinerary.findIndex(d => d.day === day.day);
-              return renderDay(day, gi, daySpacing);
+              const part = isSplit && i === col1Days.length - 1 ? 'head' : undefined;
+              return renderDay(day, gi, daySpacing, part);
             })}
           </div>
           <div className="p2-col">
+            {isSplit && renderDay(
+              splitDay,
+              tour.itinerary.findIndex(d => d.day === splitDay.day),
+              daySpacingCol2 ?? daySpacing,
+              'tail',
+            )}
             {col2Days.map((day) => {
               const gi = tour.itinerary.findIndex(d => d.day === day.day);
               return renderDay(day, gi, daySpacingCol2 ?? daySpacing);

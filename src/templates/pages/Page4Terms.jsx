@@ -220,8 +220,25 @@ export default function Page4Terms({ tour }) {
   const [availableH,       setAvailableH]       = useState(null);
   const [introH,           setIntroH]           = useState(0);
   const [bodyColH,         setBodyColH]         = useState(null);
-  const [splitIdx,         setSplitIdx]         = useState(null);
   const [termsCompression, setTermsCompression] = useState(null);
+  // Line-level column break: { idx, head, tail } splits paragraph `idx` into
+  // `head` (ends the left column) and `tail` (starts the right column);
+  // head/tail null means the break falls cleanly between paragraphs.
+  const [colBreak,         setColBreak]         = useState(null);
+  const balanceRef     = useRef(null);       // body paragraphs, final style, at column width
+
+  // Re-measure once web fonts (Inter) finish loading — fallback-font metrics
+  // measured on first paint give different line counts. Same pattern as
+  // ItineraryPages.
+  const [fontsReady, setFontsReady] = useState(0);
+  useLayoutEffect(() => {
+    const fonts = typeof document !== 'undefined' ? document.fonts : null;
+    if (!fonts?.addEventListener) return undefined;
+    const bump = () => setFontsReady((n) => n + 1);
+    fonts.addEventListener('loadingdone', bump);
+    fonts.ready.then(bump);
+    return () => fonts.removeEventListener('loadingdone', bump);
+  }, []);
 
   // Correct column width for the new explicit flex layout.
   // .p4-content padding = 18px each side → content width = 816 - 36 = 780px
@@ -229,25 +246,29 @@ export default function Page4Terms({ tour }) {
   const BODY_COL_MEAS_W = 383;
   const INTRO_MEAS_W    = 780;
 
+  // All measurements below use offsetHeight/offsetTop (layout px), not
+  // getBoundingClientRect: the preview renders this page inside a CSS
+  // scale() transform, which shrinks bounding rects but not layout sizes.
+
   // Phase 0 — available total height for .p4-content
   useLayoutEffect(() => {
     if (!headerRef.current || !footerRef.current || !disclaimerRef.current) return;
-    const hH = headerRef.current.getBoundingClientRect().height || 0;
-    const fH = footerRef.current.getBoundingClientRect().height || 0;
-    const dH = disclaimerRef.current.getBoundingClientRect().height || 0;
+    const hH = headerRef.current.offsetHeight || 0;
+    const fH = footerRef.current.offsetHeight || 0;
+    const dH = disclaimerRef.current.offsetHeight || 0;
     const contentPad = 9 + 6;
     const avail = Math.max(200, Math.floor(1056 - hH - fH - dH - contentPad - 4));
     setAvailableH(avail);
-  }, []);
+  }, [fontsReady]);
 
   // Phase 1 — measure intro height at full content width
   useLayoutEffect(() => {
     if (!measureIntroRef.current || availableH == null) return;
-    const iH = measureIntroRef.current.getBoundingClientRect().height || 0;
+    const iH = measureIntroRef.current.offsetHeight || 0;
     setIntroH(Math.ceil(iH));
-  }, [availableH, introParagraphs.length, tour?.typography?.termsIntro]);
+  }, [availableH, introParagraphs.length, tour?.typography?.termsIntro, fontsReady]);
 
-  // Phase 2 — measure body paragraphs at column width → compute split + compression.
+  // Phase 2 — measure body paragraphs at column width → compute compression.
   // Uses getP4Typo() so user font-size/line-height overrides are respected.
   useLayoutEffect(() => {
     if (!measureRef.current || availableH == null) return;
@@ -257,20 +278,9 @@ export default function Page4Terms({ tour }) {
     setBodyColH(colH);
 
     const els     = Array.from(measureRef.current.children);
-    const heights = els.map(el => Math.ceil(el.getBoundingClientRect().height));
+    const heights = els.map(el => el.offsetHeight);
     const n       = heights.length;
-    if (n === 0) { setSplitIdx(0); return; }
-
-    // Find the split index that minimises the maximum column height (best balance).
-    let bestIdx = Math.ceil(n / 2);
-    let bestMax = Infinity;
-    for (let i = 1; i < n; i++) {
-      const c1 = heights.slice(0, i).reduce((s, h) => s + h, 0);
-      const c2 = heights.slice(i).reduce((s, h) => s + h, 0);
-      const m  = Math.max(c1, c2);
-      if (m < bestMax) { bestMax = m; bestIdx = i; }
-    }
-    setSplitIdx(bestIdx);
+    if (n === 0) return;
 
     const natural = heights.reduce((s, h) => s + h, 0);
     if (natural <= 2 * colH) {
@@ -287,20 +297,120 @@ export default function Page4Terms({ tour }) {
       fontSize:   Math.max(8,   baseBody.fontSize   * (1 - Math.min(0.10, gapFrac * 0.8))),
     };
     setTermsCompression({ paragraphGap: newGap, compressedBody });
-  }, [availableH, introH, bodyParagraphs.length, tour?.typography?.termsBody]);
+  }, [availableH, introH, bodyText, tour?.typography?.termsBody, fontsReady]);
 
   // contentStyle no longer carries maxHeight or columnFill — those were the
   // cross-engine incompatible properties. Only the user position offset remains.
   const contentStyle = positionStyle(getPosition(positions, 'terms'));
 
-  // Effective split index during the first render (before effects run):
-  // use the midpoint so both columns show content immediately.
-  const effectiveSplitIdx = splitIdx ?? Math.ceil(bodyParagraphs.length / 2);
-
   // Compressed body style uses p4Style (not typoStyle) so it stays isolated
   const bodyStyleCompressed = termsCompression
     ? { ...p4Style(termsCompression.compressedBody), marginBottom: `${termsCompression.paragraphGap}px` }
     : termsBodyStyle;
+  const bodyStyleKey = JSON.stringify(bodyStyleCompressed);
+
+  // Phase 3 — balance the two columns to (nearly) the same final line.
+  // Measures the paragraphs exactly as rendered (same TermsParagraph markup,
+  // same final style incl. paragraph gap) at column width, then chooses the
+  // column break that makes both columns' text end at the closest level:
+  // either between two paragraphs, or — like a typeset page — part-way
+  // through one paragraph, which then continues at the top of the right
+  // column. Line-level breaks keep ≥2 lines on each side (no orphan/widow).
+  useLayoutEffect(() => {
+    const box = balanceRef.current;
+    if (!box) return;
+    const els = Array.from(box.children);
+    const n   = els.length;
+    if (n < 2) { setColBreak({ idx: n, at: null }); return; }
+
+    const tops    = els.map((el) => el.offsetTop);
+    const bottoms = els.map((el) => el.offsetTop + el.offsetHeight);
+    const total   = bottoms[n - 1];
+    const lh      = parseFloat(getComputedStyle(els[0]).lineHeight);
+
+    // Candidate A: clean break before paragraph i. Preferred when it is
+    // within about a line of perfect balance (score discounted by one line).
+    let best = { idx: Math.ceil(n / 2), at: null, score: Infinity };
+    for (let i = 1; i < n; i++) {
+      const diff = Math.abs(bottoms[i - 1] - (total - tops[i]));
+      const score = diff - (lh || 0);
+      if (score < best.score) best = { idx: i, at: null, score, m: 0 };
+    }
+
+    // Candidate B: break after line m of paragraph k.
+    if (lh > 0) {
+      for (let k = 0; k < n; k++) {
+        const lines = Math.round(els[k].offsetHeight / lh);
+        for (let m = 2; m <= lines - 2; m++) {
+          const c1 = tops[k] + m * lh;
+          const c2 = (lines - m) * lh + (total - bottoms[k]);
+          const score = Math.abs(c1 - c2);
+          if (score < best.score) best = { idx: k, at: null, score, m };
+        }
+      }
+    }
+
+    // Resolve a line-level break to a character offset in the raw paragraph
+    // text: find the first word whose line box starts at line m + 1. Only
+    // the paragraph's trailing text node is searched, so the break always
+    // falls after any bold "**HEADING:**" prefix.
+    if (best.m) {
+      const el   = els[best.idx];
+      const raw  = bodyParagraphs[best.idx];
+      const node = el.lastChild;
+      const elRect = el.getBoundingClientRect();
+      const scale  = el.offsetHeight ? elRect.height / el.offsetHeight : 1;
+      let at = null;
+      if (node && node.nodeType === Node.TEXT_NODE && raw.endsWith(node.data)) {
+        const range = document.createRange();
+        const re = /\S+/g;
+        let w;
+        while ((w = re.exec(node.data))) {
+          range.setStart(node, w.index);
+          range.setEnd(node, w.index + w[0].length);
+          const r = range.getClientRects()[0];
+          if (!r) continue;
+          if ((r.top - elRect.top) / scale >= best.m * lh - lh / 2) {
+            if (w.index > 0) at = raw.length - node.data.length + w.index;
+            break;
+          }
+        }
+      }
+      if (at == null) {
+        // Could not locate the line break — fall back to the best clean break.
+        let fb = { idx: Math.ceil(n / 2), diff: Infinity };
+        for (let i = 1; i < n; i++) {
+          const diff = Math.abs(bottoms[i - 1] - (total - tops[i]));
+          if (diff < fb.diff) fb = { idx: i, diff };
+        }
+        setColBreak({ idx: fb.idx, at: null });
+        return;
+      }
+      setColBreak({ idx: best.idx, at });
+      return;
+    }
+    setColBreak({ idx: best.idx, at: null });
+  }, [bodyText, bodyStyleKey, fontsReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resolve the column break into left/right paragraph lists. Before the
+  // first measurement (or for one layout pass after an edit makes the stored
+  // break stale) fall back to the midpoint so both columns show content.
+  const n = bodyParagraphs.length;
+  let col1Paras, col2Paras, headText = null, tailText = null;
+  const brk = colBreak && colBreak.idx <= n ? colBreak : { idx: Math.ceil(n / 2), at: null };
+  const splitPara = brk.at != null ? bodyParagraphs[brk.idx] : null;
+  if (splitPara != null && brk.at > 0 && brk.at < splitPara.length) {
+    col1Paras = bodyParagraphs.slice(0, brk.idx);
+    col2Paras = bodyParagraphs.slice(brk.idx + 1);
+    headText  = splitPara.slice(0, brk.at).trimEnd();
+    tailText  = splitPara.slice(brk.at);
+  } else {
+    col1Paras = bodyParagraphs.slice(0, brk.idx);
+    col2Paras = bodyParagraphs.slice(brk.idx);
+  }
+  // The continued paragraph's last left-column line is mid-paragraph, so it
+  // is justified edge to edge like every other full line.
+  const headStyle = { ...bodyStyleCompressed, textAlignLast: 'justify' };
 
   return (
     <div className="brochure-page brochure-page--full brochure-page--terms" style={colorVars(tour?.colors)}>
@@ -316,10 +426,18 @@ export default function Page4Terms({ tour }) {
         ))}
       </div>
 
-      {/* Off-screen: body paragraphs at actual column width for split and compression */}
+      {/* Off-screen: body paragraphs at actual column width for compression */}
       <div ref={measureRef} aria-hidden="true" style={{ position: 'fixed', left: -9999, top: 0, width: BODY_COL_MEAS_W, visibility: 'hidden', pointerEvents: 'none' }}>
         {bodyParagraphs.map((para, i) => (
           <p key={`mb-${i}`} className="p4-section__body" style={termsBodyStyle}>{para}</p>
+        ))}
+      </div>
+
+      {/* Off-screen: body paragraphs exactly as rendered (markup + final style)
+          at column width, for the Phase 3 column balance */}
+      <div ref={balanceRef} aria-hidden="true" style={{ position: 'fixed', left: -9999, top: 0, width: BODY_COL_MEAS_W, visibility: 'hidden', pointerEvents: 'none' }}>
+        {bodyParagraphs.map((para, i) => (
+          <TermsParagraph key={`bb-${i}`} text={para} style={bodyStyleCompressed} />
         ))}
       </div>
 
@@ -336,12 +454,18 @@ export default function Page4Terms({ tour }) {
           style={bodyColH ? { height: `${bodyColH}px` } : undefined}
         >
           <div className="p4-col">
-            {bodyParagraphs.slice(0, effectiveSplitIdx).map((para, i) => (
+            {col1Paras.map((para, i) => (
               <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
             ))}
+            {headText != null && (
+              <TermsParagraph key="head" text={headText} style={headStyle} {...floatSel(FLOAT_TERMS_BODY)} />
+            )}
           </div>
           <div className="p4-col">
-            {bodyParagraphs.slice(effectiveSplitIdx).map((para, i) => (
+            {tailText != null && (
+              <TermsParagraph key="tail" text={tailText} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
+            )}
+            {col2Paras.map((para, i) => (
               <TermsParagraph key={i} text={para} style={bodyStyleCompressed} {...floatSel(FLOAT_TERMS_BODY)} />
             ))}
           </div>

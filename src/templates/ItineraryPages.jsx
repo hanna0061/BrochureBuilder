@@ -174,64 +174,132 @@ export default function ItineraryPages({ tour, company, renderPage }) {
       reserve: col2Reserve,
     };
 
+    // Unrounded heights (offscreen copy is outside the preview's scale
+    // transform, so these are true layout px). Each day's measured height
+    // includes the CSS default padding-block (CSS_PAD top + bottom).
     const els = Array.from(measureRef.current.children);
-    const heights = els.map((el) => Math.ceil(el.getBoundingClientRect().height));
+    const heights = els.map((el) => el.getBoundingClientRect().height);
     const n = heights.length;
     if (n === 0) return;
 
-    // Choose break index that minimizes the max column height (best balance).
-    // The right column's height includes its bottom footer reserve.
-    let bestIdx = Math.ceil(n / 2);
-    let bestMax = Infinity;
+    // ── Equal-baseline column balancing ─────────────────────────────────
+    // Both columns' LAST LINE OF TEXT is aimed at the same level: the top of
+    // the right column's footer (availableColH − col2Reserve). The left
+    // column has no footer, but ending it at the same level is what makes
+    // the two columns read as one balanced block above the footer.
+    //
+    // Only the existing per-column day spacing (paddingBlock) moves — fonts,
+    // sizes and line-heights are untouched. For a column of k days whose
+    // natural height is H (measured at CSS_PAD):
+    //   text end = H − 2k·CSS_PAD + (2k − 1)·sp      (last day's bottom pad excluded)
+    // Solving for text end = E gives each column's own sp, so both columns
+    // finish at the same E regardless of how many days each holds.
+    const CSS_PAD = 5;     // .p2-day { padding-block: 5px }
+    const SP_MAX  = 14;    // never open day gaps wider than this — short itineraries end higher instead
+    const colTarget = availableColH - col2Reserve;
+    const sum = (a, b) => heights.slice(a, b).reduce((s, h) => s + h, 0);
+    const bare   = (H, k) => H - 2 * k * CSS_PAD;                       // text end at sp = 0
+    const spFor  = (E, H, k) => (E - bare(H, k)) / (2 * k - 1);         // sp giving text end E
+    const spDiff = (H1, k1, H2, k2) => Math.abs(spFor(colTarget, H1, k1) - spFor(colTarget, H2, k2));
+
+    // Pick the break whose two columns need the most similar spacing to
+    // reach the shared target — i.e. the most even distribution of text, so
+    // the day gaps look the same in both columns.
+    //
+    // Candidate A: between two whole days. Preferred when within ~1px of
+    // the best line-level option (a clean break reads better).
+    let best = { idx: Math.ceil(n / 2), m: 0, score: Infinity };
     for (let i = 1; i < n; i++) {
-      const c1 = heights.slice(0, i).reduce((s, h) => s + h, 0);
-      const c2 = heights.slice(i).reduce((s, h) => s + h, 0) + col2Reserve;
-      const m = Math.max(c1, c2);
-      if (m < bestMax) {
-        bestMax = m;
-        bestIdx = i;
+      const score = spDiff(sum(0, i), i, sum(i, n), n - i) - 1;
+      if (score < best.score) best = { idx: i, m: 0, score };
+    }
+
+    // Candidate B: day d's body continues from the bottom of the left column
+    // to the top of the right one after body line m — like a typeset page.
+    // ≥2 body lines stay on each side (no orphan/widow); the "Day X:"
+    // heading always stays with its first lines. Head block = everything
+    // above the body + m lines + bottom pad; tail block = top pad + the
+    // remaining lines + everything below the body (Overnight/Meals, pad).
+    const geo = els.map((el) => {
+      const body = el.querySelector('.p2-day__body');
+      if (!body) return null;
+      const lh = parseFloat(getComputedStyle(body).lineHeight);
+      const dayR = el.getBoundingClientRect();
+      const bR = body.getBoundingClientRect();
+      if (!(lh > 0)) return null;
+      return { body, lh, lines: Math.round(bR.height / lh), above: bR.top - dayR.top, below: dayR.bottom - bR.bottom };
+    });
+    for (let d = 0; d < n; d++) {
+      const g = geo[d];
+      if (!g) continue;
+      for (let m = 2; m <= g.lines - 2; m++) {
+        const headH = g.above + m * g.lh + CSS_PAD;
+        const tailH = CSS_PAD + (g.lines - m) * g.lh + g.below;
+        const score = spDiff(sum(0, d) + headH, d + 1, tailH + sum(d + 1, n), n - d);
+        if (score < best.score) best = { idx: d, m, score, headH, tailH };
       }
     }
 
-    breakAtRef.current = bestIdx;
-
-    const naturalHeight = heights.reduce((s, h) => s + h, 0);
-
-    // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase1] naturalHeight=', naturalHeight, 'availableColH=', availableColH, 'bestIdx=', bestIdx);
-
-    // Per-column spacing — each column fills exactly availableColH.
-    //
-    // CSS_BASE is intentionally set 1px below the CSS padding-block (5px) to produce
-    // a tighter, more compact appearance while keeping both columns balanced.
-    //
-    // Formula (same for expansion and compression):
-    //   sp = CSS_BASE + (availableColH − colH_nat) / (2 × n)
-    //
-    // When colH_nat < availableColH → sp > CSS_BASE  (expand, more inter-day padding)
-    // When colH_nat > availableColH → sp < CSS_BASE  (compress, less padding, clamped ≥ 0)
-    //
-    // A forced break-before:column at bestIdx enforces this per-column split.
-    // Lowering CSS_BASE reduces sp by ~2px per day (~10–15% spacing reduction) and
-    // leaves a small (~24px) balanced gap at the bottom of both columns.
-    const CSS_BASE = 3;
-    const col1H = heights.slice(0, bestIdx).reduce((s, h) => s + h, 0);
-    const col2H = naturalHeight - col1H;
-    const n1    = bestIdx;
-    const n2    = n - bestIdx;
-    const sp1 = n1 > 0 ? Math.max(0, CSS_BASE + (availableColH - col1H) / (2 * n1)) : CSS_BASE;
-    const col2AvailH = availableColH - col2Reserve; // right column stops above its footer
-    const sp2 = n2 > 0 ? Math.max(0, CSS_BASE + (col2AvailH - col2H) / (2 * n2)) : CSS_BASE;
-
-    // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase1] col1H=', col1H, 'col2H=', col2H, 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
-
-    const THRESHOLD = 0.4;
-    if (Math.abs(sp1 - CSS_BASE) > THRESHOLD || Math.abs(sp2 - CSS_BASE) > THRESHOLD) {
-      setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2 });
-    } else {
-      setCompression(null);
+    // Resolve a line-level break to a character offset in the day's body:
+    // the first word whose line box starts at body line m + 1.
+    let splitAt = null;
+    if (best.m) {
+      const { body, lh } = geo[best.idx];
+      const node = body.firstChild;
+      const bTop = body.getBoundingClientRect().top;
+      if (node && node.nodeType === Node.TEXT_NODE) {
+        const range = document.createRange();
+        const re = /\S+/g;
+        let w;
+        while ((w = re.exec(node.data))) {
+          range.setStart(node, w.index);
+          range.setEnd(node, w.index + w[0].length);
+          const rc = range.getClientRects()[0];
+          if (rc && rc.top - bTop >= best.m * lh - lh / 2) { if (w.index > 0) splitAt = w.index; break; }
+        }
+      }
     }
+
+    let n1, n2, col1H, col2H;
+    if (splitAt != null) {
+      breakAtRef.current = best.idx + 1;              // day idx's heading + first lines sit in col 1
+      n1 = best.idx + 1;
+      n2 = n - best.idx;
+      col1H = sum(0, best.idx) + best.headH;
+      col2H = best.tailH + sum(best.idx + 1, n);
+    } else {
+      // Clean break (chosen, or a line break that couldn't be located —
+      // fall back to the best whole-day break).
+      let idx = best.m ? Math.ceil(n / 2) : best.idx;
+      if (best.m) {
+        let bd = Infinity;
+        for (let i = 1; i < n; i++) {
+          const s = spDiff(sum(0, i), i, sum(i, n), n - i);
+          if (s < bd) { bd = s; idx = i; }
+        }
+      }
+      breakAtRef.current = idx;
+      n1 = idx;
+      n2 = n - idx;
+      col1H = sum(0, idx);
+      col2H = sum(idx, n);
+    }
+
+    // Shared text-end level E: the footer line, lowered if reaching it would
+    // need gaps wider than SP_MAX, raised (overflow — spacing exhausted, as
+    // before) only if even zero spacing can't fit a column above it.
+    let E = colTarget;
+    if (n1 > 0) E = Math.min(E, bare(col1H, n1) + (2 * n1 - 1) * SP_MAX);
+    if (n2 > 0) E = Math.min(E, bare(col2H, n2) + (2 * n2 - 1) * SP_MAX);
+    E = Math.max(E, n1 > 0 ? bare(col1H, n1) : 0, n2 > 0 ? bare(col2H, n2) : 0);
+
+    const sp1 = n1 > 0 ? Math.max(0, spFor(E, col1H, n1)) : CSS_PAD;
+    const sp2 = n2 > 0 ? Math.max(0, spFor(E, col2H, n2)) : CSS_PAD;
+
+    // eslint-disable-next-line no-console
+    console.log('[Itinerary Debug][Phase1] col1H=', col1H.toFixed(1), 'col2H=', col2H.toFixed(1), 'target=', colTarget, 'E=', E.toFixed(1), 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
+
+    setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2, splitAt });
     setPageScale(1);
     setGridColH(availableColH);
   }, [tour.itinerary, itHeadingTypo, itBodyTypo, availableColH, fontsReady, col2Reserve]);
@@ -330,6 +398,7 @@ export default function ItineraryPages({ tour, company, renderPage }) {
           days={tour.itinerary}
           isFirstPage={true}
           colBreakIdx={colBreakIdx}
+          splitAt={compression?.splitAt ?? null}
           daySpacing={daySpacing}
           daySpacingCol2={daySpacing2}
           pageScale={pageScale}

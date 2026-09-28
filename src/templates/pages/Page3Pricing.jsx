@@ -338,6 +338,10 @@ export default function Page3Pricing({ tour, company }) {
         </div>
       )}
 
+      {/* Page 3 frame — continues Page 2's frame (see .p3-frame). Absolutely
+          positioned, so it never affects Page 3's layout. */}
+      <div className="p3-frame" aria-hidden="true" />
+
       <TextgramLayer page="pricing" />
     </div>
   );

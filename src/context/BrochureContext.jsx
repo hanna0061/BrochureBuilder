@@ -118,6 +118,9 @@ function migrateTour(tour) {
     // means "no QR uploaded", which Page1Design2.jsx renders as an empty
     // placeholder in the editor and nothing at all in print.
     page1Design2Qr: tour.page1Design2Qr ?? { src: null, size: 60 },
+    // Design 2's metadata line text override. null means "not edited yet",
+    // which Page1Design2.jsx renders as the line derived from duration/stops.
+    page1Design2Meta: tour.page1Design2Meta ?? null,
   };
 }
 
