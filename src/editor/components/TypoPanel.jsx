@@ -31,6 +31,8 @@ const GROUP_LABELS = {
   itineraryBody:      'Itinerary Body Text',
   itineraryOvernight: 'Overnight',
   itineraryMeals:     'Meals',
+  itineraryFootnote:  'Itinerary Footnote',
+  itineraryInfoBox:   'Itinerary Info Box',
   pricingBarTitle:    'Pricing Bar Title',
   pricingPrice:       'Price Amount Display',
   pricingHeading:     'Pricing Headings',

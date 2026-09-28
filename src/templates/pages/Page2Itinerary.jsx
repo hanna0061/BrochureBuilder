@@ -30,6 +30,55 @@ function headingPerDayStyle(baseStyle, pos) {
   return { ...fontProps, position: 'relative', left: `${x}px`, top: `${y}px` };
 }
 
+// Default text for the bottom black info box. Stored per-tour as
+// itineraryInfoLine1..3 so each line is editable from the floating editor.
+export const P2_INFO_DEFAULTS = {
+  itineraryInfoLine1: 'Tour Number: SFO-0411-13D',
+  itineraryInfoLine2: 'Pax Via Tours and Travel - info@paxvia.com',
+  itineraryInfoLine3: 'Tel (844) 218-8162',
+};
+const P2_INFO_FIELDS = Object.keys(P2_INFO_DEFAULTS);
+
+/**
+ * Page 2 right-column footer: "*Time Permitting" footnote + solid black info box.
+ * Pinned to the inner bottom-right corner of the Page 2 frame, one right-column
+ * width wide, so it sits under the RIGHT itinerary column (see .p2-footer). Also
+ * rendered off-screen by ItineraryPages so its real height is reserved in the
+ * right column's spacing math only — the right column's days end above it,
+ * and the left column keeps its full height.
+ * `floatSel` is omitted for the off-screen measurement copy.
+ */
+export function Page2Footer({ tour, floatSel = () => ({}) }) {
+  const footnoteStyle = typoStyle(getTypo(tour.typography, 'itineraryFootnote'));
+  const infoStyle     = typoStyle(getTypo(tour.typography, 'itineraryInfoBox'));
+  const footnote      = (tour.footnotes ?? []).join('  ');
+
+  return (
+    <footer className="p2-footer">
+      {footnote && (
+        <p className="p2-footnote" style={footnoteStyle}
+          {...floatSel({
+            id: 'itinerary', label: 'Footnote', typographyKey: 'itineraryFootnote',
+            getValue: (t) => (t.footnotes ?? []).join('  '),
+            setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'footnotes', value: val ? [val] : [] }),
+          })}
+        >{footnote}</p>
+      )}
+      <div className="p2-infobox">
+        {P2_INFO_FIELDS.map((field, i) => (
+          <p key={field} className="p2-infobox__line" style={infoStyle}
+            {...floatSel({
+              id: 'itinerary', label: `Info Box Line ${i + 1}`, typographyKey: 'itineraryInfoBox',
+              getValue: (t) => t[field] ?? P2_INFO_DEFAULTS[field],
+              setValue: (d, val) => d({ type: 'UPDATE_FIELD', field, value: val }),
+            })}
+          >{tour[field] ?? P2_INFO_DEFAULTS[field]}</p>
+        ))}
+      </div>
+    </footer>
+  );
+}
+
 export default function Page2Itinerary({ tour, company, days, isFirstPage = true, colBreakIdx, daySpacing, daySpacingCol2 = null, pageScale = 1, gridColH = null, availableColH = null }) {
   const typo = tour.typography;
   const { selectedId, selectElement, openFloating } = useSelection();
@@ -138,6 +187,12 @@ export default function Page2Itinerary({ tour, company, days, isFirstPage = true
 
   return (
     <div className="brochure-page brochure-page--full brochure-page--itinerary" style={colorVars(tour.colors)}>
+
+      {/* Page 2 frame. The right-column footer is its child, pinned to the
+          frame's inner bottom-right corner so the box shares the frame's edges. */}
+      <div className="p2-frame">
+        <Page2Footer tour={tour} floatSel={floatSel} />
+      </div>
 
       <div
         className={`p2-body${hl('itinerary')}`}
