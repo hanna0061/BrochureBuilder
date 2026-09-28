@@ -10,10 +10,13 @@ import SafeAreaOverlay from './SafeAreaOverlay';
 const PAGE_W = 816;
 const PAGE_H = 1056;
 
-function PreviewWrap({ label, scale, children, showSafeArea, variant }) {
+function PreviewWrap({ label, scale, children, showSafeArea, variant, warning }) {
   return (
     <div className="preview-page-wrap">
       <span className="preview-page-label u-print-hidden">{label}</span>
+      {warning && (
+        <p className="preview-page-warning u-print-hidden" role="alert">⚠ {warning}</p>
+      )}
       <div
         className={`preview-page-clip${variant ? ` preview-page-clip--${variant}` : ''}`}
         style={{
@@ -127,12 +130,13 @@ export default function BrochurePreview() {
           <ItineraryPages
             tour={tour}
             company={company}
-            renderPage={(pageEl, idx, label) => (
+            renderPage={(pageEl, idx, label, warning) => (
               <PreviewWrap
                 key={`itinerary-${idx}`}
                 label={`Page ${idx + 2} — ${label}`}
                 scale={scale}
                 showSafeArea={showSafeArea}
+                warning={warning}
               >
                 {pageEl}
               </PreviewWrap>

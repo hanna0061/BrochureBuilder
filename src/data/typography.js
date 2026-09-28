@@ -67,7 +67,13 @@ export const TYPOGRAPHY_DEFAULTS = Object.freeze({
   itinerarySubtitle:  { fontFamily: 'Inter',       fontSize: 9,   fontWeight: 600, lineHeight: 1.00, letterSpacing:  0.10  },
   itineraryDayLabel:  { fontFamily: 'Inter',       fontSize: 10,   fontWeight: 600, lineHeight: 1.00, letterSpacing:  0.08  },
   itineraryHeading:   { fontFamily: 'EB Garamond', fontSize: 12.5, fontWeight: 800, lineHeight: 1.25, letterSpacing:  0     },
-  itineraryBody:      { fontFamily: 'EB Garamond', fontSize: 10,   fontWeight: 400, lineHeight: 1.50, letterSpacing:  0     },
+  // APPROVED Page 2 body baseline (2026-09-28; size 12.5 → 12px on request) —
+  // EB Garamond 400, 12px, lh 1.15, ls -0.015em, inherited color, x/y 0.
+  // This is what Reset and new projects fall back to. Saved projects keep
+  // their own stored values; the column-flow engine (ItineraryPages.jsx)
+  // never writes typography — it only redistributes days and adjusts day
+  // spacing. Change only on explicit request.
+  itineraryBody:      { fontFamily: 'EB Garamond', fontSize: 12,   fontWeight: 400, lineHeight: 1.15, letterSpacing: -0.015 },
   itineraryOvernight: { fontFamily: 'Inter',       fontSize: 8.5,  fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.04  },
   itineraryMeals:     { fontFamily: 'Inter',       fontSize: 8.5,  fontWeight: 400, lineHeight: 1.20, letterSpacing:  0.04  },
   itineraryFootnote:  { fontFamily: 'EB Garamond', fontSize: 9.5,  fontWeight: 400, lineHeight: 1.20, letterSpacing:  0     },

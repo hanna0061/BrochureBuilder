@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import Page2Itinerary, { Page2Footer, P2_INFO_DEFAULTS } from './pages/Page2Itinerary';
+import Page2Itinerary, {
+  Page2Footer, P2_INFO_DEFAULTS, ItineraryDay, itineraryDayStyles, ITINERARY_DAY_TYPO_KEYS,
+} from './pages/Page2Itinerary';
 import { typoStyle, getTypo } from '../data/typography';
 
 // ── Page geometry — must match brochure.css ──────────────────────────────────
 const PAGE_H          = 1056;
 const PAGE_W          = 816;
 const BODY_PAD_TOP    = 40;   // .p2-body { padding: 40px 25px 5px }
+const BODY_PAD_X      = 25;
+const GRID_GAP        = 20;   // .p2-grid { gap: 20px }
 const SECTION_HDR_MARGIN_B = 2; // .p2-section-header { margin-bottom: 2px }
-const COLUMN_WIDTH    = 373;  // (816 − 50 padding − 20 gap) / 2
+const COLUMN_WIDTH    = (PAGE_W - 2 * BODY_PAD_X - GRID_GAP) / 2; // 373
 
 // Both columns end GRID_BOTTOM px above the page bottom: 12px frame inset
 // + 1px frame + 12px gap — the same ~12px frame gap as on the sides.
@@ -15,219 +19,141 @@ const GRID_BOTTOM = 25;
 
 // Right-column footer (footnote + black info box) — .p2-footer is absolutely
 // anchored to the bottom of the RIGHT column only. Its measured height plus
-// P2_FOOTER_GAP is reserved in the right column's spacing math; the left
-// column's available height is not affected.
+// P2_FOOTER_GAP is reserved in the right column only; the left column's
+// capacity is not affected.
 const P2_FOOTER_GAP     = 8;
-const FOOTER_H_ESTIMATE = 76; // footnote ~15px + 4px gap + box ~57px (wraps at column width)
+const FOOTER_H_ESTIMATE = 76; // first-paint estimate only — measured in Phase 0
+// The footer is pinned to the frame's INNER bottom edge (.p2-frame inset
+// 12px + 1px border), which is lower than the grid's bottom (GRID_BOTTOM).
+const FRAME_INNER_BOTTOM = PAGE_H - 12 - 1; // 1043
 
 // Height available for header + columns inside .p2-body.
 const BODY_CONTENT_H = PAGE_H - BODY_PAD_TOP - GRID_BOTTOM; // 991
 
-// Conservative initial estimate before the section header is measured.
-// Real value is measured in useLayoutEffect below.
-const SECTION_HDR_ESTIMATE = 46; // eyebrow ~14px + heading ~28px + margin 2px + slop
-const INIT_AVAIL_COL_H =
-  BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4;
+// First-paint estimate before the section header is measured (Phase 0).
+const SECTION_HDR_ESTIMATE = 46;
+const INIT_AVAIL_COL_H = BODY_CONTENT_H - SECTION_HDR_ESTIMATE - SECTION_HDR_MARGIN_B - 4;
 
-// Minimal day renderer for off-screen height measurement.
-function MeasureDay({ day, headingStyle, bodyStyle, daySpacing }) {
-  return (
-    <div className="p2-day" style={daySpacing != null ? { paddingBlock: daySpacing } : undefined}>
-      <p className="p2-day__title-line">
-        <span className="p2-day__label">{day.label}:</span>
-        {' '}
-        <span className="p2-day__heading" style={headingStyle}>{day.heading}</span>
-      </p>
-      <p className="p2-day__body" style={bodyStyle}>{day.body}</p>
-      {(day.overnight || day.meals) && (
-        <p className="p2-day__overnight">
-          {day.overnight && (
-            <><span className="p2-overnight-lbl">Overnight:</span>{' '}{day.overnight}</>
-          )}
-          {day.overnight && day.meals && '  ·  '}
-          {day.meals && (
-            <><span className="p2-overnight-lbl">Meals:</span>{' '}{day.meals}</>
-          )}
-        </p>
-      )}
-    </div>
-  );
-}
+// Day spacing (each .p2-day's paddingBlock) — the only thing the balancer
+// adjusts. Typography is never modified automatically.
+const CSS_PAD = 5;   // .p2-day { padding-block: 5px } — measured heights include it
+const SP_MAX  = 14;  // widest day gap when stretching a short itinerary
 
 /**
- * Compute spacing compression to reduce total day content height.
+ * ItineraryPages — Page 2 column-flow engine.
  *
- * Only day spacing is reduced (7px → 0). Typography is NEVER modified
- * automatically — user font size, line height, and letter spacing are
- * authoritative and must always reflect what the typography panel shows.
- */
-function computeCompression(naturalHeight, typography, availableTotalH) {
-  const shortage  = Math.max(0, 1 - availableTotalH / naturalHeight);
-  const spaceFrac = Math.min(1, shortage / 0.35);
-  return {
-    compressedTypography: typography, // pass through unchanged
-    daySpacing: Math.max(0, Math.round(7 * (1 - spaceFrac))),
-  };
-}
-
-/**
- * ItineraryPages
+ * Phase 0: measure the real section-header and footer heights → the left
+ *          column's capacity (availableColH) and the right column's footer
+ *          reserve.
+ * Phase 1: measure every day's real rendered height (same <ItineraryDay>
+ *          markup and typography as Page 2, inside the same text context,
+ *          after fonts load) → choose the column split and per-column day
+ *          spacing so EVERY day fits, or report the overflow.
  *
- * Three-phase layout engine:
- *   Phase 0: Measure actual section-header height → derive real available col height.
- *   Phase 1: Measure natural day heights → analytical compression if needed.
- *   Phase 2: Measure compressed heights → proportional font squeeze if still overflowing.
- *
- * Available column height is calculated as:
- *   PAGE_H − body-top-padding − GRID_BOTTOM − section-header-height
- * The right column additionally reserves room for its bottom footer
- * (col2Reserve); the left column uses the full available height.
+ * Nothing is ever hidden: all days are always rendered; if they genuinely
+ * cannot fit on one page at the chosen typography, the preview shows a
+ * "Content exceeds Page 2" warning (onOverflow / renderPage's 4th argument).
  */
 export default function ItineraryPages({ tour, company, renderPage }) {
-  const measureRef      = useRef(null); // Phase 1: natural styles
-  const measureRef2     = useRef(null); // Phase 2: compressed styles
-  const sectionHdrRef   = useRef(null); // Phase 0: section header measurement
-  const footerRef       = useRef(null); // Phase 0: bottom footer measurement
-  const lastInput       = useRef({ itinerary: null, headTypo: null, bodyTypo: null, colH: 0 });
-  const breakAtRef      = useRef(0);
+  const measureRef    = useRef(null); // Phase 1: day heights
+  const sectionHdrRef = useRef(null); // Phase 0: section header
+  const footerRef     = useRef(null); // Phase 0: right-column footer
+  const lastInput     = useRef(null);
 
   const [availableColH, setAvailableColH] = useState(INIT_AVAIL_COL_H);
-  const [compression,   setCompression]   = useState(null);
-  const [pageScale,     setPageScale]     = useState(1);
-  const [gridColH,      setGridColH]      = useState(INIT_AVAIL_COL_H);
+  const [gridTop,       setGridTop]       = useState(BODY_PAD_TOP + SECTION_HDR_ESTIMATE + SECTION_HDR_MARGIN_B);
   const [footerH,       setFooterH]       = useState(FOOTER_H_ESTIMATE);
+  const [layout,        setLayout]        = useState(null); // { breakAt, splitAt, sp1, sp2, overflowPx }
   const col2Reserve = Math.ceil(footerH) + P2_FOOTER_GAP; // right column only
+  // True room for the right column's text: from the grid top down to
+  // P2_FOOTER_GAP above the footer's actual top edge.
+  const col2RoomTrue = Math.floor(FRAME_INNER_BOTTOM - footerH - P2_FOOTER_GAP - gridTop);
 
-  // Web fonts (EB Garamond / Inter) start downloading only once text uses
-  // them, so they usually finish AFTER the first measurement pass. Fallback
-  // fonts set wider, so heights measured before then are inflated and the
-  // column spacing gets over-compressed. Bump a counter whenever a font batch
-  // finishes loading so Phases 0–1 re-measure with the real metrics.
+  // Web fonts load lazily — only once text actually uses them — so the first
+  // measurement usually runs with fallback metrics. Re-measure every time a
+  // font batch finishes loading (this also covers switching an itinerary
+  // style to a family that hasn't been used yet).
   const [fontsReady, setFontsReady] = useState(0);
   useEffect(() => {
     const fonts = typeof document !== 'undefined' ? document.fonts : null;
-    if (!fonts?.addEventListener) return;
+    if (!fonts?.addEventListener) return undefined;
     const bump = () => setFontsReady((n) => n + 1);
     fonts.addEventListener('loadingdone', bump);
     fonts.ready.then(bump);
     return () => fonts.removeEventListener('loadingdone', bump);
   }, []);
 
-  const itHeadingTypo = tour.typography?.itineraryHeading;
-  const itBodyTypo    = tour.typography?.itineraryBody;
-
-  const activeTour = compression
-    ? { ...tour, typography: compression.compressedTypography }
-    : tour;
-
-  const headingStyle = typoStyle(getTypo(activeTour.typography, 'itineraryHeading'));
-  const bodyStyle    = typoStyle(getTypo(activeTour.typography, 'itineraryBody'));
-  const daySpacing    = compression?.daySpacing  ?? null;
-  const daySpacing2   = compression?.daySpacing2 ?? null; // col2 (right) — null means same as daySpacing
+  const itinerary = tour.itinerary ?? [];
+  const dayStyles = itineraryDayStyles(tour.typography);
+  // Every typography input that can change a day's height.
+  const dayTypoKey = JSON.stringify(ITINERARY_DAY_TYPO_KEYS.map((k) => tour.typography?.[k] ?? null));
 
   // Inputs that change the header/footer heights — Phase 0 re-measures when they do.
-  const footerTypoKey = JSON.stringify([
+  const headerFooterKey = JSON.stringify([
     tour.typography?.itinerarySubtitle, tour.typography?.itineraryTitle,
     tour.itinerarySubtitleText, tour.itineraryTitleText,
     tour.typography?.itineraryFootnote, tour.typography?.itineraryInfoBox, tour.footnotes,
     ...Object.keys(P2_INFO_DEFAULTS).map((k) => tour[k]),
   ]);
 
-  // ── Phase 0: measure actual section-header + footer heights ─
+  // ── Phase 0: measure actual section-header + footer heights ──
   useLayoutEffect(() => {
     if (!sectionHdrRef.current || !footerRef.current) return;
     const shH = sectionHdrRef.current.getBoundingClientRect().height;
     const ftH = footerRef.current.querySelector('.p2-footer')?.getBoundingClientRect().height;
     if (ftH > 10) setFooterH(ftH);
-    if (shH < 10) return; // fonts/styles not loaded yet — skip
-    // Available column height = body content area minus section header and its margin.
-    // The footer is NOT subtracted here — only the right column reserves it (Phase 1).
-    const realColH = Math.max(
-      760,
-      Math.floor(BODY_CONTENT_H - shH - SECTION_HDR_MARGIN_B - 2) // 2px safety
-    );
-    setAvailableColH(realColH);
-    setGridColH(realColH); // sync default gridColH
-    // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase0] realColH=', realColH, 'shH=', shH, 'ftH=', ftH, 'BODY_CONTENT_H=', BODY_CONTENT_H);
-  }, [footerTypoKey, fontsReady]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (shH < 10) return;
+    setAvailableColH(Math.floor(BODY_CONTENT_H - shH - SECTION_HDR_MARGIN_B - 2)); // 2px safety
+    setGridTop(BODY_PAD_TOP + shH + SECTION_HDR_MARGIN_B);
+  }, [headerFooterKey, fontsReady]);
 
-  // ── Phase 1: measure natural day heights → compute analytical compression ──
+  // ── Phase 1: measure day heights → split + spacing ──
   useLayoutEffect(() => {
-    if (!measureRef.current) return;
+    const box = measureRef.current;
+    if (!box) return;
 
-    if (
-      lastInput.current.itinerary === tour.itinerary &&
-      lastInput.current.headTypo  === itHeadingTypo  &&
-      lastInput.current.bodyTypo  === itBodyTypo      &&
-      lastInput.current.colH      === availableColH  &&
-      lastInput.current.fonts     === fontsReady     &&
-      lastInput.current.reserve   === col2Reserve
-    ) return;
+    const inputKey = [itinerary, dayTypoKey, availableColH, col2Reserve, col2RoomTrue, fontsReady];
+    if (lastInput.current && inputKey.every((v, i) => v === lastInput.current[i])) return;
+    lastInput.current = inputKey;
 
-    lastInput.current = {
-      itinerary: tour.itinerary,
-      headTypo: itHeadingTypo,
-      bodyTypo: itBodyTypo,
-      colH: availableColH,
-      fonts: fontsReady,
-      reserve: col2Reserve,
-    };
-
-    // Unrounded heights (offscreen copy is outside the preview's scale
-    // transform, so these are true layout px). Each day's measured height
-    // includes the CSS default padding-block (CSS_PAD top + bottom).
-    const els = Array.from(measureRef.current.children);
+    // Real rendered heights (the measurement copy sits outside the preview's
+    // scale transform, so these are true layout px). Each includes CSS_PAD
+    // top + bottom.
+    const els = Array.from(box.children);
     const heights = els.map((el) => el.getBoundingClientRect().height);
     const n = heights.length;
-    if (n === 0) return;
+    if (n === 0) { setLayout({ breakAt: 0, splitAt: null, sp1: CSS_PAD, sp2: CSS_PAD, overflowPx: 0 }); return; }
 
-    // ── Equal-baseline column balancing ─────────────────────────────────
-    // Both columns' LAST LINE OF TEXT is aimed at the same level: the top of
-    // the right column's footer (availableColH − col2Reserve). The left
-    // column has no footer, but ending it at the same level is what makes
-    // the two columns read as one balanced block above the footer.
-    //
-    // Only the existing per-column day spacing (paddingBlock) moves — fonts,
-    // sizes and line-heights are untouched. For a column of k days whose
-    // natural height is H (measured at CSS_PAD):
-    //   text end = H − 2k·CSS_PAD + (2k − 1)·sp      (last day's bottom pad excluded)
-    // Solving for text end = E gives each column's own sp, so both columns
-    // finish at the same E regardless of how many days each holds.
-    const CSS_PAD = 5;     // .p2-day { padding-block: 5px }
-    const SP_MAX  = 14;    // never open day gaps wider than this — short itineraries end higher instead
-    const colTarget = availableColH - col2Reserve;
-    const sum = (a, b) => heights.slice(a, b).reduce((s, h) => s + h, 0);
-    const bare   = (H, k) => H - 2 * k * CSS_PAD;                       // text end at sp = 0
-    const spFor  = (E, H, k) => (E - bare(H, k)) / (2 * k - 1);         // sp giving text end E
-    const spDiff = (H1, k1, H2, k2) => Math.abs(spFor(colTarget, H1, k1) - spFor(colTarget, H2, k2));
+    const capL = availableColH; // left column: full height
+    // Right column capacity = its real room above the footer. The LEVEL
+    // target (where both columns end when content fits comfortably) keeps
+    // the established position: footer height + gap above the grid bottom.
+    const capR     = Math.max(0, col2RoomTrue);
+    const levelTop = Math.min(capR, availableColH - col2Reserve);
+    const sum  = (a, b) => heights.slice(a, b).reduce((s, h) => s + h, 0);
+    // A column of k blocks with natural height H (measured at CSS_PAD):
+    //   last text line ends at  H − 2k·CSS_PAD + (2k − 1)·sp
+    const bare  = (H, k) => (k > 0 ? H - 2 * k * CSS_PAD : 0);           // text end at sp = 0
+    const spFor = (E, H, k) => (k > 0 ? (E - bare(H, k)) / (2 * k - 1) : 0);
 
-    // Pick the break whose two columns need the most similar spacing to
-    // reach the shared target — i.e. the most even distribution of text, so
-    // the day gaps look the same in both columns.
-    //
-    // Candidate A: between two whole days. Preferred when within ~1px of
-    // the best line-level option (a clean break reads better).
-    let best = { idx: Math.ceil(n / 2), m: 0, score: Infinity };
-    for (let i = 1; i < n; i++) {
-      const score = spDiff(sum(0, i), i, sum(i, n), n - i) - 1;
-      if (score < best.score) best = { idx: i, m: 0, score };
-    }
-
-    // Candidate B: day d's body continues from the bottom of the left column
-    // to the top of the right one after body line m — like a typeset page.
-    // ≥2 body lines stay on each side (no orphan/widow); the "Day X:"
-    // heading always stays with its first lines. Head block = everything
-    // above the body + m lines + bottom pad; tail block = top pad + the
-    // remaining lines + everything below the body (Overnight/Meals, pad).
+    // Candidate column breaks: between whole days, or part-way through one
+    // day's body (≥2 lines each side; the heading stays with its first lines).
+    const cands = [];
+    const addCand = (c) => {
+      c.bare1 = bare(c.H1, c.k1);
+      c.bare2 = bare(c.H2, c.k2);
+      cands.push(c);
+    };
+    for (let i = 1; i < n; i++) addCand({ idx: i, m: 0, H1: sum(0, i), k1: i, H2: sum(i, n), k2: n - i });
+    if (n === 1) addCand({ idx: 1, m: 0, H1: sum(0, 1), k1: 1, H2: 0, k2: 0 });
     const geo = els.map((el) => {
       const body = el.querySelector('.p2-day__body');
-      if (!body) return null;
+      if (!body || !body.firstChild) return null;
       const lh = parseFloat(getComputedStyle(body).lineHeight);
-      const dayR = el.getBoundingClientRect();
-      const bR = body.getBoundingClientRect();
       if (!(lh > 0)) return null;
-      return { body, lh, lines: Math.round(bR.height / lh), above: bR.top - dayR.top, below: dayR.bottom - bR.bottom };
+      const dR = el.getBoundingClientRect();
+      const bR = body.getBoundingClientRect();
+      return { body, lh, lines: Math.round(bR.height / lh), above: bR.top - dR.top, below: dR.bottom - bR.bottom };
     });
     for (let d = 0; d < n; d++) {
       const g = geo[d];
@@ -235,111 +161,93 @@ export default function ItineraryPages({ tour, company, renderPage }) {
       for (let m = 2; m <= g.lines - 2; m++) {
         const headH = g.above + m * g.lh + CSS_PAD;
         const tailH = CSS_PAD + (g.lines - m) * g.lh + g.below;
-        const score = spDiff(sum(0, d) + headH, d + 1, tailH + sum(d + 1, n), n - d);
-        if (score < best.score) best = { idx: d, m, score, headH, tailH };
+        addCand({ idx: d + 1, m, d, H1: sum(0, d) + headH, k1: d + 1, H2: tailH + sum(d + 1, n), k2: n - d });
       }
     }
 
-    // Resolve a line-level break to a character offset in the day's body:
-    // the first word whose line box starts at body line m + 1.
+    // Choose a mode, then the best candidate within it:
+    //  A. LEVEL — both columns fit above the footer line: end both columns'
+    //     text at the same level (the footer line, or higher if reaching it
+    //     would need gaps wider than SP_MAX). Best = most similar day gaps.
+    //  B. FIT — too tall for A, but fits when the LEFT column uses its full
+    //     height beside the footer. Best = the most even spare room.
+    //  C. OVERFLOW — cannot fit at the chosen typography even with zero day
+    //     spacing. Best = least overflow; every day is still rendered and a
+    //     warning is raised. Typography is never shrunk automatically.
+    const over = (c) => Math.max(c.bare1 - capL, c.bare2 - capR);
+    let mode;
+    let pool = cands.filter((c) => c.bare1 <= levelTop && c.bare2 <= levelTop);
+    if (pool.length) {
+      mode = 'level';
+      pool.forEach((c) => {
+        const d = c.k1 && c.k2 ? Math.abs(spFor(levelTop, c.H1, c.k1) - spFor(levelTop, c.H2, c.k2)) : 0;
+        c.score = d - (c.m ? 0 : 1); // prefer a clean break when within ~1px
+      });
+    } else {
+      pool = cands.filter((c) => c.bare1 <= capL && c.bare2 <= capR);
+      mode = pool.length ? 'fit' : 'overflow';
+      if (!pool.length) pool = cands;
+      pool.forEach((c) => { c.score = over(c) - (c.m ? 0 : 1); });
+    }
+    pool.sort((a, b) => a.score - b.score);
+
+    // Resolve the first candidate that works (a line-level break needs the
+    // character offset of body line m + 1 — skip it if it can't be located).
+    let pick = null;
     let splitAt = null;
-    if (best.m) {
-      const { body, lh } = geo[best.idx];
+    for (const c of pool) {
+      if (!c.m) { pick = c; break; }
+      const { body, lh } = geo[c.d];
       const node = body.firstChild;
+      if (!node || node.nodeType !== Node.TEXT_NODE) continue;
       const bTop = body.getBoundingClientRect().top;
-      if (node && node.nodeType === Node.TEXT_NODE) {
-        const range = document.createRange();
-        const re = /\S+/g;
-        let w;
-        while ((w = re.exec(node.data))) {
-          range.setStart(node, w.index);
-          range.setEnd(node, w.index + w[0].length);
-          const rc = range.getClientRects()[0];
-          if (rc && rc.top - bTop >= best.m * lh - lh / 2) { if (w.index > 0) splitAt = w.index; break; }
-        }
+      const range = document.createRange();
+      const re = /\S+/g;
+      let w;
+      let at = null;
+      while ((w = re.exec(node.data))) {
+        range.setStart(node, w.index);
+        range.setEnd(node, w.index + w[0].length);
+        const rc = range.getClientRects()[0];
+        if (rc && rc.top - bTop >= c.m * lh - lh / 2) { if (w.index > 0) at = w.index; break; }
       }
+      if (at != null) { pick = c; splitAt = at; break; }
     }
+    if (!pick) pick = pool[0];
 
-    let n1, n2, col1H, col2H;
-    if (splitAt != null) {
-      breakAtRef.current = best.idx + 1;              // day idx's heading + first lines sit in col 1
-      n1 = best.idx + 1;
-      n2 = n - best.idx;
-      col1H = sum(0, best.idx) + best.headH;
-      col2H = best.tailH + sum(best.idx + 1, n);
+    // Day spacing per column.
+    let sp1;
+    let sp2;
+    if (mode === 'level') {
+      let E = levelTop;
+      if (pick.k1) E = Math.min(E, pick.bare1 + (2 * pick.k1 - 1) * SP_MAX);
+      if (pick.k2) E = Math.min(E, pick.bare2 + (2 * pick.k2 - 1) * SP_MAX);
+      E = Math.max(E, pick.bare1, pick.bare2);
+      sp1 = spFor(E, pick.H1, pick.k1);
+      sp2 = spFor(E, pick.H2, pick.k2);
     } else {
-      // Clean break (chosen, or a line break that couldn't be located —
-      // fall back to the best whole-day break).
-      let idx = best.m ? Math.ceil(n / 2) : best.idx;
-      if (best.m) {
-        let bd = Infinity;
-        for (let i = 1; i < n; i++) {
-          const s = spDiff(sum(0, i), i, sum(i, n), n - i);
-          if (s < bd) { bd = s; idx = i; }
-        }
-      }
-      breakAtRef.current = idx;
-      n1 = idx;
-      n2 = n - idx;
-      col1H = sum(0, idx);
-      col2H = sum(idx, n);
+      // Each column: default spacing if it fits, else tightened to its own capacity.
+      sp1 = Math.min(CSS_PAD, spFor(capL, pick.H1, pick.k1));
+      sp2 = Math.min(CSS_PAD, spFor(capR, pick.H2, pick.k2));
     }
-
-    // Shared text-end level E: the footer line, lowered if reaching it would
-    // need gaps wider than SP_MAX, raised (overflow — spacing exhausted, as
-    // before) only if even zero spacing can't fit a column above it.
-    let E = colTarget;
-    if (n1 > 0) E = Math.min(E, bare(col1H, n1) + (2 * n1 - 1) * SP_MAX);
-    if (n2 > 0) E = Math.min(E, bare(col2H, n2) + (2 * n2 - 1) * SP_MAX);
-    E = Math.max(E, n1 > 0 ? bare(col1H, n1) : 0, n2 > 0 ? bare(col2H, n2) : 0);
-
-    const sp1 = n1 > 0 ? Math.max(0, spFor(E, col1H, n1)) : CSS_PAD;
-    const sp2 = n2 > 0 ? Math.max(0, spFor(E, col2H, n2)) : CSS_PAD;
+    sp1 = Math.max(0, sp1);
+    sp2 = Math.max(0, sp2);
+    const overflowPx = mode === 'overflow' ? Math.ceil(over(pick)) : 0;
 
     // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase1] col1H=', col1H.toFixed(1), 'col2H=', col2H.toFixed(1), 'target=', colTarget, 'E=', E.toFixed(1), 'sp1=', sp1.toFixed(2), 'sp2=', sp2.toFixed(2));
+    console.log('[Itinerary Debug][Phase1]', mode, 'days=', n, 'capL=', capL, 'capR=', capR, 'level=', levelTop,
+      'break=', pick.idx, pick.m ? `(+${pick.m} lines)` : '', 'bare=', pick.bare1.toFixed(1), pick.bare2.toFixed(1),
+      'sp=', sp1.toFixed(2), sp2.toFixed(2), overflowPx ? `OVERFLOW ${overflowPx}px` : '');
 
-    setCompression({ compressedTypography: tour.typography, daySpacing: sp1, daySpacing2: sp2, splitAt });
-    setPageScale(1);
-    setGridColH(availableColH);
-  }, [tour.itinerary, itHeadingTypo, itBodyTypo, availableColH, fontsReady, col2Reserve]);
+    setLayout({ breakAt: pick.idx, splitAt: pick.m ? splitAt : null, sp1, sp2, overflowPx });
+  }, [itinerary, dayTypoKey, availableColH, col2Reserve, col2RoomTrue, fontsReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Phase 2: measure compressed heights → proportional font squeeze if still overflowing ──
-  useLayoutEffect(() => {
-    if (!measureRef2.current) return;
-
-    if (!compression) {
-      setPageScale(1);
-      setGridColH(availableColH);
-      return;
-    }
-
-    const breakAt = breakAtRef.current;
-    const els     = Array.from(measureRef2.current.children);
-    const col1H   = els.slice(0, breakAt).reduce((s, el) => s + el.getBoundingClientRect().height, 0);
-    const col2H   = els.slice(breakAt).reduce((s, el)    => s + el.getBoundingClientRect().height, 0) + col2Reserve;
-    const maxColH = Math.max(col1H, col2H, 1);
-
-    // Diagnostics: log column heights and current available height
-    // eslint-disable-next-line no-console
-    console.log('[Itinerary Debug][Phase2] col1H=', col1H, 'col2H=', col2H, 'maxColH=', maxColH, 'availableColH=', availableColH, 'currentGridColH=', gridColH);
-
-    if (maxColH <= availableColH) {
-      setPageScale(1);
-      setGridColH(availableColH);
-      // eslint-disable-next-line no-console
-      console.log('[Itinerary Debug][Phase2] No scaling needed; pageScale=1');
-    } else {
-      // Spacing compression is exhausted; content exceeds availableColH.
-      // User typography is authoritative — no automatic overrides. Accept the result.
-      setPageScale(1);
-      setGridColH(availableColH);
-      // eslint-disable-next-line no-console
-      console.log('[Itinerary Debug][Phase2] Overflow; spacing exhausted, typography preserved.');
-    }
-  }, [compression, availableColH, col2Reserve]);
-
-  const colBreakIdx = breakAtRef.current || Math.ceil(tour.itinerary.length / 2);
+  const n = itinerary.length;
+  // Before the first measurement: a midpoint split at CSS default spacing.
+  const cur = layout && layout.breakAt <= n ? layout : { breakAt: Math.ceil(n / 2), splitAt: null, sp1: null, sp2: null, overflowPx: 0 };
+  const overflowWarning = cur.overflowPx > 0
+    ? `Content exceeds Page 2 by about ${cur.overflowPx}px at the current itinerary typography — reduce the font size, line height or text so every day fits on the page.`
+    : null;
 
   const offScreenStyle = {
     position: 'fixed',
@@ -353,60 +261,41 @@ export default function ItineraryPages({ tour, company, renderPage }) {
   return (
     <>
       {/* Phase 0: section-header measurement — same markup as Page2Itinerary */}
-      <div ref={sectionHdrRef} aria-hidden="true" style={offScreenStyle}>
+      <div ref={sectionHdrRef} aria-hidden="true" className="p2-measure" style={offScreenStyle}>
         <header className="p2-section-header">
           <p className="p2-eyebrow" style={typoStyle(getTypo(tour.typography, 'itinerarySubtitle'))}>{tour.itinerarySubtitleText ?? 'Pilgrimage Route'}</p>
           <h2 className="p2-heading" style={typoStyle(getTypo(tour.typography, 'itineraryTitle'))}>{tour.itineraryTitleText ?? 'Day by Day Itinerary'}</h2>
         </header>
       </div>
 
-      {/* Phase 0: bottom footer measurement — same component as Page2Itinerary */}
-      {/* Off-screen copy of the footer (fixed 373px width) for height measurement. */}
-      <div ref={footerRef} aria-hidden="true" style={{ ...offScreenStyle, width: PAGE_W, height: 200 }}>
+      {/* Phase 0: footer measurement — same component as Page2Itinerary */}
+      <div ref={footerRef} aria-hidden="true" className="p2-measure" style={{ ...offScreenStyle, width: PAGE_W, height: 200 }}>
         <Page2Footer tour={tour} />
       </div>
 
-      {/* Phase 1: natural (uncompressed) measurement */}
-      <div ref={measureRef} aria-hidden="true" style={offScreenStyle}>
-        {tour.itinerary.map((day, i) => (
-          <MeasureDay
-            key={i}
-            day={day}
-            headingStyle={typoStyle(getTypo(tour.typography, 'itineraryHeading'))}
-            bodyStyle={typoStyle(getTypo(tour.typography, 'itineraryBody'))}
-          />
-        ))}
-      </div>
-
-      {/* Phase 2: compressed measurement */}
-      <div ref={measureRef2} aria-hidden="true" style={offScreenStyle}>
-        {tour.itinerary.map((day, i) => (
-          <MeasureDay
-            key={i}
-            day={day}
-            headingStyle={headingStyle}
-            bodyStyle={bodyStyle}
-            daySpacing={daySpacing}
-          />
+      {/* Phase 1: every day, rendered with the exact <ItineraryDay> markup and
+          typography Page 2 uses, at the real column width, in the same text
+          context (.p2-measure mirrors .brochure-page's text settings). */}
+      <div ref={measureRef} aria-hidden="true" className="p2-measure p2-col" style={offScreenStyle}>
+        {itinerary.map((day, gi) => (
+          <ItineraryDay key={gi} day={day} gi={gi} styles={dayStyles} />
         ))}
       </div>
 
       {renderPage(
         <Page2Itinerary
-          tour={activeTour}
+          tour={tour}
           company={company}
-          days={tour.itinerary}
           isFirstPage={true}
-          colBreakIdx={colBreakIdx}
-          splitAt={compression?.splitAt ?? null}
-          daySpacing={daySpacing}
-          daySpacingCol2={daySpacing2}
-          pageScale={pageScale}
-          gridColH={gridColH}
+          colBreakIdx={cur.breakAt}
+          splitAt={cur.splitAt}
+          daySpacing={cur.sp1}
+          daySpacingCol2={cur.sp2}
           availableColH={availableColH}
         />,
         0,
         'Itinerary',
+        overflowWarning,
       )}
     </>
   );
