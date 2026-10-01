@@ -62,7 +62,7 @@ function TextContent({ meta, tour, dispatch }) {
   return (
     <>
       {/* Text — omitted when meta has no getValue/setValue, i.e. a purely
-          structural/derived label (e.g. Design 2's eyebrow or tagline)
+          structural/derived label (e.g. Design 2's eyebrow)
           that only exposes typography controls, not raw text
           editing. Every other caller already supplies both. */}
       {meta.getValue && (

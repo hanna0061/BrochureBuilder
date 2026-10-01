@@ -927,10 +927,16 @@
      SafeAreaOverlay). @page margin is 0, so the PDF puts the frame exactly
      this far from the physical sheet edge; at 12px (0.125in ≈ 3.2mm) the
      LEFT line fell inside printers' unprintable hardware margin and was
-     dropped on paper. Top/bottom/right keep 12px — the right line is the
-     Full Spread center seam shared with Page 3 and the black info box is
-     flush against it, so it must not move. */
+     dropped on paper. The right line keeps 12px — it is the Full Spread
+     center seam shared with Page 3 and the black info box is flush against
+     it, so it must not move. */
   --p2-frame-inset-left: 18px;
+  /* Top/bottom lines: 18px for the same reason as the left line — at 12px
+     they fell inside the printer's unprintable top/bottom margin and were
+     dropped on paper even though the PDF contains them. Must match
+     --p3-frame-inset-y (Full Spread alignment) and FRAME_INNER_BOTTOM in
+     ItineraryPages.jsx. */
+  --p2-frame-inset-y: 18px;
   --p2-frame-color: #C4C4C4;
   background-color: #FFFFFF;
   isolation: isolate;
@@ -939,12 +945,14 @@
 /* The frame is a real element (not a pseudo-element) so the right-column
    footer can be its child: the footer's containing block is then the frame's
    padding box, i.e. exactly the frame's INNER border edges. box-sizing
-   border-box + no padding → inner edges at x 19–803, y 13–1043 (left line
-   at x 18, see --p2-frame-inset-left). */
+   border-box + no padding → inner edges at x 19–803, y 19–1037 (left line
+   at x 18, top/bottom lines at y 18 / 1037, see --p2-frame-inset-left/-y). */
 .p2-frame {
   position: absolute;
   inset: var(--p2-frame-inset);
   left: var(--p2-frame-inset-left);
+  top: var(--p2-frame-inset-y);
+  bottom: var(--p2-frame-inset-y);
   box-sizing: border-box;
   padding: 0;
   border: 1px solid var(--p2-frame-color);
@@ -1143,14 +1151,16 @@
    .brochure-page--itinerary for Page 2 and .brochure-page--terms for Page 4. */
 .brochure-page--pricing {
   background-color: #FFFFFF;
-  /* Same values as Page 2's --p2-frame-inset / --p2-frame-color — keep in sync. */
+  /* Same values as Page 2's --p2-frame-inset / -inset-y / --p2-frame-color — keep in sync. */
   --p3-frame-inset: 12px;
+  --p3-frame-inset-y: 18px;
   --p3-frame-color: #C4C4C4;
 }
 
 /* Page 3 frame — the same 1px square-cornered frame as Page 2's .p2-frame
    (same inset, color, thickness), so Page 2 + Page 3 read as one framed
-   spread: line rows/columns at 12 and 803 / 1043, exactly like Page 2.
+   spread: line columns at 12 / 803, rows at 18 / 1037, exactly like Page 2
+   (top/bottom at 18px so printers don't drop them — see --p2-frame-inset-y).
    Page 3's photo, navy bars and pricing panel are full-bleed, so the frame
    also carries a white outer ring (box-shadow spread = the inset) that
    covers the band between the page edge and the frame line. Everything on
@@ -1164,10 +1174,14 @@
 .p3-frame {
   position: absolute;
   inset: var(--p3-frame-inset);
+  top: var(--p3-frame-inset-y);
+  bottom: var(--p3-frame-inset-y);
   box-sizing: border-box;
   border: 1px solid var(--p3-frame-color);
   border-radius: 0;
-  box-shadow: 0 0 0 var(--p3-frame-inset) #FFFFFF;
+  /* Ring spread = the LARGER inset so it reaches the top/bottom page edges;
+     on the sides the extra 6px falls off-page and is clipped by the page box. */
+  box-shadow: 0 0 0 var(--p3-frame-inset-y) #FFFFFF;
   pointer-events: none;
   z-index: 3;
 }
@@ -1833,7 +1847,7 @@
      gap Page 2 keeps between that line and its own content.
    - Page 2's top/bottom lines are continued the 13px from its right frame
      line to its right page edge, closing the gap to Page 3's lines.
-   Same rows (y 12 and y 1043), color and thickness on both sides. Letter
+   Same rows (y 18 and y 1037), color and thickness on both sides. Letter
    print, the preview and the Page 1 + 2 Spread don't match these rules, so
    each page keeps its own closed frame there. */
 .print-spread-sheet .p3-frame {

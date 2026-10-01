@@ -121,6 +121,9 @@ function migrateTour(tour) {
     // Design 2's metadata line text override. null means "not edited yet",
     // which Page1Design2.jsx renders as the line derived from duration/stops.
     page1Design2Meta: tour.page1Design2Meta ?? null,
+    // Design 2's tagline text override. null means "not edited yet",
+    // which Page1Design2.jsx renders as "Travel in Peace.".
+    page1Design2Tagline: tour.page1Design2Tagline ?? null,
   };
 }
 

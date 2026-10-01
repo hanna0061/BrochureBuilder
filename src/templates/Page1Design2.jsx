@@ -26,7 +26,7 @@ import calendarIconSrc from '../assets/p1alt-calendar-outline.png';
 // font/weight/size/color controls work on Design 2 exactly like they do
 // everywhere else in the app, without ever sharing state with Design 1's
 // coverTitle/coverSubtitle/infobar* keys. Elements with no tour field
-// backing them (eyebrow, the director label phrase, the tagline) omit getValue/setValue so the panel shows typography
+// backing them (eyebrow, the director label phrase) omit getValue/setValue so the panel shows typography
 // controls only, not a text box with nothing real to save.
 
 // Overflow protection for the large display title/secondary-title/subtitle
@@ -57,6 +57,13 @@ function getMetaLine(tour) {
     'Catholic Pilgrimage',
     metaDestination,
   ].filter(Boolean).join('  •  ');
+}
+
+// Tagline: the manager's own text (tour.page1Design2Tagline) once edited,
+// otherwise the original "Travel in Peace." default.
+const DEFAULT_TAGLINE = 'Travel in Peace.';
+function getTagline(tour) {
+  return tour.page1Design2Tagline ?? DEFAULT_TAGLINE;
 }
 
 const PlaneIcon = () => (
@@ -140,7 +147,9 @@ export default function Page1Design2({ tour, company }) {
     setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'page1Design2Meta', value: val }),
   };
   const FLOAT_TAGLINE = {
-    id: 'tourInfo', label: 'Travel in Peace', typographyKey: 'taglineAlt',
+    id: 'tourInfo', label: 'Tagline', typographyKey: 'taglineAlt',
+    getValue: (t) => getTagline(t),
+    setValue: (d, val) => d({ type: 'UPDATE_FIELD', field: 'page1Design2Tagline', value: val }),
   };
   const FLOAT_QR = {
     id: 'images', label: 'QR Code', type: 'qr',
@@ -283,7 +292,7 @@ export default function Page1Design2({ tour, company }) {
 
         <p className="p1alt-meta" style={typoStyle(metaTypo)} {...floatSel(FLOAT_META)}>{metaLine}</p>
         <div className="p1alt-tagline-rule" aria-hidden="true" />
-        <p className="p1alt-tagline" style={typoStyle(taglineTypo)} {...floatSel(FLOAT_TAGLINE)}>Travel in Peace.</p>
+        <p className="p1alt-tagline" style={typoStyle(taglineTypo)} {...floatSel(FLOAT_TAGLINE)}>{getTagline(tour)}</p>
 
         {/* QR slot — fixed anchor position/footprint (never moves the
             director/date/price/meta/tagline flow above); the visual layer

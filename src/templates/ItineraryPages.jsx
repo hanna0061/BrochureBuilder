@@ -23,9 +23,9 @@ const GRID_BOTTOM = 25;
 // capacity is not affected.
 const P2_FOOTER_GAP     = 8;
 const FOOTER_H_ESTIMATE = 76; // first-paint estimate only — measured in Phase 0
-// The footer is pinned to the frame's INNER bottom edge (.p2-frame inset
-// 12px + 1px border), which is lower than the grid's bottom (GRID_BOTTOM).
-const FRAME_INNER_BOTTOM = PAGE_H - 12 - 1; // 1043
+// The footer is pinned to the frame's INNER bottom edge (.p2-frame bottom
+// inset 18px — --p2-frame-inset-y — + 1px border).
+const FRAME_INNER_BOTTOM = PAGE_H - 18 - 1; // 1037
 
 // Height available for header + columns inside .p2-body.
 const BODY_CONTENT_H = PAGE_H - BODY_PAD_TOP - GRID_BOTTOM; // 991
